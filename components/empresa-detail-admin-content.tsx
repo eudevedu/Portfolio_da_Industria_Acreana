@@ -89,14 +89,53 @@ export function EmpresaDetailAdminContent({ initialEmpresa, isConfiguredProp }: 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target
-    setFormData((prev) => ({ ...prev, [id]: value }))
+
+    // Validação específica para CNPJ
+    if (id === "cnpj") {
+      // Remove caracteres não numéricos para validação
+      const numericValue = value.replace(/\D/g, "")
+      if (numericValue.length > 14) {
+        return // Não permite mais de 14 dígitos
+      }
+      // Formatar CNPJ automaticamente
+      let formattedValue = value
+      if (numericValue.length <= 14) {
+        formattedValue = numericValue
+          .replace(/^(\d{2})(\d)/, "$1.$2")
+          .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+          .replace(/\.(\d{3})(\d)/, ".$1/$2")
+          .replace(/(\d{4})(\d)/, "$1-$2")
+      }
+      setFormData((prev) => ({ ...prev, [id]: formattedValue }))
+    } else {
+      setFormData((prev) => ({ ...prev, [id]: value }))
+    }
   }
 
   const handleSelectChange = (id: string, value: string) => {
     setFormData((prev) => ({ ...prev, [id]: value }))
   }
 
+  const handleCancel = () => {
+    setFormData(empresa) // Reset form data to original empresa data
+    setIsEditing(false)
+  }
+
   const handleSave = async () => {
+    // Validação básica dos campos obrigatórios
+    const requiredFields = ["nome_fantasia", "razao_social", "cnpj", "setor_economico", "setor_empresa", "municipio"]
+    const missingFields = requiredFields.filter((field) => !formData[field]?.trim())
+
+    if (missingFields.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Campos obrigatórios",
+        description: `Por favor, preencha os seguintes campos: ${missingFields.join(", ")}`,
+        duration: 5000,
+      })
+      return
+    }
+
     setLoading(true)
     try {
       const updated = await atualizarEmpresa(empresa.id, formData)
@@ -160,7 +199,7 @@ export function EmpresaDetailAdminContent({ initialEmpresa, isConfiguredProp }: 
           </Button>
           {isEditing ? (
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setIsEditing(false)} disabled={loading}>
+              <Button variant="outline" onClick={handleCancel} disabled={loading}>
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
@@ -187,7 +226,7 @@ export function EmpresaDetailAdminContent({ initialEmpresa, isConfiguredProp }: 
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="nome_fantasia">Nome Fantasia</Label>
+                <Label htmlFor="nome_fantasia">Nome Fantasia *</Label>
                 {isEditing ? (
                   <Input id="nome_fantasia" value={formData.nome_fantasia || ""} onChange={handleInputChange} />
                 ) : (
@@ -195,7 +234,7 @@ export function EmpresaDetailAdminContent({ initialEmpresa, isConfiguredProp }: 
                 )}
               </div>
               <div>
-                <Label htmlFor="razao_social">Razão Social</Label>
+                <Label htmlFor="razao_social">Razão Social *</Label>
                 {isEditing ? (
                   <Input id="razao_social" value={formData.razao_social || ""} onChange={handleInputChange} />
                 ) : (
@@ -203,7 +242,7 @@ export function EmpresaDetailAdminContent({ initialEmpresa, isConfiguredProp }: 
                 )}
               </div>
               <div>
-                <Label htmlFor="cnpj">CNPJ</Label>
+                <Label htmlFor="cnpj">CNPJ *</Label>
                 {isEditing ? (
                   <Input id="cnpj" value={formData.cnpj || ""} onChange={handleInputChange} />
                 ) : (
@@ -211,7 +250,7 @@ export function EmpresaDetailAdminContent({ initialEmpresa, isConfiguredProp }: 
                 )}
               </div>
               <div>
-                <Label htmlFor="setor_economico">Setor Econômico</Label>
+                <Label htmlFor="setor_economico">Setor Econômico *</Label>
                 {isEditing ? (
                   <Select
                     value={formData.setor_economico || ""}
@@ -236,7 +275,7 @@ export function EmpresaDetailAdminContent({ initialEmpresa, isConfiguredProp }: 
                 )}
               </div>
               <div>
-                <Label htmlFor="setor_empresa">Setor da Empresa</Label>
+                <Label htmlFor="setor_empresa">Setor da Empresa *</Label>
                 {isEditing ? (
                   <Select
                     value={formData.setor_empresa || ""}
@@ -276,7 +315,7 @@ export function EmpresaDetailAdminContent({ initialEmpresa, isConfiguredProp }: 
                 )}
               </div>
               <div>
-                <Label htmlFor="municipio">Município</Label>
+                <Label htmlFor="municipio">Município *</Label>
                 {isEditing ? (
                   <Select
                     value={formData.municipio || ""}
