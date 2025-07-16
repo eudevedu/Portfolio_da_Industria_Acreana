@@ -202,33 +202,18 @@ export async function criarEmpresa(
 
 export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): Promise<Empresa | null> {
   if (!isSupabaseConfigured()) {
-    console.warn("Supabase não configurado. Simulando atualização de empresa.")
-    // Em modo mock, simula a atualização
-    return {
-      ...updates,
-      id,
-      updated_at: new Date().toISOString(),
-    } as Empresa
+    return null
   }
-
-  try {
-    const { data, error } = await supabase
-      .from("empresas")
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .select("*, produtos(*), arquivos(*)")
-      .single()
-
-    if (error) {
-      console.error("Erro ao atualizar empresa:", error)
-      throw new Error(error.message || "Erro ao atualizar empresa")
-    }
-
-    return data as Empresa
-  } catch (err) {
-    console.error("Erro na função atualizarEmpresa:", err)
-    throw err
+  const { data, error } = await supabase
+    .from("empresas")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single()
+  if (error) {
+    return null
   }
+  return data as Empresa
 }
 
 export async function deletarEmpresa(id: string): Promise<void> {
