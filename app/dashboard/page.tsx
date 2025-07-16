@@ -106,7 +106,7 @@ export default async function DashboardPage() {
         ) : (
           // Passa os dados iniciais para o novo Client Component
           <DashboardContent
-            initialEmpresa={empresa}
+            initialEmpresa={empresas}
             initialProdutos={produtos}
             initialAnalytics={analytics}
             isConfiguredProp={isConfigured}
