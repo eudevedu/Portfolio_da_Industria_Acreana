@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Factory, Package, Plus, Eye, CheckCircle, Clock, Search, ChevronDown } from "lucide-react"
+import { Factory, Package, Plus, Eye, CheckCircle, Clock, Search, ChevronDown, Edit, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,11 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import {
   AlertDialog,
@@ -320,29 +320,50 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Link href={`/admin/empresas/${empresa.id}`}>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" title="Ver detalhes">
                                   <Eye className="h-4 w-4" />
                                 </Button>
                               </Link>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
+                                  <Button variant="ghost" size="sm" title="Mais ações">
                                     <ChevronDown className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Alterar Status</DropdownMenuLabel>
+                                  <DropdownMenuLabel>Ações da Empresa</DropdownMenuLabel>
                                   <DropdownMenuSeparator />
+
+                                  <DropdownMenuItem asChild>
+                                    <Link href={`/admin/empresas/${empresa.id}`} className="flex items-center w-full">
+                                      <Edit className="h-4 w-4 mr-2" />
+                                      Editar Detalhes
+                                    </Link>
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuItem asChild>
+                                    <Link
+                                      href={`/empresas/${empresa.id}`}
+                                      target="_blank"
+                                      className="flex items-center w-full"
+                                    >
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      Ver Perfil Público
+                                    </Link>
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuLabel>Alterar Status</DropdownMenuLabel>
+
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                      <DropdownMenuCheckboxItem
-                                        checked={empresa.status === "ativo"}
-                                        onCheckedChange={() => {}}
+                                      <DropdownMenuItem
                                         disabled={empresa.status === "ativo"}
                                         onSelect={(e) => e.preventDefault()}
                                       >
+                                        <CheckCircle className="h-4 w-4 mr-2" />
                                         Ativar
-                                      </DropdownMenuCheckboxItem>
+                                      </DropdownMenuItem>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                       <AlertDialogHeader>
@@ -363,14 +384,13 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
 
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                      <DropdownMenuCheckboxItem
-                                        checked={empresa.status === "pendente"}
-                                        onCheckedChange={() => {}}
+                                      <DropdownMenuItem
                                         disabled={empresa.status === "pendente"}
                                         onSelect={(e) => e.preventDefault()}
                                       >
+                                        <Clock className="h-4 w-4 mr-2" />
                                         Marcar como Pendente
-                                      </DropdownMenuCheckboxItem>
+                                      </DropdownMenuItem>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                       <AlertDialogHeader>
@@ -391,14 +411,13 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
 
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                      <DropdownMenuCheckboxItem
-                                        checked={empresa.status === "inativo"}
-                                        onCheckedChange={() => {}}
+                                      <DropdownMenuItem
                                         disabled={empresa.status === "inativo"}
                                         onSelect={(e) => e.preventDefault()}
                                       >
+                                        <X className="h-4 w-4 mr-2" />
                                         Inativar
-                                      </DropdownMenuCheckboxItem>
+                                      </DropdownMenuItem>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                       <AlertDialogHeader>
