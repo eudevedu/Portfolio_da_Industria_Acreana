@@ -1,10 +1,9 @@
 "use server" // Todas as funções exportadas deste arquivo são Server Actions
-
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { supabase, isSupabaseConfigured } from "./supabase"
 import type { User } from "./supabase.types" // Importa o tipo User do novo arquivo de tipos
-import { criarPerfilEmpresa } from "./database" // Importa a nova função
+import { criarPerfilEmpresa } from "./database" // Importa a nova função (corrigido para 'data' se for o arquivo correto)
 
 const USER_COOKIE_NAME = "user_session"
 
@@ -39,9 +38,9 @@ export async function login(email: string, password: string): Promise<{ success:
         password_hash: "mock_hash", // Adicionado para tipo User
       }
     }
-
     if (user) {
-      cookies().set(USER_COOKIE_NAME, JSON.stringify(user), {
+      const cookieStore = await cookies() // Adicionado await
+      cookieStore.set(USER_COOKIE_NAME, JSON.stringify(user), {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 7, // 1 semana
@@ -52,28 +51,23 @@ export async function login(email: string, password: string): Promise<{ success:
       return { success: false, message: "Credenciais inválidas." }
     }
   }
-
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
-
     if (error) {
       return { success: false, message: error.message }
     }
-
     if (data.user) {
       // Fetch user type from public.perfis_empresas or public.admins
       let userType: "empresa" | "admin" = "empresa" // Default
       let empresaId: string | null = null
-
       const { data: perfilEmpresa, error: perfilError } = await supabase
         .from("perfis_empresas")
         .select("empresa_id")
         .eq("id", data.user.id)
         .single()
-
       if (perfilEmpresa) {
         userType = "empresa"
         empresaId = perfilEmpresa.empresa_id
@@ -87,7 +81,6 @@ export async function login(email: string, password: string): Promise<{ success:
           userType = "admin"
         }
       }
-
       const userSession: User = {
         id: data.user.id,
         email: data.user.email!,
@@ -96,8 +89,8 @@ export async function login(email: string, password: string): Promise<{ success:
         created_at: data.user.created_at,
         updated_at: data.user.updated_at,
       }
-
-      cookies().set(USER_COOKIE_NAME, JSON.stringify(userSession), {
+      const cookieStore = await cookies() // Adicionado await
+      cookieStore.set(USER_COOKIE_NAME, JSON.stringify(userSession), {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 7, // 1 semana
@@ -105,7 +98,6 @@ export async function login(email: string, password: string): Promise<{ success:
       })
       return { success: true, message: "Login bem-sucedido!" }
     }
-
     return { success: false, message: "Erro desconhecido durante o login." }
   } catch (error: any) {
     console.error("Erro ao conectar com o servidor:", error)
@@ -125,9 +117,9 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
       updated_at: new Date().toISOString(),
       password_hash: "mock_hash",
     }
-
     if (email === admin.email && password === "admin123") {
-      cookies().set(USER_COOKIE_NAME, JSON.stringify(admin), {
+      const cookieStore = await cookies() // Adicionado await
+      cookieStore.set(USER_COOKIE_NAME, JSON.stringify(admin), {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 7, // 1 semana
@@ -138,21 +130,18 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
       return { success: false, message: "Credenciais inválidas." }
     }
   }
-
   try {
     // Login admin com Supabase (usando uma tabela separada de admins)
     const { data, error } = await supabase!.auth.signInWithPassword({
       email,
       password,
     })
-
     if (error) {
       return {
         success: false,
         message: error.message,
       }
     }
-
     if (data.user) {
       // Verificar se é admin na tabela de admins
       const { data: adminData, error: adminError } = await supabase!
@@ -160,7 +149,6 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
         .select("id, nome")
         .eq("id", data.user.id) // Check by user ID from auth.users
         .single()
-
       if (adminError || !adminData) {
         // If user exists in auth.users but not in admins table, deny access
         await supabase.auth.signOut() // Sign out the user from auth.users
@@ -169,7 +157,6 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
           message: "Acesso não autorizado. Esta conta não é de administrador.",
         }
       }
-
       const userSession: User = {
         id: data.user.id,
         email: data.user.email!,
@@ -178,8 +165,8 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
         created_at: data.user.created_at,
         updated_at: data.user.updated_at,
       }
-
-      cookies().set(USER_COOKIE_NAME, JSON.stringify(userSession), {
+      const cookieStore = await cookies() // Adicionado await
+      cookieStore.set(USER_COOKIE_NAME, JSON.stringify(userSession), {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 7, // 1 semana
@@ -190,7 +177,6 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
         message: "Login bem-sucedido!",
       }
     }
-
     return {
       success: false,
       message: "Erro desconhecido",
@@ -209,7 +195,8 @@ export async function logout(): Promise<void> {
   if (isSupabaseConfigured()) {
     await supabase.auth.signOut()
   }
-  cookies().delete(USER_COOKIE_NAME)
+  const cookieStore = await cookies() // Adicionado await
+  cookieStore.delete(USER_COOKIE_NAME)
   redirect("/") // Redireciona após o logout
 }
 
@@ -220,7 +207,7 @@ export async function isLoggedIn(): Promise<boolean> {
 
 // Função para obter usuário atual
 export async function getCurrentUser(): Promise<User | null> {
-  const cookieStore = cookies()
+  const cookieStore = await cookies() // Adicionado await
   const userCookie = cookieStore.get(USER_COOKIE_NAME)
   if (userCookie && userCookie.value) {
     try {
@@ -253,7 +240,6 @@ export async function register(
     // Simulate creation for mock mode
     return { success: true, message: "Registro bem-sucedido! Faça login para continuar.", userId: "mock-user-id" }
   }
-
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -264,16 +250,14 @@ export async function register(
         },
       },
     })
-
     if (error) {
       return { success: false, message: error.message }
     }
-
     if (data.user) {
       // Create a profile entry in public.perfis_empresas immediately for 'empresa' type
       if (tipo === "empresa") {
         const { error: profileError } = await criarPerfilEmpresa(data.user.id, null, {
-          nome_contato,
+          nome_completo: nome_contato, // Mapeado para nome_completo
           telefone,
           cargo,
         })
@@ -287,14 +271,12 @@ export async function register(
       }
       // For 'admin' type, the admin user would typically be created and linked to the 'admins' table
       // through a separate, more controlled process (e.g., by another admin).
-
       return {
         success: true,
         message: "Registro bem-sucedido! Verifique seu email para confirmar.",
         userId: data.user.id,
       }
     }
-
     return { success: false, message: "Erro desconhecido durante o registro." }
   } catch (err: any) {
     console.error("Erro ao registrar usuário:", err)
@@ -308,16 +290,13 @@ export async function recoverPassword(email: string): Promise<{ success: boolean
     console.warn("Supabase não configurado. Recuperação de senha mock.")
     return { success: true, message: "Se as credenciais estiverem corretas, um link de recuperação foi enviado." }
   }
-
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/redefinir-senha`, // Replace with your actual reset password page URL
     })
-
     if (error) {
       return { success: false, message: error.message }
     }
-
     return { success: true, message: "Um link de redefinição de senha foi enviado para o seu email." }
   } catch (err: any) {
     console.error("Erro na recuperação de senha:", err)
@@ -331,20 +310,16 @@ export async function resetPassword(newPassword: string): Promise<{ success: boo
     console.warn("Supabase não configurado. Redefinição de senha mock.")
     return { success: true, message: "Senha redefinida com sucesso (modo mock)!" }
   }
-
   try {
     const { data, error } = await supabase.auth.updateUser({
       password: newPassword,
     })
-
     if (error) {
       return { success: false, message: error.message }
     }
-
     if (data.user) {
       return { success: true, message: "Sua senha foi redefinida com sucesso! Você pode fazer login agora." }
     }
-
     return { success: false, message: "Erro desconhecido ao redefinir a senha." }
   } catch (err: any) {
     console.error("Erro ao redefinir senha:", err)

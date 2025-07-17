@@ -17,31 +17,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { buscarEmpresaPorId, buscarProdutosPorEmpresa, obterAnalytics } from "@/lib/database"
-import { isSupabaseConfigured } from "@/lib/supabase"
-import type { Empresa, Produto } from "@/lib/supabase.types" // Importa o tipo do novo arquivo
+import { buscarEmpresaPorId, buscarProdutosPorEmpresa, obterAnalytics } from "../../lib/database" // Caminho relativo
+import { isSupabaseConfigured } from "../../lib/supabase" // Caminho relativo
+import type { Empresa, Produto } from "../../lib/supabase.types" // Caminho relativo
 import { AuthGuard } from "@/components/auth-guard"
-import { logout, isLoggedIn, getCurrentUser } from "@/lib/auth" // Importa Server Actions e funções de auth
+import { logout, isLoggedIn, getCurrentUser } from "../../lib/auth" // Caminho relativo
 import { redirect } from "next/navigation" // Para redirecionamento server-side
+import { CompanyInfoCard } from "@/components/company-info-card" // Importa o componente de edição
+import { EmpresaDashboard } from "./EmpresaDashboard"
 
 // Esta página agora é um Server Component
 export default async function DashboardPage() {
   const loggedIn = await isLoggedIn()
   const user = await getCurrentUser()
 
-  // Redirecionamento server-side se não estiver logado ou não for tipo 'empresa'
-  if (!loggedIn || user?.tipo !== "empresa") {
+  // Corrija o tipo para aceitar "empresa" ou "admin"
+  if (!loggedIn || (user?.tipo !== "empresa" && user?.tipo !== "admin")) {
     redirect("/login")
   }
 
   const isConfigured = isSupabaseConfigured()
-
-  // ID da empresa (vem do usuário logado)
-  const empresaId = user?.empresa_id || "1" // Usar ID mock "1" se empresa_id não estiver definido (para testes)
+  const empresaId = user?.empresa_id || "1"
 
   let empresa: Empresa | null = null
   let produtos: Produto[] = []
-  let analytics = {
+  let analytics: DashboardData = {
     totalVisualizacoes: 0,
     visualizacoesMes: 0,
     produtosMaisVistos: [],
@@ -55,23 +55,25 @@ export default async function DashboardPage() {
         buscarProdutosPorEmpresa(empresaId),
         obterAnalytics(empresaId),
       ])
-
       empresa = empresaData
       produtos = produtosData
       analytics = analyticsData
     } catch (error) {
       console.error("Erro ao carregar dashboard:", error)
-      // Em caso de erro, pode-se redirecionar ou mostrar uma mensagem
     } finally {
       loadingData = false
     }
   } else {
-    loadingData = false // Se não configurado ou sem empresaId, não está "carregando" dados do DB
+    loadingData = false
   }
 
   return (
-    // AuthGuard é um Client Component, recebe props do Server Component
-    <AuthGuard isLoggedIn={loggedIn} isAdmin={user?.tipo === "admin"} requireAuth={true} requireAdmin={false}>
+    <AuthGuard
+      isLoggedIn={loggedIn}
+      isAdmin={user?.tipo === "admin"}
+      requireAuth={true}
+      requireAdmin={false}
+    >
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <header className="bg-white shadow-sm border-b">
@@ -104,7 +106,6 @@ export default async function DashboardPage() {
             </div>
           </div>
         </header>
-
         {!isConfigured && (
           <div className="bg-yellow-100 border-yellow-500 text-yellow-700 px-4 py-3" role="alert">
             <strong className="font-bold">Atenção:</strong>
@@ -113,7 +114,6 @@ export default async function DashboardPage() {
             </span>
           </div>
         )}
-
         {loadingData ? (
           <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
             <div className="h-16 w-16 animate-spin rounded-full border-4 border-solid border-green-500 border-t-transparent" />
@@ -127,7 +127,6 @@ export default async function DashboardPage() {
               </h1>
               <p className="text-gray-600">Gerencie as informações da sua empresa e produtos</p>
             </div>
-
             {/* Stats Cards */}
             <div className="grid md:grid-cols-4 gap-6 mb-8">
               <Card>
@@ -140,7 +139,6 @@ export default async function DashboardPage() {
                   <p className="text-xs text-muted-foreground">+2 este mês</p>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Visualizações</CardTitle>
@@ -151,7 +149,6 @@ export default async function DashboardPage() {
                   <p className="text-xs text-muted-foreground">+{analytics.visualizacoesMes} este mês</p>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Contatos</CardTitle>
@@ -162,7 +159,6 @@ export default async function DashboardPage() {
                   <p className="text-xs text-muted-foreground">+8 esta semana</p>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Status</CardTitle>
@@ -176,7 +172,6 @@ export default async function DashboardPage() {
                 </CardContent>
               </Card>
             </div>
-
             {/* Main Content */}
             <Tabs defaultValue="empresa" className="space-y-6">
               <TabsList>
@@ -185,52 +180,10 @@ export default async function DashboardPage() {
                 <TabsTrigger value="arquivos">Arquivos</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
               </TabsList>
-
               <TabsContent value="empresa">
-                <Card>
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle>Informações da Empresa</CardTitle>
-                        <CardDescription>Gerencie os dados básicos da sua empresa</CardDescription>
-                      </div>
-                      <Button>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Nome Fantasia</h4>
-                        <p className="text-gray-600">{empresa?.nome_fantasia}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Razão Social</h4>
-                        <p className="text-gray-600">{empresa?.razao_social}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">CNPJ</h4>
-                        <p className="text-gray-600">{empresa?.cnpj}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Setor</h4>
-                        <Badge variant="secondary">{empresa?.setor_empresa}</Badge>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Município</h4>
-                        <p className="text-gray-600">{empresa?.municipio}, AC</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Status</h4>
-                        <Badge variant="secondary">{empresa?.status}</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                {/* Integração do CompanyInfoCard aqui */}
+                <CompanyInfoCard initialData={empresa} empresaId={empresaId} />
               </TabsContent>
-
               <TabsContent value="produtos">
                 <Card>
                   <CardHeader>
@@ -282,7 +235,6 @@ export default async function DashboardPage() {
                   </CardContent>
                 </Card>
               </TabsContent>
-
               <TabsContent value="arquivos">
                 <div className="grid md:grid-cols-2 gap-6">
                   <Card>
@@ -313,7 +265,6 @@ export default async function DashboardPage() {
                       </Button>
                     </CardContent>
                   </Card>
-
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center">
@@ -340,7 +291,6 @@ export default async function DashboardPage() {
                   </Card>
                 </div>
               </TabsContent>
-
               <TabsContent value="analytics">
                 <div className="grid md:grid-cols-2 gap-6">
                   <Card>
@@ -348,38 +298,44 @@ export default async function DashboardPage() {
                       <CardTitle>Visualizações do Perfil</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold mb-2">1,234</div>
-                      <p className="text-sm text-gray-600">Visualizações nos últimos 30 dias</p>
+                      <div className="text-3xl font-bold mb-2">{analytics.totalVisualizacoes}</div>
+                      <p className="text-sm text-gray-600">
+                        Visualizações nos últimos 30 dias
+                      </p>
                     </CardContent>
                   </Card>
-
                   <Card>
                     <CardHeader>
                       <CardTitle>Produtos Mais Visualizados</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Açaí Premium</span>
-                          <span className="text-sm font-medium">456 views</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Polpa de Cupuaçu</span>
-                          <span className="text-sm font-medium">234 views</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Castanha do Pará</span>
-                          <span className="text-sm font-medium">123 views</span>
-                        </div>
+                        {analytics.produtosMaisVistos.map((produto) => (
+                          <div className="flex justify-between" key={produto.nome}>
+                            <span className="text-sm">{produto.nome}</span>
+                            <span className="text-sm font-medium">{produto.views} views</span>
+                          </div>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
                 </div>
               </TabsContent>
             </Tabs>
+            {/* Novo componente EmpresaDashboard */}
+            {empresa && (
+              <EmpresaDashboard empresa={empresa} onAtualizado={() => window.location.reload()} />
+            )}
           </div>
         )}
       </div>
     </AuthGuard>
   )
+}
+
+// Troque o tipo do analytics para usar DashboardData:
+interface DashboardData {
+  totalVisualizacoes: number
+  visualizacoesMes: number
+  produtosMaisVistos: { nome: string; views: number }[]
 }

@@ -13,20 +13,26 @@ export type Empresa = {
   apresentacao?: string
   descricao_produtos?: string
   instagram?: string
+  facebook?: string
+  youtube?: string
+  linkedin?: string
+  twitter?: string
+  video_apresentacao?: string
   status: "pendente" | "ativo" | "inativo"
   created_at: string
   updated_at: string
-  produtos?: Produto[] // Relação para produtos
-  arquivos?: Arquivo[] // Relação para arquivos
+  produtos: Produto[] // Relação para produtos (remova o ? para garantir sempre um array)
+  arquivos: Arquivo[] // Relação para arquivos (remova o ? para garantir sempre um array)
 }
 
-export type Produto = {
+export interface Produto {
   id: string
   empresa_id: string
   nome: string
+  nome_tecnico?: string
   linha?: string
   descricao?: string
-  status: "ativo" | "inativo"
+  status: string
   created_at: string
   updated_at: string
 }
@@ -60,3 +66,16 @@ export type Analytics = {
   ip_address?: string
   user_agent?: string
 }
+
+export interface PerfilEmpresa {
+  id: string
+  empresa_id: string | null
+  nome_completo: string
+  email: string
+  telefone?: string
+  cargo?: string
+  created_at: string
+  updated_at: string
+}
+
+

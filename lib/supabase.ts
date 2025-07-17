@@ -11,10 +11,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn("Supabase URL or Anon Key is not set. Database functions will not work.")
 }
 
-export const supabase = createClient(supabaseUrl!, supabaseAnonKey!)
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 export function isSupabaseConfigured(): boolean {
   return !!supabaseUrl && !!supabaseAnonKey
 }
-
 
