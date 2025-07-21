@@ -12,17 +12,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UploadComponent } from "@/components/upload-component"
 import { criarEmpresa, criarProduto, criarArquivo, vincularEmpresaAoPerfil } from "@/lib/database"
-import { isSupabaseConfigured } from "@/lib/supabase"
-import type { Empresa, Produto } from "@/lib/supabase.types"
-import { useToast } from "@/components/ui/use-toast"
 import { register } from "@/lib/auth"
+import { useToast } from "@/components/ui/use-toast"
+import { supabase } from "@/lib/supabase"
+import type { Produto, Empresa } from "@/lib/supabase.types"
 
 export default function CadastroPage() {
   const { toast } = useToast()
   const [produtos, setProdutos] = useState<
     Array<
       Partial<Produto> & {
-        id: number
+        id: string
         ficha_tecnica_url?: string
         folder_produto_url?: string
         imagens_produto_urls?: string[]
@@ -59,7 +59,7 @@ export default function CadastroPage() {
   const [contactRole, setContactRole] = useState("")
 
   const [loading, setLoading] = useState(false)
-  const [isConfigured] = useState(isSupabaseConfigured())
+  const isConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
   // State for main company files
@@ -131,7 +131,7 @@ export default function CadastroPage() {
 
     // Validate company fields
     requiredCompanyFields.forEach((field) => {
-      if (!formData[field]) {
+      if (!((formData as Record<string, any>)[field])) {
         errors[field] = "Este campo é obrigatório."
       }
     })
@@ -181,11 +181,16 @@ export default function CadastroPage() {
     setLoading(true)
     try {
       // 1. Register user
-      const registerResult = await register(userEmail, userPassword, "empresa", contactName, contactPhone, contactRole)
-      if (!registerResult.success) {
-        throw new Error(registerResult.message)
+      const { data, error } = await supabase.auth.signUp({
+        email: userEmail,
+        password: userPassword,
+        // options: { ... } // comente ou remova esta linha para testar
+      })
+      if (error) {
+        console.error(error)
+        return { success: false, message: error.message }
       }
-      const userId = registerResult.userId
+      const userId = data.user?.id
 
       if (!userId) {
         throw new Error("ID do usuário não retornado após o registro.")
@@ -327,16 +332,20 @@ export default function CadastroPage() {
   }
 
   const adicionarProduto = () => {
-    setProdutos([...produtos, { id: Date.now() }]) // Use Date.now() for unique ID
+    setProdutos([...produtos, { id: Date.now().toString() }])
   }
 
-  const removerProduto = (id: number) => {
+  const removerProduto = (id: string) => {
     setProdutos(produtos.filter((produto) => produto.id !== id))
   }
 
-  const handleProductChange = (index: number, field: keyof Produto, value: string) => {
+  const handleProductChange = (
+    index: number,
+    field: keyof Produto | "video_produto",
+    value: string
+  ) => {
     const newProdutos = [...produtos]
-    newProdutos[index] = { ...newProdutos[index], [field]: value } // Ensure immutability
+    newProdutos[index] = { ...newProdutos[index], [field]: value }
     setProdutos(newProdutos)
   }
 
@@ -402,584 +411,586 @@ export default function CadastroPage() {
             <CardDescription>Preencha as informações da sua empresa para aparecer na plataforma</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={currentTab} onValueChange={setCurrentTab}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="acesso">Dados de Acesso</TabsTrigger>
-                <TabsTrigger value="empresa">Dados da Empresa</TabsTrigger>
-                <TabsTrigger value="contato">Contato e Redes</TabsTrigger>
-                <TabsTrigger value="produtos">Produtos</TabsTrigger>
-              </TabsList>
-              <TabsContent value="acesso" className="space-y-6 mt-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="userEmail">Email *</Label>
-                    <Input
-                      id="userEmail"
-                      type="email"
-                      placeholder="seuemail@exemplo.com"
-                      value={userEmail}
-                      onChange={(e) => {
-                        setUserEmail(e.target.value)
-                        setValidationErrors((prev) => ({ ...prev, userEmail: "" }))
-                      }}
-                      required
-                    />
-                    {validationErrors.userEmail && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.userEmail}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="userPassword">Senha *</Label>
-                    <Input
-                      id="userPassword"
-                      type="password"
-                      placeholder="********"
-                      value={userPassword}
-                      onChange={(e) => {
-                        setUserPassword(e.target.value)
-                        setValidationErrors((prev) => ({ ...prev, userPassword: "" }))
-                      }}
-                      required
-                    />
-                    {validationErrors.userPassword && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.userPassword}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="********"
-                      value={confirmPassword}
-                      onChange={(e) => {
-                        setConfirmPassword(e.target.value)
-                        setValidationErrors((prev) => ({ ...prev, confirmPassword: "" }))
-                      }}
-                      required
-                    />
-                    {validationErrors.confirmPassword && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.confirmPassword}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="contactName">Nome do Contato *</Label>
-                    <Input
-                      id="contactName"
-                      placeholder="Nome completo do responsável"
-                      value={contactName}
-                      onChange={(e) => {
-                        setContactName(e.target.value)
-                        setValidationErrors((prev) => ({ ...prev, contactName: "" }))
-                      }}
-                      required
-                    />
-                    {validationErrors.contactName && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.contactName}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="contactPhone">Telefone do Contato</Label>
-                    <Input
-                      id="contactPhone"
-                      placeholder="(XX) XXXXX-XXXX"
-                      value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="contactRole">Cargo do Contato</Label>
-                    <Input
-                      id="contactRole"
-                      placeholder="Ex: Diretor, Gerente"
-                      value={contactRole}
-                      onChange={(e) => setContactRole(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="empresa" className="space-y-6 mt-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="nome_fantasia">Nome Fantasia *</Label>
-                    <Input
-                      id="nome_fantasia"
-                      placeholder="Nome comercial da empresa"
-                      value={formData.nome_fantasia || ""}
-                      onChange={(e) => {
-                        setFormData({ ...formData, nome_fantasia: e.target.value })
-                        setValidationErrors((prev) => ({ ...prev, nome_fantasia: "" }))
-                      }}
-                      required
-                    />
-                    {validationErrors.nome_fantasia && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.nome_fantasia}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="razao_social">Razão Social *</Label>
-                    <Input
-                      id="razao_social"
-                      placeholder="Razão social completa"
-                      value={formData.razao_social || ""}
-                      onChange={(e) => {
-                        setFormData({ ...formData, razao_social: e.target.value })
-                        setValidationErrors((prev) => ({ ...prev, razao_social: "" }))
-                      }}
-                      required
-                    />
-                    {validationErrors.razao_social && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.razao_social}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="cnpj">CNPJ *</Label>
-                    <Input
-                      id="cnpj"
-                      placeholder="00.000.000/0000-00"
-                      value={formData.cnpj || ""}
-                      onChange={(e) => {
-                        setFormData({ ...formData, cnpj: e.target.value })
-                        setValidationErrors((prev) => ({ ...prev, cnpj: "" }))
-                      }}
-                      required
-                    />
-                    {validationErrors.cnpj && <p className="text-red-500 text-xs mt-1">{validationErrors.cnpj}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="setor_economico">Setor Econômico *</Label>
-                    <Select
-                      value={formData.setor_economico || ""}
-                      onValueChange={(value) => {
-                        setFormData({ ...formData, setor_economico: value })
-                        setValidationErrors((prev) => ({ ...prev, setor_economico: "" }))
-                      }}
-                      required
-                    >
-                      <SelectTrigger id="setor_economico">
-                        <SelectValue placeholder="Selecione o setor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="industria">Indústria</SelectItem>
-                        <SelectItem value="comercio">Comércio</SelectItem>
-                        <SelectItem value="servicos">Serviços</SelectItem>
-                        <SelectItem value="agropecuaria">Agropecuária</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {validationErrors.setor_economico && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.setor_economico}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="setor_empresa">Setor da Empresa *</Label>
-                    <Select
-                      value={formData.setor_empresa || ""}
-                      onValueChange={(value) => {
-                        setFormData({ ...formData, setor_empresa: value })
-                        setValidationErrors((prev) => ({ ...prev, setor_empresa: "" }))
-                      }}
-                      required
-                    >
-                      <SelectTrigger id="setor_empresa">
-                        <SelectValue placeholder="Selecione o setor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="alimentos">Alimentos</SelectItem>
-                        <SelectItem value="construcao">Construção</SelectItem>
-                        <SelectItem value="ceramico">Cerâmico</SelectItem>
-                        <SelectItem value="madeira">Madeira</SelectItem>
-                        <SelectItem value="grafico">Gráfico</SelectItem>
-                        <SelectItem value="textil">Têxtil</SelectItem>
-                        <SelectItem value="metalurgico">Metalúrgico</SelectItem>
-                        <SelectItem value="outros">Outros</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {validationErrors.setor_empresa && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.setor_empresa}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="segmento">Segmento da Empresa</Label>
-                    <Input
-                      id="segmento"
-                      placeholder="Ex: Processamento de alimentos"
-                      value={formData.segmento || ""}
-                      onChange={(e) => setFormData({ ...formData, segmento: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="tema_segmento">Tema do Segmento</Label>
-                  <Input
-                    id="tema_segmento"
-                    placeholder="Ex: Alimentos - Açaí, Alimentos - Sorvetes"
-                    value={formData.tema_segmento || ""}
-                    onChange={(e) => setFormData({ ...formData, tema_segmento: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="descricao_produtos">Descrição dos Produtos *</Label>
-                  <Textarea
-                    id="descricao_produtos"
-                    placeholder="Descreva sucintamente os produtos da sua indústria"
-                    rows={3}
-                    value={formData.descricao_produtos || ""}
-                    onChange={(e) => {
-                      setFormData({ ...formData, descricao_produtos: e.target.value })
-                      setValidationErrors((prev) => ({ ...prev, descricao_produtos: "" }))
-                    }}
-                    required
-                  />
-                  {validationErrors.descricao_produtos && (
-                    <p className="text-red-500 text-xs mt-1">{validationErrors.descricao_produtos}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="apresentacao">Texto de Apresentação *</Label>
-                  <Textarea
-                    id="apresentacao"
-                    placeholder="Breve texto de apresentação da indústria"
-                    rows={4}
-                    value={formData.apresentacao || ""}
-                    onChange={(e) => {
-                      setFormData({ ...formData, apresentacao: e.target.value })
-                      setValidationErrors((prev) => ({ ...prev, apresentacao: "" }))
-                    }}
-                    required
-                  />
-                  {validationErrors.apresentacao && (
-                    <p className="text-red-500 text-xs mt-1">{validationErrors.apresentacao}</p>
-                  )}
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="endereco">Endereço Completo *</Label>
-                    <Textarea
-                      id="endereco"
-                      placeholder="Rua, número, bairro, CEP"
-                      rows={2}
-                      value={formData.endereco || ""}
-                      onChange={(e) => {
-                        setFormData({ ...formData, endereco: e.target.value })
-                        setValidationErrors((prev) => ({ ...prev, endereco: "" }))
-                      }}
-                      required
-                    />
-                    {validationErrors.endereco && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.endereco}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="municipio">Município *</Label>
-                    <Select
-                      value={formData.municipio || ""}
-                      onValueChange={(value) => {
-                        setFormData({ ...formData, municipio: value })
-                        setValidationErrors((prev) => ({ ...prev, municipio: "" }))
-                      }}
-                      required
-                    >
-                      <SelectTrigger id="municipio">
-                        <SelectValue placeholder="Selecione o município" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {municipios.map((m) => (
-                          <SelectItem key={m.value} value={m.value}>
-                            {m.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {validationErrors.municipio && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.municipio}</p>
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="contato" className="space-y-6 mt-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="instagram">Instagram</Label>
-                    <Input
-                      id="instagram"
-                      placeholder="@suaempresa"
-                      value={formData.instagram || ""}
-                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="facebook">Facebook</Label>
-                    <Input
-                      id="facebook"
-                      placeholder="facebook.com/suaempresa"
-                      value={formData.facebook || ""}
-                      onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="youtube">YouTube</Label>
-                    <Input
-                      id="youtube"
-                      placeholder="youtube.com/suaempresa"
-                      value={formData.youtube || ""}
-                      onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="linkedin">LinkedIn</Label>
-                    <Input
-                      id="linkedin"
-                      placeholder="linkedin.com/company/suaempresa"
-                      value={formData.linkedin || ""}
-                      onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="twitter">X (Twitter)</Label>
-                  <Input
-                    id="twitter"
-                    placeholder="@suaempresa"
-                    value={formData.twitter || ""}
-                    onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="video_apresentacao">Vídeo de Apresentação (YouTube)</Label>
-                  <Input
-                    id="video_apresentacao"
-                    placeholder="Link do vídeo no YouTube"
-                    value={formData.video_apresentacao || ""}
-                    onChange={(e) => setFormData({ ...formData, video_apresentacao: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-4">
-                  <Label>Folder de Apresentação (PDF)</Label>
-                  <UploadComponent
-                    onUploadSuccess={(url) => setFolderApresentacaoUrl(url)}
-                    acceptedFileTypes="application/pdf"
-                    buttonText={folderApresentacaoUrl ? "Alterar PDF" : "Upload PDF"}
-                  />
-                  {folderApresentacaoUrl && (
-                    <p className="text-sm text-gray-600">
-                      PDF atual:{" "}
-                      <a href={folderApresentacaoUrl} target="_blank" rel="noopener noreferrer" className="underline">
-                        Ver arquivo
-                      </a>
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-4">
-                  <Label>Outros Arquivos (PDFs, Imagens)</Label>
-                  <UploadComponent
-                    onUploadSuccess={(url) => setOutrosArquivosUrls((prev) => [...prev, url])}
-                    acceptedFileTypes="image/*,application/pdf"
-                    buttonText="Adicionar Arquivo"
-                  />
-                  {outrosArquivosUrls.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {outrosArquivosUrls.map((url, idx) => (
-                        <p key={idx} className="text-sm text-gray-600">
-                          Arquivo {idx + 1}:{" "}
-                          <a href={url} target="_blank" rel="noopener noreferrer" className="underline">
-                            Ver arquivo
-                          </a>
-                        </p>
-                      ))}
+            <form onSubmit={(e) => { e.preventDefault(); handleSalvarEmpresa(); }}>
+              <Tabs value={currentTab} onValueChange={setCurrentTab}>
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="acesso">Dados de Acesso</TabsTrigger>
+                  <TabsTrigger value="empresa">Dados da Empresa</TabsTrigger>
+                  <TabsTrigger value="contato">Contato e Redes</TabsTrigger>
+                  <TabsTrigger value="produtos">Produtos</TabsTrigger>
+                </TabsList>
+                <TabsContent value="acesso" className="space-y-6 mt-6">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="userEmail">Email *</Label>
+                      <Input
+                        id="userEmail"
+                        type="email"
+                        placeholder="seuemail@exemplo.com"
+                        value={userEmail}
+                        onChange={(e) => {
+                          setUserEmail(e.target.value)
+                          setValidationErrors((prev) => ({ ...prev, userEmail: "" }))
+                        }}
+                        required
+                      />
+                      {validationErrors.userEmail && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.userEmail}</p>
+                      )}
                     </div>
-                  )}
-                </div>
-              </TabsContent>
-              <TabsContent value="produtos" className="space-y-6 mt-6">
-                <div className="flex justify-between items-center">
+                    <div>
+                      <Label htmlFor="userPassword">Senha *</Label>
+                      <Input
+                        id="userPassword"
+                        type="password"
+                        placeholder="********"
+                        value={userPassword}
+                        onChange={(e) => {
+                          setUserPassword(e.target.value)
+                          setValidationErrors((prev) => ({ ...prev, userPassword: "" }))
+                        }}
+                        required
+                      />
+                      {validationErrors.userPassword && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.userPassword}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="********"
+                        value={confirmPassword}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value)
+                          setValidationErrors((prev) => ({ ...prev, confirmPassword: "" }))
+                        }}
+                        required
+                      />
+                      {validationErrors.confirmPassword && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.confirmPassword}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="contactName">Nome do Contato *</Label>
+                      <Input
+                        id="contactName"
+                        placeholder="Nome completo do responsável"
+                        value={contactName}
+                        onChange={(e) => {
+                          setContactName(e.target.value)
+                          setValidationErrors((prev) => ({ ...prev, contactName: "" }))
+                        }}
+                        required
+                      />
+                      {validationErrors.contactName && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.contactName}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="contactPhone">Telefone do Contato</Label>
+                      <Input
+                        id="contactPhone"
+                        placeholder="(XX) XXXXX-XXXX"
+                        value={contactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="contactRole">Cargo do Contato</Label>
+                      <Input
+                        id="contactRole"
+                        placeholder="Ex: Diretor, Gerente"
+                        value={contactRole}
+                        onChange={(e) => setContactRole(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="empresa" className="space-y-6 mt-6">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="nome_fantasia">Nome Fantasia *</Label>
+                      <Input
+                        id="nome_fantasia"
+                        placeholder="Nome comercial da empresa"
+                        value={formData.nome_fantasia || ""}
+                        onChange={(e) => {
+                          setFormData({ ...formData, nome_fantasia: e.target.value })
+                          setValidationErrors((prev) => ({ ...prev, nome_fantasia: "" }))
+                        }}
+                        required
+                      />
+                      {validationErrors.nome_fantasia && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.nome_fantasia}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="razao_social">Razão Social *</Label>
+                      <Input
+                        id="razao_social"
+                        placeholder="Razão social completa"
+                        value={formData.razao_social || ""}
+                        onChange={(e) => {
+                          setFormData({ ...formData, razao_social: e.target.value })
+                          setValidationErrors((prev) => ({ ...prev, razao_social: "" }))
+                        }}
+                        required
+                      />
+                      {validationErrors.razao_social && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.razao_social}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="cnpj">CNPJ *</Label>
+                      <Input
+                        id="cnpj"
+                        placeholder="00.000.000/0000-00"
+                        value={formData.cnpj || ""}
+                        onChange={(e) => {
+                          setFormData({ ...formData, cnpj: e.target.value })
+                          setValidationErrors((prev) => ({ ...prev, cnpj: "" }))
+                        }}
+                        required
+                      />
+                      {validationErrors.cnpj && <p className="text-red-500 text-xs mt-1">{validationErrors.cnpj}</p>}
+                    </div>
+                    <div>
+                      <Label htmlFor="setor_economico">Setor Econômico *</Label>
+                      <Select
+                        value={formData.setor_economico || ""}
+                        onValueChange={(value) => {
+                          setFormData({ ...formData, setor_economico: value })
+                          setValidationErrors((prev) => ({ ...prev, setor_economico: "" }))
+                        }}
+                        required
+                      >
+                        <SelectTrigger id="setor_economico">
+                          <SelectValue placeholder="Selecione o setor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="industria">Indústria</SelectItem>
+                          <SelectItem value="comercio">Comércio</SelectItem>
+                          <SelectItem value="servicos">Serviços</SelectItem>
+                          <SelectItem value="agropecuaria">Agropecuária</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {validationErrors.setor_economico && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.setor_economico}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="setor_empresa">Setor da Empresa *</Label>
+                      <Select
+                        value={formData.setor_empresa || ""}
+                        onValueChange={(value) => {
+                          setFormData({ ...formData, setor_empresa: value })
+                          setValidationErrors((prev) => ({ ...prev, setor_empresa: "" }))
+                        }}
+                        required
+                      >
+                        <SelectTrigger id="setor_empresa">
+                          <SelectValue placeholder="Selecione o setor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="alimentos">Alimentos</SelectItem>
+                          <SelectItem value="construcao">Construção</SelectItem>
+                          <SelectItem value="ceramico">Cerâmico</SelectItem>
+                          <SelectItem value="madeira">Madeira</SelectItem>
+                          <SelectItem value="grafico">Gráfico</SelectItem>
+                          <SelectItem value="textil">Têxtil</SelectItem>
+                          <SelectItem value="metalurgico">Metalúrgico</SelectItem>
+                          <SelectItem value="outros">Outros</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {validationErrors.setor_empresa && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.setor_empresa}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="segmento">Segmento da Empresa</Label>
+                      <Input
+                        id="segmento"
+                        placeholder="Ex: Processamento de alimentos"
+                        value={formData.segmento || ""}
+                        onChange={(e) => setFormData({ ...formData, segmento: e.target.value })}
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <h3 className="text-lg font-semibold">Produtos da Empresa</h3>
-                    <p className="text-sm text-gray-600">Cadastre os produtos da sua indústria</p>
+                    <Label htmlFor="tema_segmento">Tema do Segmento</Label>
+                    <Input
+                      id="tema_segmento"
+                      placeholder="Ex: Alimentos - Açaí, Alimentos - Sorvetes"
+                      value={formData.tema_segmento || ""}
+                      onChange={(e) => setFormData({ ...formData, tema_segmento: e.target.value })}
+                    />
                   </div>
-                  <Button onClick={adicionarProduto}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Produto
-                  </Button>
-                </div>
-                {produtos.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>Nenhum produto cadastrado ainda.</p>
-                    <p className="text-sm">Clique em "Adicionar Produto" para começar.</p>
+                  <div>
+                    <Label htmlFor="descricao_produtos">Descrição dos Produtos *</Label>
+                    <Textarea
+                      id="descricao_produtos"
+                      placeholder="Descreva sucintamente os produtos da sua indústria"
+                      rows={3}
+                      value={formData.descricao_produtos || ""}
+                      onChange={(e) => {
+                        setFormData({ ...formData, descricao_produtos: e.target.value })
+                        setValidationErrors((prev) => ({ ...prev, descricao_produtos: "" }))
+                      }}
+                      required
+                    />
+                    {validationErrors.descricao_produtos && (
+                      <p className="text-red-500 text-xs mt-1">{validationErrors.descricao_produtos}</p>
+                    )}
                   </div>
-                ) : (
-                  <div className="space-y-6">
-                    {produtos.map((produto, index) => (
-                      <Card key={produto.id}>
-                        <CardHeader className="pb-4">
-                          <div className="flex justify-between items-center">
-                            <CardTitle className="text-lg">Produto {index + 1}</CardTitle>
-                            <Button variant="ghost" size="sm" onClick={() => removerProduto(produto.id)}>
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="apresentacao">Texto de Apresentação *</Label>
+                    <Textarea
+                      id="apresentacao"
+                      placeholder="Breve texto de apresentação da indústria"
+                      rows={4}
+                      value={formData.apresentacao || ""}
+                      onChange={(e) => {
+                        setFormData({ ...formData, apresentacao: e.target.value })
+                        setValidationErrors((prev) => ({ ...prev, apresentacao: "" }))
+                      }}
+                      required
+                    />
+                    {validationErrors.apresentacao && (
+                      <p className="text-red-500 text-xs mt-1">{validationErrors.apresentacao}</p>
+                    )}
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="endereco">Endereço Completo *</Label>
+                      <Textarea
+                        id="endereco"
+                        placeholder="Rua, número, bairro, CEP"
+                        rows={2}
+                        value={formData.endereco || ""}
+                        onChange={(e) => {
+                          setFormData({ ...formData, endereco: e.target.value })
+                          setValidationErrors((prev) => ({ ...prev, endereco: "" }))
+                        }}
+                        required
+                      />
+                      {validationErrors.endereco && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.endereco}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="municipio">Município *</Label>
+                      <Select
+                        value={formData.municipio || ""}
+                        onValueChange={(value) => {
+                          setFormData({ ...formData, municipio: value })
+                          setValidationErrors((prev) => ({ ...prev, municipio: "" }))
+                        }}
+                        required
+                      >
+                        <SelectTrigger id="municipio">
+                          <SelectValue placeholder="Selecione o município" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {municipios.map((m) => (
+                            <SelectItem key={m.value} value={m.value}>
+                              {m.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {validationErrors.municipio && (
+                        <p className="text-red-500 text-xs mt-1">{validationErrors.municipio}</p>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="contato" className="space-y-6 mt-6">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="instagram">Instagram</Label>
+                      <Input
+                        id="instagram"
+                        placeholder="@suaempresa"
+                        value={formData.instagram || ""}
+                        onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="facebook">Facebook</Label>
+                      <Input
+                        id="facebook"
+                        placeholder="facebook.com/suaempresa"
+                        value={formData.facebook || ""}
+                        onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="youtube">YouTube</Label>
+                      <Input
+                        id="youtube"
+                        placeholder="youtube.com/suaempresa"
+                        value={formData.youtube || ""}
+                        onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="linkedin">LinkedIn</Label>
+                      <Input
+                        id="linkedin"
+                        placeholder="linkedin.com/company/suaempresa"
+                        value={formData.linkedin || ""}
+                        onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="twitter">X (Twitter)</Label>
+                    <Input
+                      id="twitter"
+                      placeholder="@suaempresa"
+                      value={formData.twitter || ""}
+                      onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="video_apresentacao">Vídeo de Apresentação (YouTube)</Label>
+                    <Input
+                      id="video_apresentacao"
+                      placeholder="Link do vídeo no YouTube"
+                      value={formData.video_apresentacao || ""}
+                      onChange={(e) => setFormData({ ...formData, video_apresentacao: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <Label>Folder de Apresentação (PDF)</Label>
+                    <UploadComponent
+                      onUploadSuccess={(url) => setFolderApresentacaoUrl(url)}
+                      acceptedFileTypes="application/pdf"
+                      buttonText={folderApresentacaoUrl ? "Alterar PDF" : "Upload PDF"}
+                    />
+                    {folderApresentacaoUrl && (
+                      <p className="text-sm text-gray-600">
+                        PDF atual:{" "}
+                        <a href={folderApresentacaoUrl} target="_blank" rel="noopener noreferrer" className="underline">
+                          Ver arquivo
+                        </a>
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-4">
+                    <Label>Outros Arquivos (PDFs, Imagens)</Label>
+                    <UploadComponent
+                      onUploadSuccess={(url) => setOutrosArquivosUrls((prev) => [...prev, url])}
+                      acceptedFileTypes="image/*,application/pdf"
+                      buttonText="Adicionar Arquivo"
+                    />
+                    {outrosArquivosUrls.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {outrosArquivosUrls.map((url, idx) => (
+                          <p key={idx} className="text-sm text-gray-600">
+                            Arquivo {idx + 1}:{" "}
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="underline">
+                              Ver arquivo
+                            </a>
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+                <TabsContent value="produtos" className="space-y-6 mt-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-semibold">Produtos da Empresa</h3>
+                      <p className="text-sm text-gray-600">Cadastre os produtos da sua indústria</p>
+                    </div>
+                    <Button onClick={adicionarProduto}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar Produto
+                    </Button>
+                  </div>
+                  {produtos.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>Nenhum produto cadastrado ainda.</p>
+                      <p className="text-sm">Clique em "Adicionar Produto" para começar.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {produtos.map((produto, index) => (
+                        <Card key={produto.id}>
+                          <CardHeader className="pb-4">
+                            <div className="flex justify-between items-center">
+                              <CardTitle className="text-lg">Produto {index + 1}</CardTitle>
+                              <Button variant="ghost" size="sm" onClick={() => removerProduto(produto.id)}>
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor={`nome-${index}`}>Nome do Produto *</Label>
+                                <Input
+                                  id={`nome-${index}`}
+                                  placeholder="Nome comercial do produto"
+                                  value={produto.nome || ""}
+                                  onChange={(e) => {
+                                    handleProductChange(index, "nome", e.target.value)
+                                    setValidationErrors((prev) => ({ ...prev, [`produto_nome_${index}`]: "" }))
+                                  }}
+                                  required
+                                />
+                                {validationErrors[`produto_nome_${index}`] && (
+                                  <p className="text-red-500 text-xs mt-1">{validationErrors[`produto_nome_${index}`]}</p>
+                                )}
+                              </div>
+                              <div>
+                                <Label htmlFor={`nome_tecnico-${index}`}>Nome Técnico</Label>
+                                <Input
+                                  id={`nome_tecnico-${index}`}
+                                  placeholder="Nome técnico/científico"
+                                  value={produto.nome_tecnico || ""}
+                                  onChange={(e) => handleProductChange(index, "nome_tecnico", e.target.value)}
+                                />
+                              </div>
+                            </div>
                             <div>
-                              <Label htmlFor={`nome-${index}`}>Nome do Produto *</Label>
+                              <Label htmlFor={`linha-${index}`}>Linha do Produto</Label>
                               <Input
-                                id={`nome-${index}`}
-                                placeholder="Nome comercial do produto"
-                                value={produto.nome || ""}
+                                id={`linha-${index}`}
+                                placeholder="Ex: Linha Premium, Linha Econômica"
+                                value={produto.linha || ""}
+                                onChange={(e) => handleProductChange(index, "linha", e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`descricao-${index}`}>Descrição e Especificações *</Label>
+                              <Textarea
+                                id={`descricao-${index}`}
+                                placeholder="Descreva o produto e suas especificações"
+                                rows={3}
+                                value={produto.descricao || ""}
                                 onChange={(e) => {
-                                  handleProductChange(index, "nome", e.target.value)
-                                  setValidationErrors((prev) => ({ ...prev, [`produto_nome_${index}`]: "" }))
+                                  handleProductChange(index, "descricao", e.target.value)
+                                  setValidationErrors((prev) => ({ ...prev, [`produto_descricao_${index}`]: "" }))
                                 }}
                                 required
                               />
-                              {validationErrors[`produto_nome_${index}`] && (
-                                <p className="text-red-500 text-xs mt-1">{validationErrors[`produto_nome_${index}`]}</p>
+                              {validationErrors[`produto_descricao_${index}`] && (
+                                <p className="text-red-500 text-xs mt-1">
+                                  {validationErrors[`produto_descricao_${index}`]}
+                                </p>
+                              )}
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Ficha Técnica (PDF)</Label>
+                                <UploadComponent
+                                  onUploadSuccess={(url) => handleProductFileUpload(index, "ficha_tecnica_url", url)}
+                                  acceptedFileTypes="application/pdf"
+                                  buttonText={produto.ficha_tecnica_url ? "Alterar PDF" : "Upload PDF"}
+                                />
+                                {produto.ficha_tecnica_url && (
+                                  <p className="text-sm text-gray-600">
+                                    PDF atual:{" "}
+                                    <a
+                                      href={produto.ficha_tecnica_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="underline"
+                                    >
+                                      Ver arquivo
+                                    </a>
+                                  </p>
+                                )}
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Folder do Produto (PDF)</Label>
+                                <UploadComponent
+                                  onUploadSuccess={(url) => handleProductFileUpload(index, "folder_produto_url", url)}
+                                  acceptedFileTypes="application/pdf"
+                                  buttonText={produto.folder_produto_url ? "Alterar PDF" : "Upload PDF"}
+                                />
+                                {produto.folder_produto_url && (
+                                  <p className="text-sm text-gray-600">
+                                    PDF atual:{" "}
+                                    <a
+                                      href={produto.folder_produto_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="underline"
+                                    >
+                                      Ver arquivo
+                                    </a>
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Imagens do Produto</Label>
+                              <UploadComponent
+                                onUploadSuccess={(url) => handleProductImagesUpload(index, url)}
+                                acceptedFileTypes="image/*"
+                                buttonText="Adicionar Imagem"
+                              />
+                              {produto.imagens_produto_urls && produto.imagens_produto_urls.length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                  {(produto.imagens_produto_urls as string[]).map((url: string, imgIdx: number) => (
+                                    <p key={imgIdx} className="text-sm text-gray-600">
+                                      Imagem {imgIdx + 1}:{" "}
+                                      <a href={url} target="_blank" rel="noopener noreferrer" className="underline">
+                                        Ver imagem
+                                      </a>
+                                    </p>
+                                  ))}
+                                </div>
                               )}
                             </div>
                             <div>
-                              <Label htmlFor={`nome_tecnico-${index}`}>Nome Técnico</Label>
+                              <Label htmlFor={`video_produto-${index}`}>Vídeo do Produto (YouTube)</Label>
                               <Input
-                                id={`nome_tecnico-${index}`}
-                                placeholder="Nome técnico/científico"
-                                value={produto.nome_tecnico || ""}
-                                onChange={(e) => handleProductChange(index, "nome_tecnico", e.target.value)}
+                                id={`video_produto-${index}`}
+                                placeholder="Link do vídeo no YouTube"
+                                value={produto.video_produto || ""}
+                                onChange={(e) => handleProductChange(index, "video_produto", e.target.value)}
                               />
                             </div>
-                          </div>
-                          <div>
-                            <Label htmlFor={`linha-${index}`}>Linha do Produto</Label>
-                            <Input
-                              id={`linha-${index}`}
-                              placeholder="Ex: Linha Premium, Linha Econômica"
-                              value={produto.linha || ""}
-                              onChange={(e) => handleProductChange(index, "linha", e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor={`descricao-${index}`}>Descrição e Especificações *</Label>
-                            <Textarea
-                              id={`descricao-${index}`}
-                              placeholder="Descreva o produto e suas especificações"
-                              rows={3}
-                              value={produto.descricao || ""}
-                              onChange={(e) => {
-                                handleProductChange(index, "descricao", e.target.value)
-                                setValidationErrors((prev) => ({ ...prev, [`produto_descricao_${index}`]: "" }))
-                              }}
-                              required
-                            />
-                            {validationErrors[`produto_descricao_${index}`] && (
-                              <p className="text-red-500 text-xs mt-1">
-                                {validationErrors[`produto_descricao_${index}`]}
-                              </p>
-                            )}
-                          </div>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>Ficha Técnica (PDF)</Label>
-                              <UploadComponent
-                                onUploadSuccess={(url) => handleProductFileUpload(index, "ficha_tecnica_url", url)}
-                                acceptedFileTypes="application/pdf"
-                                buttonText={produto.ficha_tecnica_url ? "Alterar PDF" : "Upload PDF"}
-                              />
-                              {produto.ficha_tecnica_url && (
-                                <p className="text-sm text-gray-600">
-                                  PDF atual:{" "}
-                                  <a
-                                    href={produto.ficha_tecnica_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="underline"
-                                  >
-                                    Ver arquivo
-                                  </a>
-                                </p>
-                              )}
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Folder do Produto (PDF)</Label>
-                              <UploadComponent
-                                onUploadSuccess={(url) => handleProductFileUpload(index, "folder_produto_url", url)}
-                                acceptedFileTypes="application/pdf"
-                                buttonText={produto.folder_produto_url ? "Alterar PDF" : "Upload PDF"}
-                              />
-                              {produto.folder_produto_url && (
-                                <p className="text-sm text-gray-600">
-                                  PDF atual:{" "}
-                                  <a
-                                    href={produto.folder_produto_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="underline"
-                                  >
-                                    Ver arquivo
-                                  </a>
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Imagens do Produto</Label>
-                            <UploadComponent
-                              onUploadSuccess={(url) => handleProductImagesUpload(index, url)}
-                              acceptedFileTypes="image/*"
-                              buttonText="Adicionar Imagem"
-                            />
-                            {produto.imagens_produto_urls && produto.imagens_produto_urls.length > 0 && (
-                              <div className="mt-2 space-y-1">
-                                {produto.imagens_produto_urls.map((url, imgIdx) => (
-                                  <p key={imgIdx} className="text-sm text-gray-600">
-                                    Imagem {imgIdx + 1}:{" "}
-                                    <a href={url} target="_blank" rel="noopener noreferrer" className="underline">
-                                      Ver imagem
-                                    </a>
-                                  </p>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <Label htmlFor={`video_produto-${index}`}>Vídeo do Produto (YouTube)</Label>
-                            <Input
-                              id={`video_produto-${index}`}
-                              placeholder="Link do vídeo no YouTube"
-                              value={produto.video_produto || ""}
-                              onChange={(e) => handleProductChange(index, "video_produto", e.target.value)}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-            <div className="flex justify-between mt-8 pt-6 border-t">
-              <Button variant="outline">Salvar Rascunho</Button>
-              <div className="space-x-2">
-                <Button variant="outline">Visualizar</Button>
-                <Button onClick={handleSalvarEmpresa} disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Cadastrando...
-                    </>
-                  ) : (
-                    "Cadastrar Empresa"
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   )}
-                </Button>
+                </TabsContent>
+              </Tabs>
+              <div className="flex justify-between mt-8 pt-6 border-t">
+                <Button variant="outline" type="button">Salvar Rascunho</Button>
+                <div className="space-x-2">
+                  <Button variant="outline" type="button">Visualizar</Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Cadastrando...
+                      </>
+                    ) : (
+                      "Cadastrar Empresa"
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
+            </form>
           </CardContent>
         </Card>
       </div>

@@ -1,21 +1,11 @@
-import { createClient } from "@supabase/supabase-js"
-import type { Empresa, Produto, Arquivo, User, Analytics } from "./supabase.types"
+import { createClient } from '@supabase/supabase-js'
 
-// Tipos para as tabelas do Supabase
-export type { Empresa, Produto, Arquivo, User, Analytics }
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Supabase URL or Anon Key is not set. Database functions will not work.")
-}
-
-export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null
-
-export function isSupabaseConfigured(): boolean {
-  return !!supabaseUrl && !!supabaseAnonKey
+export function isSupabaseConfigured() {
+  return !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 }
 

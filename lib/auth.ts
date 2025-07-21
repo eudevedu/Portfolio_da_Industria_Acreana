@@ -57,6 +57,7 @@ export async function login(email: string, password: string): Promise<{ success:
       password,
     })
     if (error) {
+      console.error("Supabase error:", error, error.message);
       return { success: false, message: error.message }
     }
     if (data.user) {
@@ -86,8 +87,9 @@ export async function login(email: string, password: string): Promise<{ success:
         email: data.user.email!,
         tipo: userType,
         empresa_id: empresaId,
-        created_at: data.user.created_at,
-        updated_at: data.user.updated_at,
+        created_at: data.user.created_at ?? "",
+        updated_at: data.user.updated_at ?? "",
+        password_hash: "", // ou "hidden"
       }
       const cookieStore = await cookies() // Adicionado await
       cookieStore.set(USER_COOKIE_NAME, JSON.stringify(userSession), {
@@ -137,6 +139,7 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
       password,
     })
     if (error) {
+      console.error("Supabase error:", error, error.message);
       return {
         success: false,
         message: error.message,
@@ -163,7 +166,8 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
         tipo: "admin",
         empresa_id: null,
         created_at: data.user.created_at,
-        updated_at: data.user.updated_at,
+        updated_at: data.user.updated_at ?? "",
+        password_hash: "", // Adicione esta linha
       }
       const cookieStore = await cookies() // Adicionado await
       cookieStore.set(USER_COOKIE_NAME, JSON.stringify(userSession), {
@@ -244,22 +248,19 @@ export async function register(
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          user_type: tipo, // Custom metadata for Supabase Auth user
-        },
-      },
     })
     if (error) {
+      console.error("Supabase error:", error, error.message);
       return { success: false, message: error.message }
     }
     if (data.user) {
-      // Create a profile entry in public.perfis_empresas immediately for 'empresa' type
       if (tipo === "empresa") {
         const { error: profileError } = await criarPerfilEmpresa(data.user.id, null, {
-          nome_completo: nome_contato, // Mapeado para nome_completo
-          telefone,
-          cargo,
+          email: email,                // Email do cadastro
+          nome_completo: nome_contato, // Nome do contato do cadastro
+          telefone: telefone,          // Telefone do contato do cadastro
+          cargo: cargo,                // Cargo do contato do cadastro
+          // Adicione outros campos se necessário
         })
         if (profileError) {
           // If profile creation fails, consider rolling back user creation or logging
@@ -269,8 +270,6 @@ export async function register(
           return { success: false, message: "Registro de usuário bem-sucedido, mas falha ao criar perfil da empresa." }
         }
       }
-      // For 'admin' type, the admin user would typically be created and linked to the 'admins' table
-      // through a separate, more controlled process (e.g., by another admin).
       return {
         success: true,
         message: "Registro bem-sucedido! Verifique seu email para confirmar.",

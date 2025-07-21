@@ -4,11 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth" // Importa Server Actions e funções de auth
+import { getLastCompanies } from "@/lib/empresa" // Importe sua função de busca
 
 export default async function HomePage() {
   const loggedIn = await isLoggedIn()
   const user = await getCurrentUser()
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
+
+  // Busque as últimas 6 empresas cadastradas
+  const empresas = await getLastCompanies(6)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
@@ -97,32 +101,31 @@ export default async function HomePage() {
           <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Empresas em Destaque</h3>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="hover:shadow-lg transition-shadow">
+            {empresas.map((empresa) => (
+              <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg">Indústria Exemplo {i}</CardTitle>
-                      <CardDescription>Razão Social Ltda.</CardDescription>
+                      <CardTitle className="text-lg">{empresa.nomeFantasia}</CardTitle>
+                      <CardDescription>{empresa.razaoSocial}</CardDescription>
                     </div>
-                    <Badge variant="secondary">Alimentos</Badge>
+                    <Badge variant="secondary">{empresa.setor || "Setor"}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-600 mb-3">
-                    Empresa especializada na produção de produtos alimentícios regionais com foco em sustentabilidade.
+                    {empresa.descricao || "Empresa cadastrada na plataforma."}
                   </p>
                   <div className="flex items-center text-sm text-gray-500 mb-2">
                     <MapPin className="h-4 w-4 mr-1" />
-                    Rio Branco, AC
+                    {empresa.cidade}, {empresa.uf}
                   </div>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      Açaí
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      Castanha
-                    </Badge>
+                  <div className="flex gap-2 flex-wrap">
+                    {(empresa.tags ? empresa.tags.split(",") : []).map((tag: string) => (
+                      <Badge key={tag} variant="outline" className="text-xs">
+                        {tag.trim()}
+                      </Badge>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
