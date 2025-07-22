@@ -215,22 +215,36 @@ export async function logout(): Promise<void> {
 
 // Função para verificar se está logado
 export async function isLoggedIn(): Promise<boolean> {
-  return !!(await getCurrentUser())
+  const user = await getCurrentUser()
+  console.log("Checking if logged in:", user ? `${user.email} (${user.tipo})` : "No user")
+  return !!user
 }
 
 // Função para obter usuário atual
 export async function getCurrentUser(): Promise<User | null> {
-  const cookieStore = await cookies() // Adicionado await
-  const userCookie = cookieStore.get(USER_COOKIE_NAME)
-  if (userCookie && userCookie.value) {
-    try {
-      return JSON.parse(userCookie.value) as User
-    } catch (e) {
-      console.error("Falha ao analisar cookie de usuário:", e)
+  try {
+    const cookieStore = await cookies() // Adicionado await
+    const userCookie = cookieStore.get(USER_COOKIE_NAME)
+    
+    if (!userCookie || !userCookie.value) {
+      console.log("No user cookie found")
       return null
     }
+    
+    try {
+      const user = JSON.parse(userCookie.value) as User
+      console.log("User found in session:", user.email, user.tipo)
+      return user
+    } catch (parseError) {
+      console.error("Falha ao analisar cookie de usuário:", parseError)
+      // Remove o cookie inválido
+      cookieStore.delete(USER_COOKIE_NAME)
+      return null
+    }
+  } catch (error) {
+    console.error("Erro ao obter usuário atual:", error)
+    return null
   }
-  return null
 }
 
 // Função para verificar se é admin
