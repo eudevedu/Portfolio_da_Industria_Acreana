@@ -422,6 +422,7 @@ export default function CadastroPage() {
                       <Label htmlFor="userEmail">Email *</Label>
                       <Input
                         id="userEmail"
+                        name="userEmail"
                         type="email"
                         placeholder="seuemail@exemplo.com"
                         value={userEmail}
@@ -440,6 +441,7 @@ export default function CadastroPage() {
                       <Label htmlFor="userPassword">Senha *</Label>
                       <Input
                         id="userPassword"
+                        name="userPassword"
                         type="password"
                         placeholder="********"
                         value={userPassword}
@@ -460,6 +462,7 @@ export default function CadastroPage() {
                       <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
                       <Input
                         id="confirmPassword"
+                        name="confirmPassword"
                         type="password"
                         placeholder="********"
                         value={confirmPassword}
@@ -468,6 +471,7 @@ export default function CadastroPage() {
                           setValidationErrors((prev) => ({ ...prev, confirmPassword: "" }))
                         }}
                         required
+                        autoComplete="new-password"
                       />
                       {validationErrors.confirmPassword && (
                         <p className="text-red-500 text-xs mt-1">{validationErrors.confirmPassword}</p>
@@ -477,6 +481,7 @@ export default function CadastroPage() {
                       <Label htmlFor="contactName">Nome do Contato *</Label>
                       <Input
                         id="contactName"
+                        name="contactName"
                         placeholder="Nome completo do responsável"
                         value={contactName}
                         onChange={(e) => {
