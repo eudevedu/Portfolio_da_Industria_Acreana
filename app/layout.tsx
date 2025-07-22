@@ -10,11 +10,8 @@ export const metadata: Metadata = {
   description: "Plataforma oficial para o desenvolvimento industrial do Estado do Acre. Conectando empresas, produtos e serviços.",
   generator: "Next.js",
   icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/icon-industria.svg', type: 'image/svg+xml' },
-    ],
-    apple: '/BrasaoAcre.png',
+    icon: '/favicon.ico',
+    apple: '/favicon.ico',
   },
 }
 
