@@ -180,20 +180,17 @@ export default function CadastroPage() {
 
     setLoading(true)
     try {
-      // 1. Register user
-      const { data, error } = await supabase.auth.signUp({
-        email: userEmail,
-        password: userPassword,
-        // options: { ... } // comente ou remova esta linha para testar
-      })
-      if (error) {
-        console.error(error)
-        return { success: false, message: error.message }
-      }
-      const userId = data.user?.id
-
-      if (!userId) {
-        throw new Error("ID do usuário não retornado após o registro.")
+      // 1. Register user usando a função register
+      const { success, message, userId } = await register(
+        userEmail,
+        userPassword,
+        "empresa",
+        contactName,
+        contactPhone,
+        contactRole
+      )
+      if (!success || !userId) {
+        throw new Error(message || "Erro ao registrar usuário.")
       }
 
       // 2. Create company
@@ -323,8 +320,8 @@ export default function CadastroPage() {
       toast({
         variant: "destructive",
         title: "Erro no Cadastro",
-        description: err.message || "Erro ao cadastrar empresa. Tente novamente.",
-        duration: 8000, // Aumenta a duração para 8 segundos
+        description: err.message || err.error_description || "Erro ao cadastrar empresa. Tente novamente.",
+        duration: 8000,
       })
     } finally {
       setLoading(false)
@@ -367,14 +364,14 @@ export default function CadastroPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90% shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
-            <Link href="/" className="flex items-center text-gray-600 hover:text-gray-900">
+            <Link href="/" className="flex items-center text-slate-50 hover:text-gray-900">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar
             </Link>
-            <h1 className="ml-4 text-xl font-semibold text-gray-900">Cadastro de Empresa</h1>
+            <h1 className="ml-4 text-xl font-semibold text-slate-50">Cadastro de Empresa</h1>
           </div>
         </div>
       </header>

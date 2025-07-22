@@ -1,4 +1,5 @@
-import { Search, Building2, MapPin, Plus } from "lucide-react"
+import { Search, MapPin, Plus } from "lucide-react"
+import {  BrasaoAcre } from "@/components/LogoIndustria"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,20 +18,20 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90%">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-green-600" />
-              <h1 className="text-xl font-bold text-gray-900">Indústrias do Acre</h1>
+              <BrasaoAcre className="h-8 w-8 text-green-600" />
+              <h1 className="text-xl font-bold text-slate-50">Portfólio das Indústrias do Acre</h1>
             </div>
             <nav className="flex items-center space-x-4">
-              <Link href="/buscar" className="text-gray-600 hover:text-gray-900">
+              <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
                 Buscar Empresas
               </Link>
               {loggedIn ? (
                 <>
-                  <span className="text-gray-700 text-sm hidden sm:inline">Olá, {user?.email}</span>
+                  <span className="text-slate-50 text-sm hidden sm:inline">Olá, {user?.email}</span>
                   <Link href={dashboardLink}>
                     <Button variant="outline">Meu Painel</Button>
                   </Link>
@@ -56,13 +57,15 @@ export default async function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4 flex flex-col items-center justify-center">
-        <div className="max-w-2xl text-center">
-          <div className="flex items-center justify-center space-x-4 mb-6">
-            <Building2 className="h-16 w-16 text-green-600" />
-            <h1 className="text-5xl font-extrabold text-gray-900 leading-tight">Indústrias do Acre</h1>
+      <section className="relative py-20 px-4 flex flex-col items-center justify-center bg-[url('/acre.jpg')] bg-no-repeat bg-center bg-cover">
+        {/* Overlay escuro */}
+        <div className="absolute inset-0 bg-amber-900 bg-opacity-60"></div>
+        <div className="relative max-w-2xl text-center z-10">
+          <div className="flex items-center justify-center space-x-4 mb-6 ">
+            {/* <LogoIndustria className="h-16 w-16 text-green-600" /> */}
+            <h1 className="text-5xl font-extrabold text-slate-50 leading-tight">Portfólio das Indústrias Acreanas</h1>
           </div>
-          <p className="text-xl text-gray-700 mb-8">
+          <p className="text-xl text-slate-50 mb-8">
             Conectando o potencial industrial do Acre ao mundo. Encontre empresas, produtos e serviços da nossa região.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -76,14 +79,14 @@ export default async function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="px-8 py-3 text-lg border-green-600 text-green-700 hover:bg-green-50 hover:text-green-800 bg-transparent"
+                className="px-8 py-3 text-lg border-green-600 text-green-700 hover:bg-green-100 hover:text-green-800 bg-slate-50"
               >
                 <Plus className="h-5 w-5 mr-3" />
                 Cadastre sua Empresa
               </Button>
             </Link>
           </div>
-          <div className="mt-12 text-sm text-gray-600">
+          <div className="mt-12 text-sm text-slate-50">
             <p>
               Já tem uma conta?{" "}
               <Link href="/login" className="text-green-600 hover:underline">
@@ -163,21 +166,21 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4">
+      <footer className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90% text-white py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <Building2 className="h-6 w-6" />
-                <span className="font-bold">Indústrias do Acre</span>
+                <BrasaoAcre className="h-6 w-6" />
+                <span className="font-bold">Governo do Estado do Acre</span>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-slate-50">
                 Plataforma oficial para o desenvolvimento industrial do Estado do Acre.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Empresas</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <ul className="space-y-2 text-sm text-slate-50">
                 <li>
                   <Link href="/cadastro">Cadastrar Empresa</Link>
                 </li>
@@ -191,7 +194,7 @@ export default async function HomePage() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Setores</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <ul className="space-y-2 text-sm text-slate-50">
                 <li>Alimentos</li>
                 <li>Madeira</li>
                 <li>Construção</li>
@@ -200,15 +203,15 @@ export default async function HomePage() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Contato</h4>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-slate-50">
                 Governo do Estado do Acre
                 <br />
-                Secretaria de Indústria e Comércio
+                SECRETARIA DE ESTADO DE INDUSTRIA, CIÊNCIA E TECNOLOGIA
               </p>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            © 2024 Governo do Estado do Acre. Todos os direitos reservados.
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-slate-50">
+            © 2025 Governo do Estado do Acre. Todos os direitos reservados.
           </div>
         </div>
       </footer>

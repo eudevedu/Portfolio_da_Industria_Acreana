@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { login } from "@/lib/auth" // Importa a Server Action de login para empresas
+import { BrasaoAcre } from "@/components/LogoIndustria"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -44,7 +45,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <Building2 className="h-12 w-12 text-green-600" />
+            <BrasaoAcre className="h-12 w-12 text-green-600" />
           </div>
           <CardTitle className="text-2xl font-bold">Entrar como Empresa</CardTitle>
           <CardDescription>Acesse sua conta para gerenciar sua empresa.</CardDescription>

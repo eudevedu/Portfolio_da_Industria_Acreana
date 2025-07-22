@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { buscarEmpresas } from "@/lib/database"
 import type { Empresa } from "@/lib/supabase.types" // Importa o tipo do novo arquivo
 import { useSearchParams } from "next/navigation"
+import { BrasaoAcre } from "@/components/LogoIndustria"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
@@ -83,15 +84,15 @@ export default function BuscarPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90% shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-green-600" />
-              <h1 className="text-xl font-bold text-gray-900">Indústrias do Acre</h1>
+              <BrasaoAcre className="h-8 w-8 " />
+              <h1 className="text-xl font-bold text-slate-50">Indústrias do Acre</h1>
             </div>
             <nav className="flex items-center space-x-4">
-              <Link href="/buscar" className="text-gray-600 hover:text-gray-900">
+              <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
                 Buscar Empresas
               </Link>
               <Link href="/login">

@@ -25,6 +25,7 @@ import { logout, isLoggedIn, getCurrentUser } from "../../lib/auth" // Caminho r
 import { redirect } from "next/navigation" // Para redirecionamento server-side
 import { CompanyInfoCard } from "@/components/company-info-card" // Importa o componente de edição
 import { EmpresaDashboard } from "./EmpresaDashboard"
+import { BrasaoAcre } from "@/components/LogoIndustria"
 
 // Esta página agora é um Server Component
 export default async function DashboardPage() {
@@ -81,7 +82,7 @@ export default async function DashboardPage() {
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-4">
                 <Link href="/" className="flex items-center space-x-2">
-                  <Building2 className="h-6 w-6 text-green-600" />
+                  <BrasaoAcre className="h-6 w-6 text-green-600" />
                   <span className="font-bold text-gray-900">Indústrias do Acre</span>
                 </Link>
                 <span className="text-gray-400">|</span>

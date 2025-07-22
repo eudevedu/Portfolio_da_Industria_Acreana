@@ -7,6 +7,7 @@ import { logout, isLoggedIn, isAdmin as checkIsAdmin } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import type { Empresa } from "@/lib/supabase.types"
 import { AdminContent } from "@/components/admin-content" // Importa o Client Component
+import { BrasaoAcre } from "@/components/LogoIndustria"
 
 // Garante que esta página seja sempre renderizada no servidor
 export const dynamic = "force-dynamic"
@@ -51,16 +52,16 @@ export default async function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90% shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <Link href="/admin" className="flex items-center space-x-2">
-                <Building2 className="h-6 w-6 text-green-600" />
-                <span className="font-bold text-gray-900">Admin Indústrias do Acre</span>
+                <BrasaoAcre className="h-6 w-6 text-green-600" />
+                <span className="font-bold text-slate-50">Admin Indústrias do Acre</span>
               </Link>
               <span className="text-gray-400">|</span>
-              <span className="text-gray-600">Dashboard</span>
+              <span className="text-slate-50">Dashboard</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="outline" size="sm">
