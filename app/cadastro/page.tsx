@@ -602,7 +602,7 @@ export default function CadastroPage() {
                           <SelectItem value="alimentos">Alimentos</SelectItem>
                           <SelectItem value="construcao">Construção</SelectItem>
                           <SelectItem value="ceramico">Cerâmico</SelectItem>
-                          <SelectItem value="madeira">Madeira</SelectItem>
+                          <SelectItem value="madeireiro">Madeireiro</SelectItem>
                           <SelectItem value="grafico">Gráfico</SelectItem>
                           <SelectItem value="textil">Têxtil</SelectItem>
                           <SelectItem value="metalurgico">Metalúrgico</SelectItem>
