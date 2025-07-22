@@ -1,13 +1,14 @@
 import * as React from "react"
 import Image from "next/image"
 
-export function BrasaoAcre(props: React.SVGProps<SVGSVGElement>) {
+export function BrasaoAcre({ className, ...props }: { className?: string; width?: number; height?: number }) {
   return (
     <Image
       src="/BrasaoAcre.png" // Caminho relativo à pasta public
       alt="Logo Indústria"
-      width={50} // ou o tamanho desejado
-      height={50}
+      width={props.width || 50} // ou o tamanho desejado
+      height={props.height || 50}
+      className={className}
     />
   )
 }
