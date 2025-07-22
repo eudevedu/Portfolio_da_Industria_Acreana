@@ -273,9 +273,16 @@ export async function register(
   telefone?: string,
   cargo?: string,
 ): Promise<{ success: boolean; message: string; userId?: string }> {
+  console.log("Registro iniciado:", { 
+    email, 
+    tipo, 
+    environment: process.env.NODE_ENV,
+    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY 
+  });
+
   if (!isSupabaseConfigured()) {
     console.warn("Supabase não configurado. Registro mock.")
-    // Simulate creation for mock mode
     return { success: true, message: "Registro bem-sucedido! Faça login para continuar.", userId: "mock-user-id" }
   }
   
@@ -296,11 +303,41 @@ export async function register(
       message: "Erro de conexão com o banco de dados. Tente novamente em alguns minutos." 
     }
   }
+  
   try {
     console.log("Tentando criar usuário no Supabase:", { email, tipo })
-    const { data, error } = await supabase!.auth.signUp({
+    
+    // Configurações específicas para Vercel
+    const signUpOptions = {
       email,
       password,
+      options: {
+        emailRedirectTo: typeof window !== 'undefined' 
+          ? `${window.location.origin}/login`
+          : process.env.NEXT_PUBLIC_BASE_URL 
+            ? `${process.env.NEXT_PUBLIC_BASE_URL}/login`
+            : 'http://localhost:3000/login',
+        data: {
+          tipo,
+          nome_contato,
+          telefone,
+          cargo
+        }
+      }
+    }
+    
+    console.log("Configurações de signUp:", { 
+      redirectTo: signUpOptions.options.emailRedirectTo,
+      hasUserData: !!signUpOptions.options.data
+    })
+    
+    const { data, error } = await supabase!.auth.signUp(signUpOptions)
+    
+    console.log("Resultado do signUp:", { 
+      user: data.user?.id, 
+      session: !!data.session, 
+      error: error?.message,
+      errorCode: error?.code 
     })
     
     if (error) {
@@ -312,12 +349,16 @@ export async function register(
       })
       
       // Mensagens mais específicas baseadas no erro
-      if (error.message.includes('already registered')) {
+      if (error.message.includes('already registered') || error.code === 'user_already_exists') {
         return { success: false, message: "Este email já está cadastrado. Tente fazer login ou use outro email." }
       } else if (error.message.includes('Invalid email')) {
         return { success: false, message: "Email inválido. Verifique o formato e tente novamente." }
-      } else if (error.message.includes('Password')) {
+      } else if (error.message.includes('Password') || error.message.includes('password')) {
         return { success: false, message: "Senha deve ter pelo menos 6 caracteres." }
+      } else if (error.message.includes('Database error') || error.message.includes('database')) {
+        return { success: false, message: "Erro no banco de dados. Verifique a configuração do Supabase ou tente novamente mais tarde." }
+      } else if (error.message.includes('fetch')) {
+        return { success: false, message: "Erro de conexão. Verifique sua internet e tente novamente." }
       } else {
         return { success: false, message: `Erro no cadastro: ${error.message}` }
       }

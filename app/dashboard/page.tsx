@@ -325,8 +325,7 @@ export default async function DashboardPage() {
                 </div>
               </TabsContent>
             </Tabs>
-            {/* Novo componente EmpresaDashboard */}
-            {empresa && <EmpresaDashboardWrapper empresa={empresa} />}
+            
           </div>
         )}
       </div>
