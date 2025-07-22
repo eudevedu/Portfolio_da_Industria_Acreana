@@ -18,13 +18,13 @@ export default async function HomePage() {
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
   // Debug para Vercel - vamos ver o que está acontecendo
-  console.log('🔍 Homepage Debug:', {
-    nodeEnv: process.env.NODE_ENV,
-    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-    hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    isVercel: !!process.env.VERCEL,
-    timestamp: new Date().toISOString()
-  })
+  // console.log('🔍 Homepage Debug:', {
+  //   nodeEnv: process.env.NODE_ENV,
+  //   hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+  //   hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  //   isVercel: !!process.env.VERCEL,
+  //   timestamp: new Date().toISOString()
+  // })
 
   // Busque as últimas 6 empresas cadastradas
   let empresas = []
