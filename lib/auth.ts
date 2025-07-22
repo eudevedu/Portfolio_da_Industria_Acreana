@@ -219,9 +219,20 @@ export async function logout(): Promise<void> {
 
 // Função para verificar se está logado
 export async function isLoggedIn(): Promise<boolean> {
-  const user = await getCurrentUser()
-  console.log("Checking if logged in:", user ? `${user.email} (${user.tipo})` : "No user")
-  return !!user
+  try {
+    const user = await getCurrentUser()
+    const result = !!user
+    console.log("Checking if logged in:", user ? `${user.email} (${user.tipo})` : "No user")
+    return result
+  } catch (error) {
+    console.error("Erro ao verificar login:", error)
+    // Se for erro de renderização dinâmica, retorna false
+    if (error instanceof Error && error.message.includes('Dynamic server usage')) {
+      console.log("Retornando false devido a renderização dinâmica")
+      return false
+    }
+    return false
+  }
 }
 
 // Função para obter usuário atual
@@ -249,19 +260,38 @@ export async function getCurrentUser(): Promise<User | null> {
     } catch (parseError) {
       console.error("Falha ao analisar cookie de usuário:", parseError)
       // Remove o cookie inválido
-      cookieStore.delete(USER_COOKIE_NAME)
+      try {
+        cookieStore.delete(USER_COOKIE_NAME)
+      } catch (deleteError) {
+        console.error("Erro ao deletar cookie inválido:", deleteError)
+      }
       return null
     }
   } catch (error) {
     console.error("Erro ao obter usuário atual:", error)
+    // Se for erro de renderização dinâmica, retorna null silenciosamente
+    if (error instanceof Error && error.message.includes('Dynamic server usage')) {
+      console.log("Retornando null devido a renderização dinâmica")
+      return null
+    }
     return null
   }
 }
 
 // Função para verificar se é admin
 export async function isAdmin(): Promise<boolean> {
-  const user = await getCurrentUser()
-  return user?.tipo === "admin"
+  try {
+    const user = await getCurrentUser()
+    return user?.tipo === "admin"
+  } catch (error) {
+    console.error("Erro ao verificar se é admin:", error)
+    // Se for erro de renderização dinâmica, retorna false
+    if (error instanceof Error && error.message.includes('Dynamic server usage')) {
+      console.log("Retornando false para isAdmin devido a renderização dinâmica")
+      return false
+    }
+    return false
+  }
 }
 
 // Função para registro (agora com Supabase Auth e criação de perfil)

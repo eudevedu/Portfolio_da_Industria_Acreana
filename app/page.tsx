@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge"
 import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth" // Importa Server Actions e funções de auth
 import { getLastCompanies } from "@/lib/empresa" // Importe sua função de busca
 
+// Força renderização dinâmica devido ao uso de cookies
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const loggedIn = await isLoggedIn()
   const user = await getCurrentUser()

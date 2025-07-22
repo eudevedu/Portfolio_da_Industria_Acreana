@@ -29,6 +29,9 @@ import { EmpresaDashboard } from "./EmpresaDashboard"
 import { BrasaoAcre } from "@/components/LogoIndustria"
 import EmpresaDashboardWrapper from "@/components/EmpresaDashboardWrapper"
 
+// Força renderização dinâmica devido ao uso de cookies
+export const dynamic = 'force-dynamic'
+
 // Esta página agora é um Server Component
 export default async function DashboardPage() {
   const loggedIn = await isLoggedIn()
