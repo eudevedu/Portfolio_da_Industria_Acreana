@@ -9,14 +9,35 @@ import { getLastCompanies } from "@/lib/empresa" // Importe sua função de busc
 
 // Força renderização dinâmica devido ao uso de cookies
 export const dynamic = 'force-dynamic'
+// Força Node.js runtime para compatibilidade total com Supabase
+export const runtime = 'nodejs'
 
 export default async function HomePage() {
   const loggedIn = await isLoggedIn()
   const user = await getCurrentUser()
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
+  // Debug para Vercel - vamos ver o que está acontecendo
+  console.log('🔍 Homepage Debug:', {
+    nodeEnv: process.env.NODE_ENV,
+    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    isVercel: !!process.env.VERCEL,
+    timestamp: new Date().toISOString()
+  })
+
   // Busque as últimas 6 empresas cadastradas
-  const empresas = await getLastCompanies(6)
+  let empresas = []
+  let errorMsg = null
+  
+  try {
+    empresas = await getLastCompanies(6)
+    console.log('✅ Empresas carregadas:', empresas.length)
+  } catch (error) {
+    console.error('❌ Erro ao carregar empresas:', error)
+    errorMsg = error instanceof Error ? error.message : 'Erro desconhecido'
+    empresas = []
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
@@ -105,6 +126,28 @@ export default async function HomePage() {
       <section className="py-16 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Empresas em Destaque</h3>
+
+          {/* Debug info para Vercel */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mb-8 p-4 bg-yellow-100 border border-yellow-400 rounded">
+              <h4 className="font-bold">Debug Info:</h4>
+              <p>Environment: {process.env.NODE_ENV}</p>
+              <p>Supabase URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Configurado' : '❌ Não configurado'}</p>
+              <p>Supabase Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Configurado' : '❌ Não configurado'}</p>
+              <p>Empresas encontradas: {empresas.length}</p>
+              {errorMsg && <p className="text-red-600">Erro: {errorMsg}</p>}
+            </div>
+          )}
+
+          {errorMsg && (
+            <div className="mb-8 p-4 bg-red-100 border border-red-400 rounded">
+              <h4 className="font-bold text-red-800">Erro ao carregar empresas:</h4>
+              <p className="text-red-600">{errorMsg}</p>
+              <p className="text-sm text-red-500 mt-2">
+                Verifique se as variáveis de ambiente do Supabase estão configuradas corretamente.
+              </p>
+            </div>
+          )}
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {empresas.length === 0 ? (
