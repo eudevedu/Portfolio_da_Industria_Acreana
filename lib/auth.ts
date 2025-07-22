@@ -268,16 +268,37 @@ export async function register(
     return { success: true, message: "Registro bem-sucedido! Faça login para continuar.", userId: "mock-user-id" }
   }
   try {
+    console.log("Tentando criar usuário no Supabase:", { email, tipo })
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
     })
+    
     if (error) {
-      console.error("Supabase error:", error, error.message);
-      return { success: false, message: error.message }
+      console.error("Erro no Supabase signUp:", error)
+      console.error("Detalhes do erro:", { 
+        message: error.message, 
+        status: error.status, 
+        code: error.code 
+      })
+      
+      // Mensagens mais específicas baseadas no erro
+      if (error.message.includes('already registered')) {
+        return { success: false, message: "Este email já está cadastrado. Tente fazer login ou use outro email." }
+      } else if (error.message.includes('Invalid email')) {
+        return { success: false, message: "Email inválido. Verifique o formato e tente novamente." }
+      } else if (error.message.includes('Password')) {
+        return { success: false, message: "Senha deve ter pelo menos 6 caracteres." }
+      } else {
+        return { success: false, message: `Erro no cadastro: ${error.message}` }
+      }
     }
+    
+    console.log("Usuário criado com sucesso:", data.user?.id)
+    
     if (data.user) {
       if (tipo === "empresa") {
+        console.log("Criando perfil da empresa para usuário:", data.user.id)
         const { error: profileError } = await criarPerfilEmpresa(data.user.id, null, {
           email: email,                // Email do cadastro
           nome_contato: nome_contato,  // Nome do contato do cadastro
@@ -288,10 +309,26 @@ export async function register(
         if (profileError) {
           // If profile creation fails, consider rolling back user creation or logging
           console.error("Erro ao criar perfil da empresa:", profileError)
-          // Optionally, delete the user from auth.users if profile creation is critical
-          // await supabase.auth.admin.deleteUser(data.user.id);
-          return { success: false, message: "Registro de usuário bem-sucedido, mas falha ao criar perfil da empresa." }
+          console.error("Detalhes do erro do perfil:", {
+            message: profileError.message,
+            code: profileError.code,
+            details: profileError.details
+          })
+          
+          // Tentar fazer rollback do usuário criado
+          try {
+            await supabase.auth.admin.deleteUser(data.user.id)
+            console.log("Usuário removido devido ao erro no perfil")
+          } catch (deleteError) {
+            console.error("Não foi possível remover o usuário:", deleteError)
+          }
+          
+          return { 
+            success: false, 
+            message: `Erro ao criar perfil: ${profileError.message || 'Erro desconhecido no banco de dados'}` 
+          }
         }
+        console.log("Perfil da empresa criado com sucesso")
       }
       return {
         success: true,
