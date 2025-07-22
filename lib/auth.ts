@@ -267,6 +267,24 @@ export async function register(
     // Simulate creation for mock mode
     return { success: true, message: "Registro bem-sucedido! Faça login para continuar.", userId: "mock-user-id" }
   }
+  
+  // Verificar se o Supabase está realmente funcionando
+  try {
+    const { data: testData, error: testError } = await supabase.from('perfis_empresas').select('id').limit(1)
+    if (testError && testError.message.includes('relation "public.perfis_empresas" does not exist')) {
+      console.error("Tabela perfis_empresas não existe. Execute os scripts SQL no Supabase.")
+      return { 
+        success: false, 
+        message: "Erro de configuração: As tabelas do banco de dados não foram criadas. Entre em contato com o administrador." 
+      }
+    }
+  } catch (configError) {
+    console.error("Erro de configuração do Supabase:", configError)
+    return { 
+      success: false, 
+      message: "Erro de conexão com o banco de dados. Tente novamente em alguns minutos." 
+    }
+  }
   try {
     console.log("Tentando criar usuário no Supabase:", { email, tipo })
     const { data, error } = await supabase.auth.signUp({
