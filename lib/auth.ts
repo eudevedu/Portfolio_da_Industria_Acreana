@@ -266,7 +266,7 @@ export async function register(
       if (tipo === "empresa") {
         const { error: profileError } = await criarPerfilEmpresa(data.user.id, null, {
           email: email,                // Email do cadastro
-          nome_completo: nome_contato, // Nome do contato do cadastro
+          nome_contato: nome_contato,  // Nome do contato do cadastro
           telefone: telefone,          // Telefone do contato do cadastro
           cargo: cargo,                // Cargo do contato do cadastro
           // Adicione outros campos se necessário
