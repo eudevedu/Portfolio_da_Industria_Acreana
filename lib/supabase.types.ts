@@ -70,7 +70,7 @@ export type Analytics = {
 export interface PerfilEmpresa {
   id: string
   empresa_id: string | null
-  nome_completo: string
+  nome_contato: string
   email: string
   telefone?: string
   cargo?: string

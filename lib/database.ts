@@ -458,7 +458,7 @@ export async function buscarPerfilEmpresaPorId(userId: string): Promise<PerfilEm
       return {
         id: "mock-user-1",
         empresa_id: "1", // Vinculado à AcreFoods Indústria
-        nome_completo: "Usuário Mock",
+        nome_contato: "Usuário Mock",
         email: "mock@example.com",
         telefone: "999999999",
         cargo: "Gerente",
@@ -507,3 +507,4 @@ export async function deletarPerfilEmpresa(userId: string): Promise<{ success: b
   }
   return { success: true, error: null }
 }
+

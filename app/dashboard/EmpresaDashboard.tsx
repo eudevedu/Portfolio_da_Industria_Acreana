@@ -1,4 +1,4 @@
-import React from "react"
+"use client"
 import { useForm } from "react-hook-form"
 import { Empresa } from "@/lib/supabase.types"
 import { atualizarEmpresa } from "@/lib/database"
@@ -50,3 +50,4 @@ export function EmpresaDashboard({ empresa, onAtualizado }: EmpresaDashboardProp
     </form>
   )
 }
+

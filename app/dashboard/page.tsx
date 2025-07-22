@@ -1,5 +1,6 @@
+
 import {
-  Building2,
+  
   Package,
   Users,
   BarChart3,
@@ -26,6 +27,7 @@ import { redirect } from "next/navigation" // Para redirecionamento server-side
 import { CompanyInfoCard } from "@/components/company-info-card" // Importa o componente de edição
 import { EmpresaDashboard } from "./EmpresaDashboard"
 import { BrasaoAcre } from "@/components/LogoIndustria"
+import EmpresaDashboardWrapper from "@/components/EmpresaDashboardWrapper"
 
 // Esta página agora é um Server Component
 export default async function DashboardPage() {
@@ -324,9 +326,7 @@ export default async function DashboardPage() {
               </TabsContent>
             </Tabs>
             {/* Novo componente EmpresaDashboard */}
-            {empresa && (
-              <EmpresaDashboard empresa={empresa} onAtualizado={() => window.location.reload()} />
-            )}
+            {empresa && <EmpresaDashboardWrapper empresa={empresa} />}
           </div>
         )}
       </div>

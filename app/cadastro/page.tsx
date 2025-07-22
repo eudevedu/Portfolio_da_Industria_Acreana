@@ -184,7 +184,7 @@ export default function CadastroPage() {
       const { success, message, userId } = await register(
         userEmail,
         userPassword,
-        "empresa",
+        "empresa", // Corrija aqui: passe o tipo como string
         contactName,
         contactPhone,
         contactRole
@@ -430,6 +430,7 @@ export default function CadastroPage() {
                           setValidationErrors((prev) => ({ ...prev, userEmail: "" }))
                         }}
                         required
+                        autoComplete="email"
                       />
                       {validationErrors.userEmail && (
                         <p className="text-red-500 text-xs mt-1">{validationErrors.userEmail}</p>
@@ -447,6 +448,7 @@ export default function CadastroPage() {
                           setValidationErrors((prev) => ({ ...prev, userPassword: "" }))
                         }}
                         required
+                        autoComplete="new-password"
                       />
                       {validationErrors.userPassword && (
                         <p className="text-red-500 text-xs mt-1">{validationErrors.userPassword}</p>
@@ -482,6 +484,7 @@ export default function CadastroPage() {
                           setValidationErrors((prev) => ({ ...prev, contactName: "" }))
                         }}
                         required
+                        autoComplete="name"
                       />
                       {validationErrors.contactName && (
                         <p className="text-red-500 text-xs mt-1">{validationErrors.contactName}</p>
@@ -972,9 +975,9 @@ export default function CadastroPage() {
                 </TabsContent>
               </Tabs>
               <div className="flex justify-between mt-8 pt-6 border-t">
-                <Button variant="outline" type="button">Salvar Rascunho</Button>
+                {/* <Button variant="outline" type="button">Salvar Rascunho</Button> */}
                 <div className="space-x-2">
-                  <Button variant="outline" type="button">Visualizar</Button>
+                  {/* <Button variant="outline" type="button">Visualizar</Button> */}
                   <Button type="submit" disabled={loading}>
                     {loading ? (
                       <>
