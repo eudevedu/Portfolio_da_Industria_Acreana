@@ -107,40 +107,46 @@ export default async function HomePage() {
           <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Empresas em Destaque</h3>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {empresas.map((empresa) => (
-              <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{empresa.nome_fantasia}</CardTitle>
-                      <CardDescription>{empresa.razao_social}</CardDescription>
+            {empresas.length === 0 ? (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-600">Nenhuma empresa encontrada.</p>
+              </div>
+            ) : (
+              empresas.map((empresa) => (
+                <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
+                        <CardDescription>{empresa.razao_social || "Razão social não informada"}</CardDescription>
+                      </div>
+                      <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
                     </div>
-                    <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {empresa.apresentacao || "Empresa cadastrada na plataforma."}
-                  </p>
-                  <div className="flex items-center text-sm text-gray-500 mb-2">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    {empresa.municipio || "Acre"}
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {empresa.instagram && (
-                      <Badge variant="outline" className="text-xs">
-                        {empresa.instagram}
-                      </Badge>
-                    )}
-                  </div>
-                  <Link href={`/empresas/${empresa.id}`} className="block mt-3">
-                    <Button variant="outline" size="sm" className="w-full">
-                      Ver mais detalhes
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-3">
+                      {empresa.apresentacao || "Empresa cadastrada na plataforma."}
+                    </p>
+                    <div className="flex items-center text-sm text-gray-500 mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {empresa.municipio || "Acre"}
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {empresa.instagram && (
+                        <Badge variant="outline" className="text-xs">
+                          {empresa.instagram}
+                        </Badge>
+                      )}
+                    </div>
+                    <Link href={`/empresas/${empresa.id}`} className="block mt-3">
+                      <Button variant="outline" size="sm" className="w-full">
+                        Ver mais detalhes
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
 
           <div className="text-center mt-8">

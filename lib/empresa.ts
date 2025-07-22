@@ -8,26 +8,19 @@ export async function getLastCompanies(limit = 6) {
   }
 
   try {
-    console.log("Buscando empresas do Supabase...");
-    
-    // Buscar empresas ativas OU pendentes (para desenvolvimento)
+    // Buscar empresas ativas e pendentes
     const { data, error } = await supabase
       .from('empresas')
       .select('*')
-      .in('status', ['ativo', 'pendente']) // Aceita tanto ativo quanto pendente
+      .in('status', ['ativo', 'pendente'])
       .order('created_at', { ascending: false })
       .limit(limit)
 
-    console.log("Empresas encontradas:", { data, error });
-
     if (error) {
       console.error("Erro ao buscar empresas do Supabase:", error);
-      console.error("Código do erro:", error.code);
-      console.error("Detalhes do erro:", error.details);
       return [];
     }
-
-    console.log(`${data?.length || 0} empresas encontradas no Supabase`);
+    
     return data || [];
   } catch (err) {
     console.error("Erro na conexão com Supabase:", err);
