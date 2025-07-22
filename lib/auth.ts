@@ -57,8 +57,17 @@ export async function login(email: string, password: string): Promise<{ success:
       password,
     })
     if (error) {
-      console.error("Supabase error:", error, error.message);
-      return { success: false, message: error.message }
+      console.error("Supabase login error:", error);
+      console.error("Error details:", { message: error.message, status: error.status, code: error.code });
+      
+      // Retorna uma mensagem mais específica baseada no código do erro
+      if (error.code === 'invalid_credentials') {
+        return { success: false, message: "Email ou senha incorretos. Verifique suas credenciais e tente novamente." }
+      } else if (error.code === 'email_not_confirmed') {
+        return { success: false, message: "Email não confirmado. Verifique sua caixa de entrada." }
+      } else {
+        return { success: false, message: `Erro de autenticação: ${error.message}` }
+      }
     }
     if (data.user) {
       // Fetch user type from public.perfis_empresas or public.admins
