@@ -109,27 +109,32 @@ export default async function HomePage() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg">{empresa.nomeFantasia}</CardTitle>
-                      <CardDescription>{empresa.razaoSocial}</CardDescription>
+                      <CardTitle className="text-lg">{empresa.nome_fantasia}</CardTitle>
+                      <CardDescription>{empresa.razao_social}</CardDescription>
                     </div>
-                    <Badge variant="secondary">{empresa.setor || "Setor"}</Badge>
+                    <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-600 mb-3">
-                    {empresa.descricao || "Empresa cadastrada na plataforma."}
+                    {empresa.apresentacao || "Empresa cadastrada na plataforma."}
                   </p>
                   <div className="flex items-center text-sm text-gray-500 mb-2">
                     <MapPin className="h-4 w-4 mr-1" />
-                    {empresa.cidade}, {empresa.uf}
+                    {empresa.municipio || "Acre"}
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    {(empresa.tags ? empresa.tags.split(",") : []).map((tag: string) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag.trim()}
+                    {empresa.instagram && (
+                      <Badge variant="outline" className="text-xs">
+                        {empresa.instagram}
                       </Badge>
-                    ))}
+                    )}
                   </div>
+                  <Link href={`/empresas/${empresa.id}`} className="block mt-3">
+                    <Button variant="outline" size="sm" className="w-full">
+                      Ver mais detalhes
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}

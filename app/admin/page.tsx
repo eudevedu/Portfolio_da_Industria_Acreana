@@ -18,7 +18,7 @@ export default async function AdminDashboardPage() {
 
   // Redirecionamento server-side se não for admin
   if (!loggedIn || !userIsAdmin) {
-    redirect("/login")
+    redirect("/admin/login")
   }
 
   const isConfigured = isSupabaseConfigured()

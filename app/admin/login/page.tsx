@@ -28,6 +28,7 @@ export default function AdminLoginPage() {
       const result = await loginAdmin(email, password) // Chama a Server Action de login para admin
       if (result.success) {
         router.push("/admin") // Redireciona para o painel de administração
+        router.refresh() // Força refresh para garantir que o cookie seja lido
       } else {
         setError(result.message)
       }
