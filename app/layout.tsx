@@ -6,9 +6,16 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Plataforma Industrial do Acre",
-  description: "Plataforma para registro e busca de indústrias e produtos no Acre.",
-  generator: "v0.dev",
+  title: "Portfólio das Indústrias do Acre",
+  description: "Plataforma oficial para o desenvolvimento industrial do Estado do Acre. Conectando empresas, produtos e serviços.",
+  generator: "Next.js",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon-industria.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/BrasaoAcre.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
