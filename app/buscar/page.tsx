@@ -233,21 +233,21 @@ export default function BuscarPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4">
+      <footer className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90% text-white py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <Building2 className="h-6 w-6" />
-                <span className="font-bold">Indústrias do Acre</span>
+                <BrasaoAcre className="h-6 w-6" />
+                <span className="font-bold">Governo do Estado do Acre</span>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-slate-50">
                 Plataforma oficial para o desenvolvimento industrial do Estado do Acre.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Empresas</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <ul className="space-y-2 text-sm text-slate-50">
                 <li>
                   <Link href="/cadastro">Cadastrar Empresa</Link>
                 </li>
@@ -261,7 +261,7 @@ export default function BuscarPage() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Setores</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <ul className="space-y-2 text-sm text-slate-50">
                 <li>Alimentos</li>
                 <li>Madeira</li>
                 <li>Construção</li>
@@ -270,15 +270,15 @@ export default function BuscarPage() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Contato</h4>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-slate-50">
                 Governo do Estado do Acre
                 <br />
-                Secretaria de Indústria e Comércio
+                SECRETARIA DE ESTADO DE INDUSTRIA, CIÊNCIA E TECNOLOGIA
               </p>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            © 2024 Governo do Estado do Acre. Todos os direitos reservados.
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-slate-50">
+            © 2025 Governo do Estado do Acre. Todos os direitos reservados.
           </div>
         </div>
       </footer>
