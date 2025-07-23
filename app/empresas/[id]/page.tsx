@@ -20,6 +20,7 @@ import { Separator } from "@/components/ui/separator"
 import { buscarEmpresaPorId } from "@/lib/database"
 import { isSupabaseConfigured } from "@/lib/supabase"
 import { notFound } from "next/navigation" // Importa notFound para lidar com empresas não encontradas
+import { BrasaoAcre } from "@/components/LogoIndustria"
 
 export default async function EmpresaDetailPage({ params }: { params: { id: string } }) {
   const empresaId = params.id
