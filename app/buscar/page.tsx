@@ -233,25 +233,19 @@ export default function BuscarPage() {
               {empresas.map((empresa) => (
                     <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
                       <CardHeader>
-                        <div className="flex items-start justify-between gap-3">
-                          {/* Logo da empresa */}
-                          {empresa.logo_url ? (
-                            <div className="flex-shrink-0">
-                              <SafeImage
-                                src={empresa.logo_url} 
-                                alt={`Logo ${empresa.nome_fantasia}`}
-                                className="w-12 h-12 object-contain border rounded"
-                                fallbackSrc="/placeholder.svg"
-                              />
-                            </div>
-                          ) : null}
-                          
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{empresa.nome_fantasia}</CardTitle>
-                            <CardDescription>{empresa.razao_social}</CardDescription>
-                          </div>
-                          <Badge variant="secondary">{empresa.setor_empresa}</Badge>
+                        {empresa.logo_url && (
+                          <img
+                            src={empresa.logo_url}
+                            alt={`Logo da ${empresa.nome_fantasia}`}
+                            className="w-12 h-12 object-contain rounded bg-white border"
+                          />
+                        )}
+                        
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">{empresa.nome_fantasia}</CardTitle>
+                          <CardDescription>{empresa.razao_social}</CardDescription>
                         </div>
+                        <Badge variant="secondary">{empresa.setor_empresa}</Badge>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-gray-600 mb-3 line-clamp-3">

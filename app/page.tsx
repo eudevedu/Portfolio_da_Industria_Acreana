@@ -142,16 +142,15 @@ export default async function HomePage() {
                   <CardHeader>
                     <div className="flex items-start justify-between gap-3">
                       {/* Logo da empresa */}
-                      {empresa.logo_url ? (
+                      {empresa.logo_url && (
                         <div className="flex-shrink-0">
-                          <SafeImage
-                            src={empresa.logo_url} 
-                            alt={`Logo ${empresa.nome_fantasia}`}
-                            className="w-12 h-12 object-contain border rounded"
-                            fallbackSrc="/placeholder.svg"
+                          <img
+                            src={empresa.logo_url}
+                            alt={`Logo da ${empresa.nome_fantasia}`}
+                            className="w-12 h-12 object-contain rounded bg-white border"
                           />
                         </div>
-                      ) : null}
+                      )}
                       
                       <div className="flex-1">
                         <CardTitle className="text-lg">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
