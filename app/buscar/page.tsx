@@ -14,6 +14,7 @@ import { useSearchParams } from "next/navigation"
 import { BrasaoAcre } from "@/components/LogoIndustria"
 import { SafeImage } from "@/components/SafeImage"
 import { useAuth } from "@/hooks/use-auth"
+import { logout } from "@/lib/auth"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
@@ -121,7 +122,7 @@ export default function BuscarPage() {
                       <Link href={user?.tipo === "admin" ? "/admin" : "/dashboard"}>
                         <Button variant="outline">Meu Painel</Button>
                       </Link>
-                      <form action="/api/auth/logout" method="post" className="inline">
+                      <form action={logout} method="post" className="inline">
                         <Button type="submit" variant="ghost" className="text-slate-50">
                           Sair
                         </Button>
