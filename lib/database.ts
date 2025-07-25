@@ -32,6 +32,7 @@ export async function buscarEmpresas(filters?: {
           linkedin: "linkedin.com/company/acrefoods",
           twitter: "@acrefoods",
           video_apresentacao: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+          logo_url: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center",
           status: "ativo",
           created_at: "2023-01-15T10:00:00Z",
           updated_at: "2023-01-15T10:00:00Z",
@@ -172,8 +173,17 @@ export async function buscarEmpresaPorId(id: string): Promise<Empresa | null> {
     const mockEmpresas = await buscarEmpresas()
     return mockEmpresas.find((emp) => emp.id === id) || null
   }
-  const { data, error } = await supabase!.from("empresas").select("*, produtos(*), arquivos(*)").eq("id", id).single()
+  const { data, error } = await supabase!
+    .from("empresas")
+    .select(`
+      *,
+      produtos(*),
+      arquivos(*)
+    `)
+    .eq("id", id)
+    .single()
   if (error) {
+    console.error("Erro ao buscar empresa por ID:", error)
     return null
   }
   return data as Empresa
@@ -205,7 +215,10 @@ export async function criarEmpresa(
 }
 
 export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): Promise<Empresa | null> {
+  console.log("atualizarEmpresa chamada:", { id, updates })
+  
   if (!isSupabaseConfigured()) {
+    console.log("Supabase não configurado, usando mock store")
     if (!mockEmpresasStore) await buscarEmpresas()
     const idx = mockEmpresasStore!.findIndex((e) => e.id === id)
     if (idx === -1) return null
@@ -215,17 +228,24 @@ export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): P
       updated_at: new Date().toISOString(),
     }
     mockEmpresasStore![idx] = atualizada
+    console.log("Empresa atualizada no mock:", atualizada)
     return atualizada
   }
+  
+  console.log("Atualizando empresa no Supabase...")
   const { data, error } = await supabase!
     .from("empresas")
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq("id", id)
     .select()
     .single()
+    
   if (error) {
+    console.error("Erro ao atualizar empresa no Supabase:", error)
     return null
   }
+  
+  console.log("Empresa atualizada no Supabase:", data)
   return data as Empresa
 }
 
@@ -327,26 +347,31 @@ export async function obterAnalytics(empresaId: string): Promise<{
   totalVisualizacoes: number
   visualizacoesMes: number
   produtosMaisVistos: { nome: string; views: number }[]
+  produtosDoMes: number
 }> {
   if (!isSupabaseConfigured()) {
+    // Buscar produtos da empresa no mock store para simular dados realistas
+    const mockEmpresas = await buscarEmpresas()
+    const empresa = mockEmpresas.find(e => e.id === empresaId)
+    const produtosMock = empresa?.produtos || []
+    
+    const produtosMaisVistos = produtosMock.slice(0, 3).map((produto, index) => ({
+      nome: produto.nome,
+      views: 500 - (index * 100) // Simula views decrescentes
+    }))
+
     return {
       totalVisualizacoes: 1234,
       visualizacoesMes: 234,
-      produtosMaisVistos: [
-        { nome: "Açaí Premium", views: 456 },
-        { nome: "Polpa de Cupuaçu", views: 234 },
-        { nome: "Castanha do Pará", views: 123 },
-      ],
+      produtosMaisVistos,
+      produtosDoMes: 2, // Simula 2 produtos adicionados este mês
     }
   }
 
   let totalVisualizacoes = 0
   let visualizacoesMes = 0
-  const produtosMaisVistos = [
-    { nome: "Açaí Premium", views: 456 },
-    { nome: "Polpa de Cupuaçu", views: 234 },
-    { nome: "Castanha do Pará", views: 123 },
-  ]
+  let produtosMaisVistos: { nome: string; views: number }[] = []
+  let produtosDoMes = 0
 
   const { data: totalViewsData, error: totalViewsError } = await supabase!
     .from("analytics")
@@ -373,11 +398,69 @@ export async function obterAnalytics(empresaId: string): Promise<{
     visualizacoesMes = monthViewsData?.length || 0
   }
 
+  // Buscar produtos criados no mês atual
+  try {
+    const { data: produtosDoMesData, error: produtosDoMesError } = await supabase!
+      .from('produtos')
+      .select('id', { count: 'exact' })
+      .eq('empresa_id', empresaId)
+      .gte('created_at', startOfMonth.toISOString())
+
+    if (!produtosDoMesError) {
+      produtosDoMes = produtosDoMesData?.length || 0
+    }
+  } catch (error) {
+    console.error('Erro ao buscar produtos do mês:', error)
+  }
+
+  // Buscar produtos mais visualizados da empresa específica
+  try {
+    const { data: produtosAnalytics, error: produtosError } = await supabase!
+      .from('analytics')
+      .select('referencia_id')
+      .eq('empresa_id', empresaId)
+      .eq('tipo_evento', 'visualizacao_produto')
+      .not('referencia_id', 'is', null)
+
+    if (!produtosError && produtosAnalytics) {
+      // Contar visualizações por produto
+      const viewCounts: Record<string, number> = {}
+      produtosAnalytics.forEach(item => {
+        if (item.referencia_id) {
+          viewCounts[item.referencia_id] = (viewCounts[item.referencia_id] || 0) + 1
+        }
+      })
+
+      // Buscar nomes dos produtos
+      const produtoIds = Object.keys(viewCounts)
+      if (produtoIds.length > 0) {
+        const { data: produtosData, error: produtosNomeError } = await supabase!
+          .from('produtos')
+          .select('id, nome')
+          .eq('empresa_id', empresaId)
+          .in('id', produtoIds)
+
+        if (!produtosNomeError && produtosData) {
+          produtosMaisVistos = produtosData
+            .map(produto => ({
+              nome: produto.nome,
+              views: viewCounts[produto.id] || 0
+            }))
+            .sort((a, b) => b.views - a.views)
+            .slice(0, 5) // Top 5 produtos
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao buscar produtos mais visualizados:', error)
+  }
+
   if (totalViewsError || monthViewsError) {
     return {
       totalVisualizacoes: 0,
       visualizacoesMes: 0,
       produtosMaisVistos: [],
+      produtosDoMes: 0,
     }
   }
 
@@ -385,6 +468,178 @@ export async function obterAnalytics(empresaId: string): Promise<{
     totalVisualizacoes,
     visualizacoesMes,
     produtosMaisVistos,
+    produtosDoMes,
+  }
+}
+
+// Função para buscar produtos mais visualizados globalmente
+export async function buscarProdutosMaisVisualizados(limite: number = 6): Promise<Array<{
+  id: string
+  nome: string
+  descricao?: string
+  empresa: {
+    id: string
+    nome_fantasia: string
+    logo_url?: string
+  }
+  visualizacoes: number
+}>> {
+  if (!isSupabaseConfigured()) {
+    // Retorna dados mock quando Supabase não está configurado
+    return [
+      {
+        id: "prod1",
+        nome: "Açaí Premium Orgânico",
+        descricao: "Açaí 100% orgânico da Amazônia",
+        empresa: {
+          id: "1",
+          nome_fantasia: "AcreFoods Indústria",
+          logo_url: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center"
+        },
+        visualizacoes: 1250
+      },
+      {
+        id: "prod2",
+        nome: "Castanha do Pará Premium",
+        descricao: "Castanha do Pará selecionada e embalada a vácuo",
+        empresa: {
+          id: "1",
+          nome_fantasia: "AcreFoods Indústria",
+          logo_url: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center"
+        },
+        visualizacoes: 980
+      },
+      {
+        id: "prod3",
+        nome: "Tábuas de Madeira Nobre",
+        descricao: "Tábuas de madeira certificada FSC",
+        empresa: {
+          id: "2",
+          nome_fantasia: "Madeira Nobre do Acre",
+          logo_url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop&crop=center"
+        },
+        visualizacoes: 856
+      },
+      {
+        id: "prod4",
+        nome: "Polpa de Cupuaçu",
+        descricao: "Polpa natural de cupuaçu sem conservantes",
+        empresa: {
+          id: "1",
+          nome_fantasia: "AcreFoods Indústria",
+          logo_url: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center"
+        },
+        visualizacoes: 734
+      },
+      {
+        id: "prod5",
+        nome: "Telhas Ecológicas",
+        descricao: "Telhas coloniais feitas com materiais sustentáveis",
+        empresa: {
+          id: "3",
+          nome_fantasia: "Cerâmica Acreana",
+          logo_url: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop&crop=center"
+        },
+        visualizacoes: 692
+      },
+      {
+        id: "prod6",
+        nome: "Mel de Abelha Orgânico",
+        descricao: "Mel puro de abelhas nativas da Amazônia",
+        empresa: {
+          id: "1",
+          nome_fantasia: "AcreFoods Indústria",
+          logo_url: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop&crop=center"
+        },
+        visualizacoes: 567
+      }
+    ]
+  }
+
+  try {
+    // Buscar todas as visualizações de produtos
+    const { data: analyticsData, error: analyticsError } = await supabase!
+      .from('analytics')
+      .select('referencia_id')
+      .eq('tipo_evento', 'visualizacao_produto')
+      .not('referencia_id', 'is', null)
+
+    if (analyticsError) {
+      console.error('Erro ao buscar analytics:', analyticsError)
+      return []
+    }
+
+    // Contar visualizações por produto
+    const viewCounts: Record<string, number> = {}
+    analyticsData?.forEach(item => {
+      if (item.referencia_id) {
+        viewCounts[item.referencia_id] = (viewCounts[item.referencia_id] || 0) + 1
+      }
+    })
+
+    // Ordenar produtos por número de visualizações
+    const topProductIds = Object.entries(viewCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, limite)
+      .map(([id]) => id)
+
+    if (topProductIds.length === 0) {
+      return []
+    }
+
+    // Buscar dados dos produtos mais visualizados
+    const { data: produtosData, error: produtosError } = await supabase!
+      .from('produtos')
+      .select(`
+        id,
+        nome,
+        descricao,
+        empresa_id,
+        empresas(
+          id,
+          nome_fantasia,
+          logo_url
+        )
+      `)
+      .in('id', topProductIds)
+
+    if (produtosError) {
+      console.error('Erro ao buscar produtos:', produtosError)
+      return []
+    }
+
+    // Transformar os dados no formato esperado e manter a ordem de visualizações
+    return topProductIds.map(id => {
+      const produto = produtosData?.find(p => p.id === id)
+      if (!produto || !produto.empresas) return null
+
+      const empresa = Array.isArray(produto.empresas) ? produto.empresas[0] : produto.empresas
+
+      return {
+        id: produto.id,
+        nome: produto.nome,
+        descricao: produto.descricao,
+        empresa: {
+          id: empresa.id,
+          nome_fantasia: empresa.nome_fantasia,
+          logo_url: empresa.logo_url
+        },
+        visualizacoes: viewCounts[id]
+      }
+    }).filter(Boolean) as Array<{
+      id: string
+      nome: string
+      descricao?: string
+      empresa: {
+        id: string
+        nome_fantasia: string
+        logo_url?: string
+      }
+      visualizacoes: number
+    }>
+  } catch (error) {
+    console.error('Erro ao buscar produtos mais visualizados:', error)
+    return []
   }
 }
 
@@ -506,5 +761,71 @@ export async function deletarPerfilEmpresa(userId: string): Promise<{ success: b
     return { success: false, error }
   }
   return { success: true, error: null }
+}
+
+// Funções para buscar estatísticas da home page
+export async function obterEstatisticasHome(): Promise<{
+  totalEmpresas: number
+  totalProdutos: number
+  totalMunicipios: number
+}> {
+  if (!isSupabaseConfigured()) {
+    // Retorna dados mock se Supabase não estiver configurado
+    return {
+      totalEmpresas: 150,
+      totalProdutos: 500,
+      totalMunicipios: 22
+    }
+  }
+
+  try {
+    // Buscar total de empresas ativas
+    const { count: totalEmpresas, error: empresasError } = await supabase!
+      .from("empresas")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "ativo")
+
+    if (empresasError) {
+      console.error("Erro ao buscar total de empresas:", empresasError)
+    }
+
+    // Buscar total de produtos
+    const { count: totalProdutos, error: produtosError } = await supabase!
+      .from("produtos")
+      .select("id", { count: "exact", head: true })
+
+    if (produtosError) {
+      console.error("Erro ao buscar total de produtos:", produtosError)
+    }
+
+    // Buscar total de municípios únicos
+    const { data: municipios, error: municipiosError } = await supabase!
+      .from("empresas")
+      .select("municipio")
+      .eq("status", "ativo")
+
+    if (municipiosError) {
+      console.error("Erro ao buscar municípios:", municipiosError)
+    }
+
+    // Contar municípios únicos
+    const municipiosUnicos = new Set(
+      municipios?.map(m => m.municipio).filter(Boolean) || []
+    )
+
+    return {
+      totalEmpresas: totalEmpresas || 0,
+      totalProdutos: totalProdutos || 0,
+      totalMunicipios: municipiosUnicos.size || 22 // fallback para 22
+    }
+
+  } catch (error) {
+    console.error("Erro geral ao buscar estatísticas:", error)
+    return {
+      totalEmpresas: 150,
+      totalProdutos: 500,
+      totalMunicipios: 22
+    }
+  }
 }
 

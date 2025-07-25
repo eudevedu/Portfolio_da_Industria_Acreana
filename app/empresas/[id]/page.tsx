@@ -21,9 +21,11 @@ import { buscarEmpresaPorId } from "@/lib/database"
 import { isSupabaseConfigured } from "@/lib/supabase"
 import { notFound } from "next/navigation" // Importa notFound para lidar com empresas não encontradas
 import { BrasaoAcre } from "@/components/LogoIndustria"
+import ImageGallery from "@/components/ImageGallery"
+import AnalyticsTracker from "@/components/AnalyticsTracker"
 
-export default async function EmpresaDetailPage({ params }: { params: { id: string } }) {
-  const empresaId = params.id
+export default async function EmpresaDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: empresaId } = await params
   const isConfigured = isSupabaseConfigured()
 
   let empresa = null
@@ -65,6 +67,12 @@ export default async function EmpresaDetailPage({ params }: { params: { id: stri
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Analytics Tracker para registrar visualização da empresa */}
+      <AnalyticsTracker 
+        empresaId={empresa.id}
+        tipoEvento="visualizacao_perfil"
+      />
+      
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -77,6 +85,12 @@ export default async function EmpresaDetailPage({ params }: { params: { id: stri
           </div>
         </div>
       </header>
+
+      {/* Analytics Tracker - registra visualização da empresa */}
+      <AnalyticsTracker 
+        empresaId={empresaId} 
+        tipoEvento="visualizacao_perfil" 
+      />
 
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <Card className="mb-8">
@@ -198,7 +212,14 @@ export default async function EmpresaDetailPage({ params }: { params: { id: stri
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">Nossos Produtos</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {empresa.produtos.map((produto) => (
-                      <Card key={produto.id}>
+                      <Card key={produto.id} className="relative">
+                        {/* Analytics Tracker para registrar visualização do produto */}
+                        <AnalyticsTracker 
+                          empresaId={empresa.id}
+                          tipoEvento="visualizacao_produto"
+                          referenciaId={produto.id}
+                        />
+                        
                         <CardHeader>
                           <CardTitle className="text-lg flex items-center gap-2">
                             <Package className="h-5 w-5 text-green-600" /> {produto.nome}
@@ -225,31 +246,81 @@ export default async function EmpresaDetailPage({ params }: { params: { id: stri
               <>
                 <Separator />
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Arquivos e Documentos</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {empresa.arquivos.map((arquivo) => (
-                      <Card key={arquivo.id} className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {arquivo.tipo === "pdf" ? (
-                            <FileText className="h-6 w-6 text-red-500" />
-                          ) : (
-                            <ImageIcon className="h-6 w-6 text-blue-500" />
-                          )}
-                          <div>
-                            <p className="font-medium text-gray-800">{arquivo.nome}</p>
-                            {arquivo.categoria && (
-                              <p className="text-sm text-gray-500">Categoria: {arquivo.categoria}</p>
-                            )}
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <ImageIcon className="h-6 w-6 text-blue-600" />
+                    Galeria e Documentos
+                  </h3>
+                  
+                  {/* Separar imagens e documentos */}
+                  {(() => {
+                    const imagens = empresa.arquivos.filter(arquivo => 
+                      arquivo.tipo && ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(arquivo.tipo.toLowerCase())
+                    )
+                    const documentos = empresa.arquivos.filter(arquivo => 
+                      !arquivo.tipo || !['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(arquivo.tipo.toLowerCase())
+                    )
+
+                    return (
+                      <>
+                        {/* Galeria de Imagens */}
+                        {imagens.length > 0 && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
+                              <ImageIcon className="h-5 w-5" />
+                              Fotos ({imagens.length})
+                            </h4>
+                            <ImageGallery images={imagens} />
                           </div>
-                        </div>
-                        <a href={arquivo.url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="outline" size="sm">
-                            <ExternalLink className="h-4 w-4 mr-2" /> Ver
-                          </Button>
-                        </a>
-                      </Card>
-                    ))}
-                  </div>
+                        )}
+
+                        {/* Lista de Documentos */}
+                        {documentos.length > 0 && (
+                          <div>
+                            <h4 className="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
+                              <FileText className="h-5 w-5" />
+                              Documentos ({documentos.length})
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {documentos.map((arquivo) => (
+                                <Card key={arquivo.id} className="p-4 flex items-center justify-between hover:shadow-md transition-shadow">
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-gray-100">
+                                      {arquivo.tipo === "pdf" ? (
+                                        <FileText className="h-6 w-6 text-red-500" />
+                                      ) : arquivo.tipo === "doc" || arquivo.tipo === "docx" ? (
+                                        <FileText className="h-6 w-6 text-blue-500" />
+                                      ) : arquivo.tipo === "xls" || arquivo.tipo === "xlsx" ? (
+                                        <FileText className="h-6 w-6 text-green-500" />
+                                      ) : (
+                                        <FileText className="h-6 w-6 text-gray-500" />
+                                      )}
+                                    </div>
+                                    <div>
+                                      <p className="font-medium text-gray-800">{arquivo.nome}</p>
+                                      {arquivo.categoria && (
+                                        <p className="text-sm text-gray-500">{arquivo.categoria}</p>
+                                      )}
+                                      {arquivo.tipo && (
+                                        <Badge variant="outline" className="text-xs mt-1">
+                                          {arquivo.tipo.toUpperCase()}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <a href={arquivo.url} target="_blank" rel="noopener noreferrer">
+                                    <Button variant="outline" size="sm" className="shrink-0">
+                                      <ExternalLink className="h-4 w-4 mr-2" />
+                                      Abrir
+                                    </Button>
+                                  </a>
+                                </Card>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )
+                  })()}
                 </div>
               </>
             )}

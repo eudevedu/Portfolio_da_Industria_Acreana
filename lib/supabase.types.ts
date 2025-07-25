@@ -12,6 +12,7 @@ export type Empresa = {
   endereco?: string
   apresentacao?: string
   descricao_produtos?: string
+  logo_url?: string
   instagram?: string
   facebook?: string
   youtube?: string
@@ -23,6 +24,7 @@ export type Empresa = {
   updated_at: string
   produtos: Produto[] // Relação para produtos (remova o ? para garantir sempre um array)
   arquivos: Arquivo[] // Relação para arquivos (remova o ? para garantir sempre um array)
+  perfil_empresa?: PerfilEmpresa[] // Relação para perfis de contato
 }
 
 export interface Produto {
@@ -74,6 +76,16 @@ export interface PerfilEmpresa {
   email: string
   telefone?: string
   cargo?: string
+  created_at: string
+  updated_at: string
+}
+
+export type Admin = {
+  id: string
+  nome: string
+  email: string
+  cargo?: string
+  ativo: boolean
   created_at: string
   updated_at: string
 }

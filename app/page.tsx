@@ -1,11 +1,13 @@
 import { Search, MapPin, Plus } from "lucide-react"
 import {  BrasaoAcre } from "@/components/LogoIndustria"
+import { SafeImage } from "@/components/SafeImage"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth" // Importa Server Actions e funções de auth
 import { getLastCompanies } from "@/lib/empresa" // Importe sua função de busca
+import { obterEstatisticasHome } from "@/lib/database" // Importa função de estatísticas
 
 // Força renderização dinâmica devido ao uso de cookies
 export const dynamic = 'force-dynamic'
@@ -17,27 +19,19 @@ export default async function HomePage() {
   const user = await getCurrentUser()
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
-  // Debug para Vercel - vamos ver o que está acontecendo
-  // console.log('🔍 Homepage Debug:', {
-  //   nodeEnv: process.env.NODE_ENV,
-  //   hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-  //   hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  //   isVercel: !!process.env.VERCEL,
-  //   timestamp: new Date().toISOString()
-  // })
-
   // Busque as últimas 6 empresas cadastradas
-  let empresas = []
+  let empresas: any[] = []
   let errorMsg = null
   
   try {
     empresas = await getLastCompanies(6)
-    console.log('✅ Empresas carregadas:', empresas.length)
   } catch (error) {
-    console.error('❌ Erro ao carregar empresas:', error)
     errorMsg = error instanceof Error ? error.message : 'Erro desconhecido'
     empresas = []
   }
+
+  // Busca estatísticas dinâmicas
+  const stats = await obterEstatisticasHome()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
@@ -127,18 +121,6 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto">
           <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Empresas em Destaque</h3>
 
-          {/* Debug info para Vercel */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mb-8 p-4 bg-yellow-100 border border-yellow-400 rounded">
-              <h4 className="font-bold">Debug Info:</h4>
-              <p>Environment: {process.env.NODE_ENV}</p>
-              <p>Supabase URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Configurado' : '❌ Não configurado'}</p>
-              <p>Supabase Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Configurado' : '❌ Não configurado'}</p>
-              <p>Empresas encontradas: {empresas.length}</p>
-              {errorMsg && <p className="text-red-600">Erro: {errorMsg}</p>}
-            </div>
-          )}
-
           {errorMsg && (
             <div className="mb-8 p-4 bg-red-100 border border-red-400 rounded">
               <h4 className="font-bold text-red-800">Erro ao carregar empresas:</h4>
@@ -158,29 +140,86 @@ export default async function HomePage() {
               empresas.map((empresa) => (
                 <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
+                    <div className="flex items-start justify-between gap-3">
+                      {/* Logo da empresa */}
+                      {empresa.logo_url ? (
+                        <div className="flex-shrink-0">
+                          <SafeImage
+                            src={empresa.logo_url} 
+                            alt={`Logo ${empresa.nome_fantasia}`}
+                            className="w-12 h-12 object-contain border rounded"
+                            fallbackSrc="/placeholder.svg"
+                          />
+                        </div>
+                      ) : null}
+                      
+                      <div className="flex-1">
                         <CardTitle className="text-lg">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
-                        <CardDescription>{empresa.razao_social || "Razão social não informada"}</CardDescription>
+                        <CardDescription className="mb-2">{empresa.razao_social || "Razão social não informada"}</CardDescription>
+                        <div className="flex gap-2 flex-wrap">
+                          <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
+                          {empresa.setor_empresa && (
+                            <Badge variant="outline">{empresa.setor_empresa}</Badge>
+                          )}
+                        </div>
                       </div>
-                      <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge variant={empresa.status === 'ativo' ? 'default' : 'secondary'} className="text-xs">
+                          {empresa.status === 'ativo' ? 'Ativo' : empresa.status === 'pendente' ? 'Pendente' : 'Inativo'}
+                        </Badge>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {empresa.apresentacao || "Empresa cadastrada na plataforma."}
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                      {empresa.apresentacao || empresa.descricao_produtos || "Empresa cadastrada na plataforma."}
                     </p>
+                    
+                    {/* Localização */}
                     <div className="flex items-center text-sm text-gray-500 mb-2">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {empresa.municipio || "Acre"}
+                      <MapPin className="h-4 w-4 mr-1 shrink-0" />
+                      <span className="truncate">
+                        {empresa.municipio || "Acre"}{empresa.endereco && `, ${empresa.endereco}`}
+                      </span>
                     </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {empresa.instagram && (
-                        <Badge variant="outline" className="text-xs">
-                          {empresa.instagram}
-                        </Badge>
-                      )}
-                    </div>
+                    
+                    {/* Segmentos e temas */}
+                    {(empresa.segmento || empresa.tema_segmento) && (
+                      <div className="flex gap-1 flex-wrap mb-3">
+                        {empresa.segmento && (
+                          <Badge variant="outline" className="text-xs">
+                            {empresa.segmento}
+                          </Badge>
+                        )}
+                        {empresa.tema_segmento && (
+                          <Badge variant="outline" className="text-xs">
+                            {empresa.tema_segmento}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Redes sociais */}
+                    {(empresa.instagram || empresa.facebook || empresa.linkedin) && (
+                      <div className="flex gap-2 flex-wrap mb-3">
+                        {empresa.instagram && (
+                          <Badge variant="outline" className="text-xs bg-pink-50 text-pink-700">
+                            Instagram
+                          </Badge>
+                        )}
+                        {empresa.facebook && (
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                            Facebook
+                          </Badge>
+                        )}
+                        {empresa.linkedin && (
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600">
+                            LinkedIn
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    
                     <Link href={`/empresas/${empresa.id}`} className="block mt-3">
                       <Button variant="outline" size="sm" className="w-full">
                         Ver mais detalhes
@@ -207,15 +246,15 @@ export default async function HomePage() {
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">150+</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">{stats.totalEmpresas}+</div>
               <div className="text-gray-600">Empresas Cadastradas</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">500+</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">{stats.totalProdutos}+</div>
               <div className="text-gray-600">Produtos Registrados</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-purple-600 mb-2">22</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">{stats.totalMunicipios}</div>
               <div className="text-gray-600">Municípios Atendidos</div>
             </div>
           </div>

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { UploadComponent } from "@/components/upload-component"
 
 import type { Empresa } from "../lib/supabase.types" // Caminho relativo
 import { atualizarEmpresa } from "../lib/database" // Caminho relativo
@@ -29,6 +30,7 @@ const formSchema = z.object({
   endereco: z.string().optional(),
   apresentacao: z.string().optional(),
   descricao_produtos: z.string().optional(),
+  logo_url: z.string().optional(),
   instagram: z.string().optional(),
   facebook: z.string().optional(),
   youtube: z.string().optional(),
@@ -61,6 +63,7 @@ export function CompanyInfoCard({ initialData, empresaId }: CompanyInfoCardProps
       endereco: initialData?.endereco || "",
       apresentacao: initialData?.apresentacao || "",
       descricao_produtos: initialData?.descricao_produtos || "",
+      logo_url: initialData?.logo_url || "",
       instagram: initialData?.instagram || "",
       facebook: initialData?.facebook || "",
       youtube: initialData?.youtube || "",
@@ -84,6 +87,7 @@ export function CompanyInfoCard({ initialData, empresaId }: CompanyInfoCardProps
         endereco: initialData.endereco || "",
         apresentacao: initialData.apresentacao || "",
         descricao_produtos: initialData.descricao_produtos || "",
+        logo_url: initialData.logo_url || "",
         instagram: initialData.instagram || "",
         facebook: initialData.facebook || "",
         youtube: initialData.youtube || "",
@@ -102,12 +106,16 @@ export function CompanyInfoCard({ initialData, empresaId }: CompanyInfoCardProps
         ...values,
         cnpj: unformatCnpj(values.cnpj), // Desformata o CNPJ antes de enviar
       }
+      
+      console.log("Atualizando empresa com dados:", updatedData)
       const result = await atualizarEmpresa(empresaId, updatedData)
 
       if (result) {
+        console.log("Empresa atualizada com sucesso:", result)
         toast.success("Informações da empresa atualizadas com sucesso!")
         setIsEditing(false) // Sai do modo de edição após salvar
       } else {
+        console.error("Erro: resultado null ao atualizar empresa")
         toast.error("Erro ao atualizar informações da empresa.")
       }
     } catch (error) {
@@ -308,6 +316,71 @@ export function CompanyInfoCard({ initialData, empresaId }: CompanyInfoCardProps
                     </FormControl>
                   ) : (
                     <p className="text-sm text-muted-foreground">{field.value || "Não informado"}</p>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="logo_url"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Logo da Empresa</FormLabel>
+                  {isEditing ? (
+                    <div className="space-y-3">
+                      <UploadComponent
+                        onUploadSuccess={(url, filename) => {
+                          console.log("Upload realizado com sucesso:", { url, filename })
+                          field.onChange(url)
+                          form.setValue("logo_url", url)
+                        }}
+                        acceptedFileTypes="image/*"
+                        buttonText={field.value ? "Alterar Logo" : "Upload Logo"}
+                      />
+                      {field.value && (
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={field.value} 
+                            alt="Logo atual" 
+                            className="w-16 h-16 rounded-lg object-contain border"
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              field.onChange("")
+                              form.setValue("logo_url", "")
+                            }}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Remover
+                          </Button>
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Formatos aceitos: PNG, JPG, JPEG. Tamanho máximo: 5MB
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      {field.value ? (
+                        <>
+                          <img 
+                            src={field.value} 
+                            alt="Logo da empresa" 
+                            className="w-12 h-12 rounded-lg object-cover border"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                          <p className="text-sm text-muted-foreground">Logo configurado</p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Não informado</p>
+                      )}
+                    </div>
                   )}
                   <FormMessage />
                 </FormItem>

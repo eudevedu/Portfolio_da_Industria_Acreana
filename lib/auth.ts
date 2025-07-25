@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { supabase, isSupabaseConfigured } from "./supabase"
 import type { User } from "./supabase.types" // Importa o tipo User do novo arquivo de tipos
 import { criarPerfilEmpresa } from "./database" // Importa a nova função (corrigido para 'data' se for o arquivo correto)
+import bcrypt from 'bcryptjs'
 
 const USER_COOKIE_NAME = "user_session"
 
@@ -45,6 +46,7 @@ export async function login(email: string, password: string): Promise<{ success:
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 7, // 1 semana
         path: "/",
+        sameSite: "lax", // Permite cookies em navegação normal
       })
       return { success: true, message: "Login bem-sucedido!" }
     } else {
@@ -106,6 +108,7 @@ export async function login(email: string, password: string): Promise<{ success:
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 7, // 1 semana
         path: "/",
+        sameSite: "lax", // Permite cookies em navegação normal
       })
       return { success: true, message: "Login bem-sucedido!" }
     }
@@ -141,15 +144,33 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
         path: "/",
         sameSite: "lax", // Adicionado para melhorar compatibilidade
       })
-      redirect("/admin") // Redirecionamento automático
+      
+      return { success: true, message: "Login realizado com sucesso!" }
     }
     return { success: false, message: "Supabase não configurado. Use admin@example.com / admin123 para desenvolvimento." }
   }
 
   try {
-    console.log("Checking admin credentials in admins table...");
+    console.log("Tentando autenticação via Supabase Auth...");
     
-    // Buscar admin diretamente na tabela admins
+    // Autenticar usando Supabase Auth
+    const { data: authData, error: authError } = await supabase!.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    console.log("Supabase Auth result:", { 
+      hasUser: !!authData.user, 
+      userEmail: authData.user?.email,
+      error: authError?.message 
+    });
+
+    if (authError || !authData.user) {
+      console.log('Falha na autenticação Supabase:', authError?.message);
+      return { success: false, message: 'Credenciais inválidas' };
+    }
+
+    // Verificar se o usuário é admin na tabela admins
     const { data: admin, error: adminError } = await supabase!
       .from('admins')
       .select('*')
@@ -157,20 +178,20 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
       .eq('ativo', true)
       .single();
 
-    console.log("Admin table query result:", { admin: admin?.email, error: adminError?.message });
+    console.log("Admin table verification:", { admin: admin?.email, error: adminError?.message });
 
     if (adminError || !admin) {
-      console.log('Admin não encontrado na tabela admins ou não está ativo');
-      return { success: false, message: 'Credenciais inválidas ou conta inativa' };
+      console.log('Usuário não é admin ou conta inativa');
+      // Fazer logout do Supabase se não for admin
+      await supabase!.auth.signOut();
+      return { success: false, message: 'Acesso negado. Usuário não é administrador' };
     }
-
-    // Para simplificar, vamos aceitar qualquer senha para admin ativo
-    // Em um ambiente de produção, você deveria verificar o hash da senha
-    console.log('Admin encontrado:', admin.nome);
+    
+    console.log('Admin autenticado com sucesso:', admin.nome);
     
     // Criar sessão do admin
     const userSession: User = {
-      id: admin.id.toString(),
+      id: authData.user.id, // Usar ID do Supabase Auth
       email: admin.email,
       tipo: "admin",
       empresa_id: null,
@@ -187,7 +208,7 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24 * 7, // 1 semana
       path: "/",
-      sameSite: "lax", // Adicionado para melhorar compatibilidade
+      sameSite: "lax", // Permite cookies em navegação normal
     })
     
     console.log("Cookie definido com nome:", USER_COOKIE_NAME);

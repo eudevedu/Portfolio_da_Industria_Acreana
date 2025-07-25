@@ -14,31 +14,21 @@ export async function getLastCompanies(limit = 6) {
   }
 
   try {
-    console.log('🔍 Buscando empresas - tentativa de conexão com Supabase...')
-    
-    // Buscar empresas ativas e pendentes
+    // Buscar apenas empresas ativas
     const { data, error } = await supabase
       .from('empresas')
       .select('*')
-      .in('status', ['ativo', 'pendente'])
+      .eq('status', 'ativo')
       .order('created_at', { ascending: false })
       .limit(limit)
 
     if (error) {
-      console.error("❌ Erro na query Supabase:", {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
-      })
       throw new Error(`Erro na consulta ao banco de dados: ${error.message}`)
     }
 
-    console.log(`✅ Query executada com sucesso - ${data?.length || 0} empresas encontradas`)
     return data || []
     
   } catch (err) {
-    console.error("❌ Erro na função getLastCompanies:", err)
     
     if (err instanceof Error) {
       // Re-throw para manter a mensagem original

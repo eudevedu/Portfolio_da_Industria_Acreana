@@ -12,9 +12,13 @@ import { buscarEmpresas } from "@/lib/database"
 import type { Empresa } from "@/lib/supabase.types" // Importa o tipo do novo arquivo
 import { useSearchParams } from "next/navigation"
 import { BrasaoAcre } from "@/components/LogoIndustria"
+import { SafeImage } from "@/components/SafeImage"
+import { useAuth } from "@/hooks/use-auth"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
+  const { user, loading: authLoading, isLoggedIn } = useAuth()
+  
   const initialSearchTerm = searchParams.get("busca") || ""
   const initialStatus = searchParams.get("status") || "ativo" // Default to active companies
   const initialSector = searchParams.get("setor_economico") || "all"
@@ -62,15 +66,24 @@ export default function BuscarPage() {
   const fetchEmpresas = async () => {
     setLoading(true)
     try {
+      console.log('🔍 Frontend - Buscando empresas com filtros:', {
+        status: selectedStatus,
+        setor_economico: selectedSector,
+        municipio: selectedCity,
+        busca: searchTerm
+      })
+
       const fetchedEmpresas = await buscarEmpresas({
         status: selectedStatus === "all" ? undefined : selectedStatus,
         setor_economico: selectedSector === "all" ? undefined : selectedSector,
         municipio: selectedCity === "all" ? undefined : selectedCity,
         busca: searchTerm,
       })
+      
+      console.log('✅ Frontend - Empresas encontradas:', fetchedEmpresas.length)
       setEmpresas(fetchedEmpresas)
     } catch (error) {
-      console.error("Erro ao buscar empresas:", error)
+      console.error("❌ Frontend - Erro ao buscar empresas:", error)
       setEmpresas([])
     } finally {
       setLoading(false)
@@ -95,12 +108,37 @@ export default function BuscarPage() {
               <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
                 Buscar Empresas
               </Link>
-              <Link href="/login">
-                <Button variant="outline">Entrar</Button>
+              <Link href="/" className="text-slate-50 hover:text-gray-900">
+                Início
               </Link>
-              <Link href="/cadastro">
-                <Button>Cadastrar Empresa</Button>
-              </Link>
+              {!authLoading && (
+                <>
+                  {isLoggedIn ? (
+                    <>
+                      <span className="text-slate-50 text-sm hidden sm:inline">
+                        Olá, {user?.email}
+                      </span>
+                      <Link href={user?.tipo === "admin" ? "/admin" : "/dashboard"}>
+                        <Button variant="outline">Meu Painel</Button>
+                      </Link>
+                      <form action="/api/auth/logout" method="post" className="inline">
+                        <Button type="submit" variant="ghost" className="text-slate-50">
+                          Sair
+                        </Button>
+                      </form>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/login">
+                        <Button variant="outline">Entrar</Button>
+                      </Link>
+                      <Link href="/cadastro">
+                        <Button>Cadastrar Empresa</Button>
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </nav>
           </div>
         </div>
@@ -192,45 +230,57 @@ export default function BuscarPage() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {empresas.map((empresa) => (
-                <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{empresa.nome_fantasia}</CardTitle>
-                        <CardDescription>{empresa.razao_social}</CardDescription>
-                      </div>
-                      <Badge variant="secondary">{empresa.setor_empresa}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
-                      {empresa.apresentacao || "Nenhuma apresentação disponível."}
-                    </p>
-                    <div className="flex items-center text-sm text-gray-500 mb-2">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {empresa.municipio}, AC
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {empresa.descricao_produtos?.split(",").map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {tag.trim()}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="mt-4">
-                      <Link href={`/empresas/${empresa.id}`}>
-                        <Button variant="outline" size="sm">
-                          Ver Detalhes
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-3">
+                          {/* Logo da empresa */}
+                          {empresa.logo_url ? (
+                            <div className="flex-shrink-0">
+                              <SafeImage
+                                src={empresa.logo_url} 
+                                alt={`Logo ${empresa.nome_fantasia}`}
+                                className="w-12 h-12 object-contain border rounded"
+                                fallbackSrc="/placeholder.svg"
+                              />
+                            </div>
+                          ) : null}
+                          
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{empresa.nome_fantasia}</CardTitle>
+                            <CardDescription>{empresa.razao_social}</CardDescription>
+                          </div>
+                          <Badge variant="secondary">{empresa.setor_empresa}</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                          {empresa.apresentacao || "Nenhuma apresentação disponível."}
+                        </p>
+                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {empresa.municipio}, AC
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          {empresa.descricao_produtos?.split(",").map((tag, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {tag.trim()}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="mt-4">
+                          <Link href={`/empresas/${empresa.id}`}>
+                            <Button variant="outline" size="sm">
+                              Ver Detalhes
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </section>
+          </section>
 
       {/* Footer */}
       <footer className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90% text-white py-12 px-4">

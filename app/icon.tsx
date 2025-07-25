@@ -18,17 +18,17 @@ export default function Icon() {
       <div
         style={{
           fontSize: 24,
-          background: '#059669',
+          background: 'linear-gradient(90deg, #15803d, #059669)',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: 'white',
-          borderRadius: '20%',
+          fontWeight: 'bold',
         }}
       >
-        I
+        A
       </div>
     ),
     // ImageResponse options

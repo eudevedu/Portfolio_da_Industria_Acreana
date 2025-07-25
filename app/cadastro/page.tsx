@@ -43,13 +43,14 @@ export default function CadastroPage() {
     apresentacao: "",
     endereco: "",
     municipio: "",
+    logo_url: "",
     instagram: "",
     facebook: "",
     youtube: "",
     linkedin: "",
     twitter: "",
     video_apresentacao: "",
-    status: "pendente",
+    status: "ativo",
   })
   const [userEmail, setUserEmail] = useState("")
   const [userPassword, setUserPassword] = useState("")
@@ -65,6 +66,7 @@ export default function CadastroPage() {
   // State for main company files
   const [folderApresentacaoUrl, setFolderApresentacaoUrl] = useState<string | null>(null)
   const [outrosArquivosUrls, setOutrosArquivosUrls] = useState<string[]>([])
+  const [logoUploading, setLogoUploading] = useState(false)
 
   const setoresEconomicos = [
     { value: "industria", label: "Indústria" },
@@ -277,7 +279,7 @@ export default function CadastroPage() {
 
       toast({
         title: "Sucesso!",
-        description: "Empresa e conta de usuário cadastrados com sucesso! Você será redirecionado para o login.",
+        description: "Empresa e conta de usuário cadastrados com sucesso! Sua empresa já está ativa e visível no portfólio. Você será redirecionado para o login.",
         duration: 8000, // Aumenta a duração para 8 segundos
       })
       // Clear form and redirect
@@ -293,13 +295,14 @@ export default function CadastroPage() {
         apresentacao: "",
         endereco: "",
         municipio: "",
+        logo_url: "",
         instagram: "",
         facebook: "",
         youtube: "",
         linkedin: "",
         twitter: "",
         video_apresentacao: "",
-        status: "pendente",
+        status: "ativo",
       })
       setUserEmail("")
       setUserPassword("")
@@ -552,6 +555,40 @@ export default function CadastroPage() {
                       )}
                     </div>
                   </div>
+                  
+                  {/* Campo de Logo */}
+                  <div>
+                    <Label htmlFor="logo">Logo da Empresa</Label>
+                    <div className="space-y-2">
+                      <UploadComponent
+                        onUploadSuccess={(url) => setFormData({ ...formData, logo_url: url })}
+                        acceptedFileTypes="image/*"
+                        buttonText={formData.logo_url ? "Alterar Logo" : "Upload Logo"}
+                      />
+                      {formData.logo_url && (
+                        <div className="flex items-center space-x-2">
+                          <img 
+                            src={formData.logo_url} 
+                            alt="Logo da empresa" 
+                            className="w-20 h-20 object-contain border rounded"
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setFormData({ ...formData, logo_url: "" })}
+                          >
+                            <X className="h-4 w-4" />
+                            Remover
+                          </Button>
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Formatos aceitos: PNG, JPG, JPEG. Tamanho máximo: 5MB
+                      </p>
+                    </div>
+                  </div>
+                  
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="cnpj">CNPJ *</Label>

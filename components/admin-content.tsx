@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Factory, Package, Plus, Eye, CheckCircle, Clock, Search, ChevronDown } from "lucide-react"
+import { Factory, Package, Plus, Eye, CheckCircle, Clock, Search, ChevronDown, Loader2, UserPlus, Edit, Key, UserX, UserCheck, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -28,8 +28,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { obterEstatisticasAdmin, buscarEmpresasAdmin, atualizarStatusEmpresa } from "@/lib/admin"
-import type { Empresa } from "@/lib/supabase.types"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { obterEstatisticasAdmin, buscarEmpresasAdmin, atualizarStatusEmpresa, obterTodosAdmins, atualizarStatusAdmin } from "@/lib/admin"
+import { criarEmpresa } from "@/lib/database"
+import type { Empresa, Admin } from "@/lib/supabase.types"
 import { formatBrazilianShortDate } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 
@@ -50,11 +62,61 @@ interface AdminContentProps {
 export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }: AdminContentProps) {
   const [stats, setStats] = useState(initialStats)
   const [empresas, setEmpresas] = useState(initialEmpresas)
+  const [admins, setAdmins] = useState<Admin[]>([])
   const [loading, setLoading] = useState(false) // Este loading é para buscas client-side
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedSector, setSelectedSector] = useState("all")
   const [selectedCity, setSelectedCity] = useState("all")
+
+  // Estados para o modal de cadastro de empresa
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [creatingEmpresa, setCreatingEmpresa] = useState(false)
+  const [novaEmpresa, setNovaEmpresa] = useState({
+    // Dados de Acesso
+    email: "",
+    password: "",
+    confirmPassword: "",
+    // Dados da Empresa
+    nome_fantasia: "",
+    razao_social: "",
+    cnpj: "",
+    setor_economico: "",
+    setor_empresa: "",
+    segmento: "",
+    tema_segmento: "",
+    municipio: "",
+    endereco: "",
+    apresentacao: "",
+    descricao_produtos: "",
+    instagram: "",
+    facebook: "",
+    youtube: "",
+    linkedin: "",
+    twitter: "",
+    video_apresentacao: ""
+  })
+
+  // Estados para o modal de cadastro de administrador
+  const [showCreateAdminDialog, setShowCreateAdminDialog] = useState(false)
+  const [creatingAdmin, setCreatingAdmin] = useState(false)
+  const [novoAdmin, setNovoAdmin] = useState({
+    nome: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    cargo: ""
+  })
+
+  // Estados para gerenciamento de administradores
+  const [showEditAdminDialog, setShowEditAdminDialog] = useState(false)
+  const [editingAdmin, setEditingAdmin] = useState(false)
+  const [adminToEdit, setAdminToEdit] = useState<Admin | null>(null)
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [resetingPassword, setResetingPassword] = useState(false)
+  const [adminToResetPassword, setAdminToResetPassword] = useState<Admin | null>(null)
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmNewPassword, setConfirmNewPassword] = useState("")
 
   const setoresEconomicos = [
     { value: "industria", label: "Indústria" },
@@ -107,6 +169,357 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
     }
     loadFilteredData()
   }, [selectedStatus, selectedSector, selectedCity, searchTerm])
+
+  // Carregar administradores
+  useEffect(() => {
+    const loadAdmins = async () => {
+      try {
+        const adminsData = await obterTodosAdmins()
+        setAdmins(adminsData)
+      } catch (err) {
+        console.error("Erro ao carregar administradores:", err)
+      }
+    }
+    loadAdmins()
+  }, [])
+
+  const handleCreateEmpresa = async () => {
+    // Validação dos campos obrigatórios
+    if (!novaEmpresa.email || !novaEmpresa.password || !novaEmpresa.confirmPassword ||
+        !novaEmpresa.nome_fantasia || !novaEmpresa.razao_social || !novaEmpresa.cnpj || 
+        !novaEmpresa.setor_economico || !novaEmpresa.setor_empresa || 
+        !novaEmpresa.descricao_produtos || !novaEmpresa.apresentacao || 
+        !novaEmpresa.endereco || !novaEmpresa.municipio) {
+      alert("Preencha todos os campos obrigatórios marcados com *")
+      return
+    }
+
+    // Validação de confirmação de senha
+    if (novaEmpresa.password !== novaEmpresa.confirmPassword) {
+      alert("As senhas não coincidem")
+      return
+    }
+
+    // Validação de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(novaEmpresa.email)) {
+      alert("Digite um email válido")
+      return
+    }
+
+    setCreatingEmpresa(true)
+    try {
+      const empresaData = {
+        nome_fantasia: novaEmpresa.nome_fantasia,
+        razao_social: novaEmpresa.razao_social,
+        cnpj: novaEmpresa.cnpj,
+        setor_economico: novaEmpresa.setor_economico,
+        setor_empresa: novaEmpresa.setor_empresa,
+        segmento: novaEmpresa.segmento,
+        tema_segmento: novaEmpresa.tema_segmento,
+        municipio: novaEmpresa.municipio,
+        endereco: novaEmpresa.endereco,
+        apresentacao: novaEmpresa.apresentacao,
+        descricao_produtos: novaEmpresa.descricao_produtos,
+        instagram: novaEmpresa.instagram,
+        facebook: novaEmpresa.facebook,
+        youtube: novaEmpresa.youtube,
+        linkedin: novaEmpresa.linkedin,
+        twitter: novaEmpresa.twitter,
+        video_apresentacao: novaEmpresa.video_apresentacao,
+        produtos: [],
+        arquivos: []
+      }
+      
+      const result = await criarEmpresa(empresaData)
+      
+      if (result) {
+        // Atualizar a lista de empresas
+        const empresasData = await buscarEmpresasAdmin({
+          status: selectedStatus === "all" ? undefined : selectedStatus,
+          setor_economico: selectedSector === "all" ? undefined : selectedSector,
+          municipio: selectedCity === "all" ? undefined : selectedCity,
+          busca: searchTerm,
+        })
+        setEmpresas(empresasData)
+        
+        // Atualizar estatísticas
+        setStats(prev => ({
+          ...prev,
+          totalEmpresas: prev.totalEmpresas + 1,
+          empresasAtivas: prev.empresasAtivas + 1
+        }))
+        
+        // Limpar formulário e fechar modal
+        setNovaEmpresa({
+          // Dados de Acesso
+          email: "",
+          password: "",
+          confirmPassword: "",
+          // Dados da Empresa
+          nome_fantasia: "",
+          razao_social: "",
+          cnpj: "",
+          setor_economico: "",
+          setor_empresa: "",
+          segmento: "",
+          tema_segmento: "",
+          municipio: "",
+          endereco: "",
+          apresentacao: "",
+          descricao_produtos: "",
+          instagram: "",
+          facebook: "",
+          youtube: "",
+          linkedin: "",
+          twitter: "",
+          video_apresentacao: ""
+        })
+        setShowCreateDialog(false)
+        
+        alert("Empresa criada com sucesso!")
+      } else {
+        alert("Erro ao criar empresa. Tente novamente.")
+      }
+    } catch (error) {
+      console.error("Erro ao criar empresa:", error)
+      alert("Erro ao criar empresa. Verifique os dados e tente novamente.")
+    } finally {
+      setCreatingEmpresa(false)
+    }
+  }
+
+  const handleCreateAdmin = async () => {
+    // Validação dos campos obrigatórios
+    if (!novoAdmin.nome || !novoAdmin.email || !novoAdmin.password || !novoAdmin.confirmPassword) {
+      alert("Preencha todos os campos obrigatórios")
+      return
+    }
+
+    // Validação de confirmação de senha
+    if (novoAdmin.password !== novoAdmin.confirmPassword) {
+      alert("As senhas não coincidem")
+      return
+    }
+
+    // Validação de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(novoAdmin.email)) {
+      alert("Digite um email válido")
+      return
+    }
+
+    setCreatingAdmin(true)
+    try {
+      // Criar administrador via API route
+      const response = await fetch('/api/criar-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: novoAdmin.nome,
+          email: novoAdmin.email,
+          password: novoAdmin.password,
+          cargo: novoAdmin.cargo
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        // Recarregar lista de administradores
+        const adminsData = await obterTodosAdmins()
+        setAdmins(adminsData)
+        
+        // Limpar formulário e fechar modal
+        setNovoAdmin({
+          nome: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          cargo: ""
+        })
+        setShowCreateAdminDialog(false)
+        
+        alert("Administrador criado com sucesso!")
+      } else {
+        alert(`Erro ao criar administrador: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Erro ao criar administrador:", error)
+      alert("Erro ao criar administrador. Verifique a conexão.")
+    } finally {
+      setCreatingAdmin(false)
+    }
+  }
+
+  // Funções para gerenciamento de administradores
+  const handleEditAdmin = (admin: Admin) => {
+    setAdminToEdit(admin)
+    setShowEditAdminDialog(true)
+  }
+
+  const handleUpdateAdmin = async () => {
+    if (!adminToEdit) return
+
+    setEditingAdmin(true)
+    try {
+      const response = await fetch('/api/gerenciar-admin', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: adminToEdit.id,
+          nome: adminToEdit.nome,
+          email: adminToEdit.email,
+          cargo: adminToEdit.cargo,
+          ativo: adminToEdit.ativo
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        // Recarregar lista de administradores
+        const adminsData = await obterTodosAdmins()
+        setAdmins(adminsData)
+        
+        setShowEditAdminDialog(false)
+        setAdminToEdit(null)
+        
+        alert("Administrador atualizado com sucesso!")
+      } else {
+        alert(`Erro ao atualizar administrador: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar administrador:", error)
+      alert("Erro ao atualizar administrador. Verifique a conexão.")
+    } finally {
+      setEditingAdmin(false)
+    }
+  }
+
+  const handleDeleteAdmin = async (admin: Admin) => {
+    if (!confirm(`Tem certeza que deseja excluir o administrador "${admin.nome}"? Esta ação não pode ser desfeita.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/gerenciar-admin?id=${admin.id}`, {
+        method: 'DELETE'
+      })
+
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        // Recarregar lista de administradores
+        const adminsData = await obterTodosAdmins()
+        setAdmins(adminsData)
+        
+        alert("Administrador excluído com sucesso!")
+      } else {
+        alert(`Erro ao excluir administrador: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Erro ao excluir administrador:", error)
+      alert("Erro ao excluir administrador. Verifique a conexão.")
+    }
+  }
+
+  const handleResetPassword = (admin: Admin) => {
+    setAdminToResetPassword(admin)
+    setNewPassword("")
+    setConfirmNewPassword("")
+    setShowPasswordDialog(true)
+  }
+
+  const handleConfirmResetPassword = async () => {
+    if (!adminToResetPassword) return
+
+    if (newPassword !== confirmNewPassword) {
+      alert("As senhas não coincidem")
+      return
+    }
+
+    if (newPassword.length < 6) {
+      alert("A senha deve ter pelo menos 6 caracteres")
+      return
+    }
+
+    setResetingPassword(true)
+    try {
+      const response = await fetch('/api/resetar-senha-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: adminToResetPassword.id,
+          novaSenha: newPassword
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        setShowPasswordDialog(false)
+        setAdminToResetPassword(null)
+        setNewPassword("")
+        setConfirmNewPassword("")
+        
+        alert("Senha resetada com sucesso!")
+      } else {
+        alert(`Erro ao resetar senha: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Erro ao resetar senha:", error)
+      alert("Erro ao resetar senha. Verifique a conexão.")
+    } finally {
+      setResetingPassword(false)
+    }
+  }
+
+  const handleToggleAdminStatus = async (admin: Admin) => {
+    const newStatus = !admin.ativo
+    const actionText = newStatus ? "ativar" : "desativar"
+    
+    if (!confirm(`Tem certeza que deseja ${actionText} o administrador "${admin.nome}"?`)) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/gerenciar-admin', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: admin.id,
+          nome: admin.nome,
+          email: admin.email,
+          cargo: admin.cargo,
+          ativo: newStatus
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        // Recarregar lista de administradores
+        const adminsData = await obterTodosAdmins()
+        setAdmins(adminsData)
+        
+        alert(`Administrador ${newStatus ? 'ativado' : 'desativado'} com sucesso!`)
+      } else {
+        alert(`Erro ao ${actionText} administrador: ${result.error}`)
+      }
+    } catch (error) {
+      console.error(`Erro ao ${actionText} administrador:`, error)
+      alert(`Erro ao ${actionText} administrador. Verifique a conexão.`)
+    }
+  }
 
   const handleStatusChange = async (empresaId: string, newStatus: "ativo" | "pendente" | "inativo") => {
     setLoading(true)
@@ -216,8 +629,8 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
             <TabsTrigger value="analytics" disabled>
               Analytics (Em Breve)
             </TabsTrigger>
-            <TabsTrigger value="usuarios" disabled>
-              Usuários (Em Breve)
+            <TabsTrigger value="administradores">
+              Administradores
             </TabsTrigger>
           </TabsList>
 
@@ -229,10 +642,243 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
                     <CardTitle>Gerenciamento de Empresas</CardTitle>
                     <CardDescription>Visualize e gerencie as empresas cadastradas.</CardDescription>
                   </div>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Empresa
-                  </Button>
+                  <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nova Empresa
+                      </Button>
+                    </DialogTrigger>
+                    
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Cadastrar Nova Empresa</DialogTitle>
+                        <DialogDescription>
+                          Preencha as informações da empresa que será cadastrada no sistema.
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6">
+                        {/* Dados de Acesso */}
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Dados de Acesso</h3>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="email">Email *</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                placeholder="seuemail@exemplo.com"
+                                value={novaEmpresa.email}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, email: e.target.value }))}
+                                required
+                                autoComplete="email"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="password">Senha *</Label>
+                              <Input
+                                id="password"
+                                type="password"
+                                placeholder="********"
+                                value={novaEmpresa.password}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, password: e.target.value }))}
+                                required
+                                autoComplete="new-password"
+                              />
+                            </div>
+                            <div className="md:col-span-2">
+                              <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
+                              <Input
+                                id="confirmPassword"
+                                type="password"
+                                placeholder="********"
+                                value={novaEmpresa.confirmPassword}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                                required
+                                autoComplete="new-password"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Dados da Empresa */}
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Dados da Empresa</h3>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="nome_fantasia">Nome Fantasia *</Label>
+                              <Input
+                                id="nome_fantasia"
+                                placeholder="Nome comercial da empresa"
+                                value={novaEmpresa.nome_fantasia}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, nome_fantasia: e.target.value }))}
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="razao_social">Razão Social *</Label>
+                              <Input
+                                id="razao_social"
+                                placeholder="Razão social completa"
+                                value={novaEmpresa.razao_social}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, razao_social: e.target.value }))}
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="cnpj">CNPJ *</Label>
+                              <Input
+                                id="cnpj"
+                                placeholder="00.000.000/0001-00"
+                                value={novaEmpresa.cnpj}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, cnpj: e.target.value }))}
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="municipio">Município *</Label>
+                              <Select
+                                value={novaEmpresa.municipio}
+                                onValueChange={(value) => setNovaEmpresa(prev => ({ ...prev, municipio: value }))}
+                                required
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o município" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Rio Branco">Rio Branco</SelectItem>
+                                  <SelectItem value="Cruzeiro do Sul">Cruzeiro do Sul</SelectItem>
+                                  <SelectItem value="Sena Madureira">Sena Madureira</SelectItem>
+                                  <SelectItem value="Feijo">Feijó</SelectItem>
+                                  <SelectItem value="Tarauaca">Tarauacá</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="md:col-span-2">
+                              <Label htmlFor="endereco">Endereço *</Label>
+                              <Input
+                                id="endereco"
+                                placeholder="Endereço completo da empresa"
+                                value={novaEmpresa.endereco}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, endereco: e.target.value }))}
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="setor_economico">Setor Econômico *</Label>
+                              <Select
+                                value={novaEmpresa.setor_economico}
+                                onValueChange={(value) => setNovaEmpresa(prev => ({ ...prev, setor_economico: value }))}
+                                required
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o setor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="industria">Indústria</SelectItem>
+                                  <SelectItem value="comercio">Comércio</SelectItem>
+                                  <SelectItem value="servicos">Serviços</SelectItem>
+                                  <SelectItem value="agropecuaria">Agropecuária</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="setor_empresa">Setor da Empresa *</Label>
+                              <Input
+                                id="setor_empresa"
+                                placeholder="Ex: Alimentos, Madeira, etc."
+                                value={novaEmpresa.setor_empresa}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, setor_empresa: e.target.value }))}
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="apresentacao">Apresentação *</Label>
+                              <Textarea
+                                id="apresentacao"
+                                placeholder="Breve apresentação da empresa..."
+                                value={novaEmpresa.apresentacao}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, apresentacao: e.target.value }))}
+                                rows={3}
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="descricao_produtos">Descrição dos Produtos/Serviços *</Label>
+                              <Textarea
+                                id="descricao_produtos"
+                                placeholder="Descrição dos produtos e serviços oferecidos..."
+                                value={novaEmpresa.descricao_produtos}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, descricao_produtos: e.target.value }))}
+                                rows={3}
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Redes Sociais (Opcional) */}
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Redes Sociais (Opcional)</h3>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="instagram">Instagram</Label>
+                              <Input
+                                id="instagram"
+                                placeholder="@empresa"
+                                value={novaEmpresa.instagram}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, instagram: e.target.value }))}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="facebook">Facebook</Label>
+                              <Input
+                                id="facebook"
+                                placeholder="facebook.com/empresa"
+                                value={novaEmpresa.facebook}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, facebook: e.target.value }))}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="linkedin">LinkedIn</Label>
+                              <Input
+                                id="linkedin"
+                                placeholder="linkedin.com/company/empresa"
+                                value={novaEmpresa.linkedin}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, linkedin: e.target.value }))}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="youtube">YouTube</Label>
+                              <Input
+                                id="youtube"
+                                placeholder="youtube.com/@empresa"
+                                value={novaEmpresa.youtube}
+                                onChange={(e) => setNovaEmpresa(prev => ({ ...prev, youtube: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                          Cancelar
+                        </Button>
+                        <Button onClick={handleCreateEmpresa} disabled={creatingEmpresa}>
+                          {creatingEmpresa ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Criando...
+                            </>
+                          ) : (
+                            "Criar Empresa"
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
                   <div className="relative flex-1">
@@ -428,8 +1074,347 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="administradores">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Gerenciamento de Administradores</CardTitle>
+                    <CardDescription>Visualize e gerencie os administradores do sistema.</CardDescription>
+                  </div>
+                  <Dialog open={showCreateAdminDialog} onOpenChange={setShowCreateAdminDialog}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Novo Administrador
+                      </Button>
+                    </DialogTrigger>
+                    
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Cadastrar Novo Administrador</DialogTitle>
+                        <DialogDescription>
+                          Preencha as informações do novo administrador do sistema.
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="admin_nome">Nome Completo *</Label>
+                          <Input
+                            id="admin_nome"
+                            placeholder="Nome completo do administrador"
+                            value={novoAdmin.nome}
+                            onChange={(e) => setNovoAdmin(prev => ({ ...prev, nome: e.target.value }))}
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="admin_email">Email *</Label>
+                          <Input
+                            id="admin_email"
+                            type="email"
+                            placeholder="admin@exemplo.com"
+                            value={novoAdmin.email}
+                            onChange={(e) => setNovoAdmin(prev => ({ ...prev, email: e.target.value }))}
+                            required
+                            autoComplete="email"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="admin_password">Senha *</Label>
+                          <Input
+                            id="admin_password"
+                            type="password"
+                            placeholder="********"
+                            value={novoAdmin.password}
+                            onChange={(e) => setNovoAdmin(prev => ({ ...prev, password: e.target.value }))}
+                            required
+                            autoComplete="new-password"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="admin_confirmPassword">Confirmar Senha *</Label>
+                          <Input
+                            id="admin_confirmPassword"
+                            type="password"
+                            placeholder="********"
+                            value={novoAdmin.confirmPassword}
+                            onChange={(e) => setNovoAdmin(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                            required
+                            autoComplete="new-password"
+                          />
+                        </div>
+                      </div>
+                      
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowCreateAdminDialog(false)}>
+                          Cancelar
+                        </Button>
+                        <Button onClick={handleCreateAdmin} disabled={creatingAdmin}>
+                          {creatingAdmin ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Criando...
+                            </>
+                          ) : (
+                            "Criar Administrador"
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                {admins.length === 0 ? (
+                  <div className="text-center py-8">
+                    <UserPlus className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Nenhum Administrador Encontrado</h3>
+                    <p className="text-gray-600 mb-4">
+                      Ainda não há administradores cadastrados no sistema.
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Use o botão "Novo Administrador" acima para criar o primeiro administrador.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-200">
+                      <thead>
+                        <tr className="bg-gray-50">
+                          <th className="border border-gray-200 px-4 py-2 text-left">Nome</th>
+                          <th className="border border-gray-200 px-4 py-2 text-left">Email</th>
+                          <th className="border border-gray-200 px-4 py-2 text-left">Cargo</th>
+                          <th className="border border-gray-200 px-4 py-2 text-center">Status</th>
+                          <th className="border border-gray-200 px-4 py-2 text-center">Criado em</th>
+                          <th className="border border-gray-200 px-4 py-2 text-center">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {admins.map((admin) => (
+                          <tr key={admin.id} className="hover:bg-gray-50">
+                            <td className="border border-gray-200 px-4 py-2 font-medium">
+                              {admin.nome}
+                            </td>
+                            <td className="border border-gray-200 px-4 py-2 text-gray-600">
+                              {admin.email}
+                            </td>
+                            <td className="border border-gray-200 px-4 py-2 text-gray-600">
+                              {admin.cargo || "-"}
+                            </td>
+                            <td className="border border-gray-200 px-4 py-2 text-center">
+                              <span 
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  admin.ativo
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {admin.ativo ? "Ativo" : "Inativo"}
+                              </span>
+                            </td>
+                            <td className="border border-gray-200 px-4 py-2 text-center text-sm text-gray-600">
+                              {new Date(admin.created_at).toLocaleDateString("pt-BR")}
+                            </td>
+                            <td className="border border-gray-200 px-4 py-2">
+                              <div className="flex items-center justify-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleEditAdmin(admin)}
+                                  className="h-8 w-8 p-0"
+                                  title="Editar administrador"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleResetPassword(admin)}
+                                  className="h-8 w-8 p-0"
+                                  title="Resetar senha"
+                                >
+                                  <Key className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleToggleAdminStatus(admin)}
+                                  className={`h-8 w-8 p-0 ${
+                                    admin.ativo 
+                                      ? "text-red-600 hover:text-red-700" 
+                                      : "text-green-600 hover:text-green-700"
+                                  }`}
+                                  title={admin.ativo ? "Desativar administrador" : "Ativar administrador"}
+                                >
+                                  {admin.ativo ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDeleteAdmin(admin)}
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                  title="Excluir administrador"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
+
+      {/* Modal para editar administrador */}
+      <Dialog open={showEditAdminDialog} onOpenChange={setShowEditAdminDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Administrador</DialogTitle>
+            <DialogDescription>
+              Altere as informações do administrador selecionado.
+            </DialogDescription>
+          </DialogHeader>
+          {adminToEdit && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-nome" className="text-right">
+                  Nome
+                </Label>
+                <Input
+                  id="edit-nome"
+                  value={adminToEdit.nome}
+                  onChange={(e) => setAdminToEdit({...adminToEdit, nome: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-email" className="text-right">
+                  Email
+                </Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={adminToEdit.email}
+                  onChange={(e) => setAdminToEdit({...adminToEdit, email: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-cargo" className="text-right">
+                  Cargo
+                </Label>
+                <Input
+                  id="edit-cargo"
+                  value={adminToEdit.cargo || ""}
+                  onChange={(e) => setAdminToEdit({...adminToEdit, cargo: e.target.value})}
+                  className="col-span-3"
+                  placeholder="Ex: Administrador Geral"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-ativo" className="text-right">
+                  Status
+                </Label>
+                <Select
+                  value={adminToEdit.ativo ? "true" : "false"}
+                  onValueChange={(value) => setAdminToEdit({...adminToEdit, ativo: value === "true"})}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Ativo</SelectItem>
+                    <SelectItem value="false">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setShowEditAdminDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdateAdmin} disabled={editingAdmin}>
+              {editingAdmin ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para resetar senha */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Resetar Senha</DialogTitle>
+            <DialogDescription>
+              Defina uma nova senha para o administrador "{adminToResetPassword?.nome}".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="new-password" className="text-right">
+                Nova Senha
+              </Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="col-span-3"
+                placeholder="Mínimo 6 caracteres"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="confirm-password" className="text-right">
+                Confirmar
+              </Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                className="col-span-3"
+                placeholder="Repita a nova senha"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setShowPasswordDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmResetPassword} disabled={resetingPassword}>
+              {resetingPassword ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Resetando...
+                </>
+              ) : (
+                "Resetar Senha"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
