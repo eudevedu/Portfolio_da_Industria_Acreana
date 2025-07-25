@@ -829,3 +829,38 @@ export async function obterEstatisticasHome(): Promise<{
   }
 }
 
+// Funções para upload de arquivos
+export async function uploadLogo(empresaId: string, file: File): Promise<string> {
+  if (!supabase) {
+    throw new Error("Supabase não está configurado.")
+  }
+
+  // Permitir apenas PNG, JPG, JPEG, SVG, WEBP
+  const allowedTypes = [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/svg+xml",
+    "image/webp"
+  ]
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("Formato de imagem não suportado. Use PNG, JPG, JPEG, SVG ou WEBP.")
+  }
+
+  // Upload para o bucket 'empresas-logos'
+  const { data, error } = await supabase.storage
+    .from("empresas-logos")
+    .upload(`${empresaId}/${file.name}`, file, {
+      cacheControl: "3600",
+      upsert: true,
+      contentType: file.type,
+    })
+
+  if (error) throw error
+
+  // Retorna a URL pública da logo
+  return supabase.storage
+    .from("empresas-logos")
+    .getPublicUrl(`${empresaId}/${file.name}`).data.publicUrl
+}
+

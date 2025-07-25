@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import { supabase, isSupabaseConfigured } from "./supabase"
 import type { User } from "./supabase.types" // Importa o tipo User do novo arquivo de tipos
 import { criarPerfilEmpresa } from "./database" // Importa a nova função (corrigido para 'data' se for o arquivo correto)
-import bcrypt from 'bcryptjs'
+
 
 const USER_COOKIE_NAME = "user_session"
 
