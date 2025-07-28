@@ -405,7 +405,7 @@ export default function EmpresaDashboard({ user }: EmpresaDashboardProps) {
                         <div className="flex-1">
                           <h4 className="font-semibold">{arquivo.nome}</h4>
                           <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="secondary">{arquivo.tipo.toUpperCase()}</Badge>
+                            <Badge variant="secondary">{arquivo.tipo?.toUpperCase() || 'ARQUIVO'}</Badge>
                             <Badge variant="outline">{arquivo.categoria}</Badge>
                           </div>
                           <a 

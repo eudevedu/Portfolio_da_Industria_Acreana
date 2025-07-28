@@ -137,8 +137,9 @@ export default function ArquivosManager() {
   }
 
   const arquivosPorTipo = arquivos.reduce((acc, arquivo) => {
-    const isPdf = arquivo.tipo.toLowerCase() === 'pdf'
-    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(arquivo.tipo.toLowerCase())
+    const tipoArquivo = arquivo.tipo?.toLowerCase() || ''
+    const isPdf = tipoArquivo === 'pdf'
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(tipoArquivo)
     
     if (isPdf) {
       acc.pdfs.push(arquivo)
@@ -303,7 +304,7 @@ export default function ArquivosManager() {
                     <div className="flex-1">
                       <div className="font-medium">{arquivo.nome}</div>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary">{arquivo.tipo.toUpperCase()}</Badge>
+                        <Badge variant="secondary">{arquivo.tipo?.toUpperCase() || 'ARQUIVO'}</Badge>
                         <Badge variant="outline">{arquivo.categoria}</Badge>
                       </div>
                       <a 
@@ -360,7 +361,7 @@ export default function ArquivosManager() {
                     <div className="flex-1">
                       <div className="font-medium">{arquivo.nome}</div>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary">{arquivo.tipo.toUpperCase()}</Badge>
+                        <Badge variant="secondary">{arquivo.tipo?.toUpperCase() || 'IMAGEM'}</Badge>
                         <Badge variant="outline">{arquivo.categoria}</Badge>
                       </div>
                       <a 
@@ -401,7 +402,7 @@ export default function ArquivosManager() {
                   <div className="flex-1">
                     <div className="font-medium">{arquivo.nome}</div>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary">{arquivo.tipo.toUpperCase()}</Badge>
+                      <Badge variant="secondary">{arquivo.tipo?.toUpperCase() || 'ARQUIVO'}</Badge>
                       <Badge variant="outline">{arquivo.categoria}</Badge>
                     </div>
                     <a 
