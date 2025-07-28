@@ -57,7 +57,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       fileUrl = `https://fake-storage.com/arquivos/${timestamp}-${file.name}`
     }
 
-    // Apenas retorna a URL do arquivo
+    // Apenas retorne a URL:
     return NextResponse.json({
       success: true,
       arquivo: {
