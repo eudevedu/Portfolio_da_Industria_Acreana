@@ -677,14 +677,35 @@ export async function criarPerfilEmpresa(
   if (!isSupabaseConfigured()) {
     return { data: null, error: new Error("Supabase not configured") }
   }
+  
+  console.log("Criando/atualizando perfil da empresa:", { userId, empresaId, profileData })
+  
+  // Garantir que campos obrigatórios estejam preenchidos
+  const perfilCompleto = {
+    id: userId,
+    empresa_id: empresaId,
+    nome_contato: profileData.nome_contato || '',
+    email: profileData.email || '',
+    telefone: profileData.telefone || null,
+    cargo: profileData.cargo || null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    ...profileData, // Sobrescreve com dados fornecidos
+  }
+  
+  // Usar UPSERT para evitar erro de chave duplicada
   const { data, error } = await supabase!
     .from("perfis_empresas")
-    .insert([{ id: userId, empresa_id: empresaId, ...profileData }])
+    .upsert([perfilCompleto])
     .select()
     .single()
+    
   if (error) {
+    console.error("Erro ao criar/atualizar perfil da empresa:", error)
     return { data: null, error }
   }
+  
+  console.log("Perfil da empresa criado/atualizado com sucesso:", data)
   return { data: data as PerfilEmpresa, error: null }
 }
 
