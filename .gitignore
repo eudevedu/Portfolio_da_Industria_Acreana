@@ -26,3 +26,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 *.md
+fix-foreign-key-constraints.sql

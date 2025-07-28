@@ -436,12 +436,42 @@ export async function register(
             details: profileError.details
           })
           
-          // Tentar fazer rollback do usuário criado
+          // Fazer rollback completo: primeiro remover perfil, depois usuário
           try {
-            await supabase!.auth.admin.deleteUser(data.user.id)
-            console.log("Usuário removido devido ao erro no perfil")
+            console.log("Iniciando rollback...")
+            
+            // 1. Remover perfil se foi criado parcialmente
+            try {
+              await supabase!.from("perfis_empresas").delete().eq("id", data.user.id)
+              console.log("Perfil removido durante rollback")
+            } catch (perfilDeleteError) {
+              console.log("Perfil não precisou ser removido:", perfilDeleteError)
+            }
+            
+            // 2. Remover usuário (precisa de SERVICE_ROLE_KEY)
+            if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+              const { createClient } = await import('@supabase/supabase-js')
+              const supabaseAdmin = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+                {
+                  auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                  }
+                }
+              )
+              
+              await supabaseAdmin.auth.admin.deleteUser(data.user.id)
+              console.log("Usuário removido com SERVICE_ROLE_KEY")
+            } else {
+              await supabase!.auth.admin.deleteUser(data.user.id)
+              console.log("Usuário removido com auth regular")
+            }
+            
           } catch (deleteError) {
-            console.error("Não foi possível remover o usuário:", deleteError)
+            console.error("Não foi possível fazer rollback completo:", deleteError)
+            console.log("⚠️ Usuário órfão criado. ID:", data.user.id)
           }
           
           return { 
