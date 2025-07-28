@@ -68,11 +68,11 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Analytics Tracker para registrar visualização da empresa */}
-      <AnalyticsTracker 
+      <AnalyticsTracker
         empresaId={empresa.id}
         tipoEvento="visualizacao_perfil"
       />
-      
+
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,9 +87,9 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
       </header>
 
       {/* Analytics Tracker - registra visualização da empresa */}
-      <AnalyticsTracker 
-        empresaId={empresaId} 
-        tipoEvento="visualizacao_perfil" 
+      <AnalyticsTracker
+        empresaId={empresaId}
+        tipoEvento="visualizacao_perfil"
       />
 
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -214,12 +214,12 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
                     {empresa.produtos.map((produto) => (
                       <Card key={produto.id} className="relative">
                         {/* Analytics Tracker para registrar visualização do produto */}
-                        <AnalyticsTracker 
+                        <AnalyticsTracker
                           empresaId={empresa.id}
                           tipoEvento="visualizacao_produto"
                           referenciaId={produto.id}
                         />
-                        
+
                         <CardHeader>
                           <CardTitle className="text-lg flex items-center gap-2">
                             <Package className="h-5 w-5 text-green-600" /> {produto.nome}
@@ -250,13 +250,13 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
                     <ImageIcon className="h-6 w-6 text-blue-600" />
                     Galeria e Documentos
                   </h3>
-                  
+
                   {/* Separar imagens e documentos */}
                   {(() => {
-                    const imagens = empresa.arquivos.filter(arquivo => 
+                    const imagens = empresa.arquivos.filter(arquivo =>
                       arquivo.tipo && ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(arquivo.tipo.toLowerCase())
                     )
-                    const documentos = empresa.arquivos.filter(arquivo => 
+                    const documentos = empresa.arquivos.filter(arquivo =>
                       !arquivo.tipo || !['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(arquivo.tipo.toLowerCase())
                     )
 
@@ -358,10 +358,14 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
             <div>
               <h4 className="font-semibold mb-4">Setores</h4>
               <ul className="space-y-2 text-sm text-slate-50">
-                <li>Alimentos</li>
-                <li>Madeira</li>
-                <li>Construção</li>
-                <li>Agropecuária</li>
+                <li value="alimentos">Alimentos</li>
+                <li value="construcao">Construção</li>
+                <li value="ceramico">Cerâmico</li>
+                <li value="madeireiro">Madeireiro</li>
+                <li value="grafico">Gráfico</li>
+                <li value="textil">Têxtil</li>
+                <li value="metalurgico">Metalúrgico</li>
+                <li value="outros">Outros</li>
               </ul>
             </div>
             <div>
