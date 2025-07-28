@@ -43,19 +43,34 @@ export function UploadComponent({
     setSuccess(null)
 
     try {
-      const response = await fetch(`/api/upload?filename=${file.name}`, {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("nome", file.name)
+      formData.append("tipo", file.type)
+      formData.append("categoria", "documento") // ou outro valor se desejar
+
+      const response = await fetch("/api/upload", {
         method: "POST",
-        body: file,
+        body: formData,
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Falha no upload do arquivo.")
+      const text = await response.text()
+      let blob
+      try {
+        blob = JSON.parse(text)
+      } catch (err) {
+        console.error("A resposta não é JSON:", text)
+        setError("Falha no upload: resposta inesperada do servidor.\nConteúdo recebido:\n" + text.slice(0, 200))
+        setUploading(false)
+        return
       }
 
-      const blob = await response.json()
+      if (!response.ok) {
+        throw new Error(blob.error || "Falha no upload do arquivo.")
+      }
+
       setSuccess("Upload realizado com sucesso!")
-      onUploadSuccess(blob.url, blob.pathname)
+      onUploadSuccess(blob.arquivo.url, blob.arquivo.id)
       setFile(null) // Clear the file input after successful upload
     } catch (err: any) {
       console.error("Erro durante o upload:", err)
@@ -102,4 +117,24 @@ export function UploadComponent({
       {success && <p className="text-sm text-green-500">{success}</p>}
     </div>
   )
+}
+
+async function uploadArquivo(url: string, options: RequestInit) {
+  try {
+    const response = await fetch(url, options);
+    const text = await response.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      console.error("A resposta não é JSON:", text);
+      throw new Error("Erro no upload: resposta inesperada do servidor.");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Erro durante o upload:", error);
+    throw error;
+  }
 }
