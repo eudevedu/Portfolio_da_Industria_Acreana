@@ -207,21 +207,28 @@ export default function CadastroPage() {
 
       // 4. Envia para o backend e recebe a empresa criada
       const empresa = await criarEmpresa({
-        ...formData,
         logo_url: logoUrl,
         nome_fantasia: formData.nome_fantasia ?? "",
         razao_social: formData.razao_social ?? "",
         cnpj: formData.cnpj ?? "",
         setor_economico: formData.setor_economico ?? "",
         setor_empresa: formData.setor_empresa ?? "",
+        segmento: formData.segmento,
+        tema_segmento: formData.tema_segmento,
         descricao_produtos: formData.descricao_produtos ?? "",
         apresentacao: formData.apresentacao ?? "",
         endereco: formData.endereco ?? "",
         municipio: formData.municipio ?? "",
-        arquivos: [],
-        produtos: [],
+        instagram: formData.instagram,
+        facebook: formData.facebook,
+        youtube: formData.youtube,
+        linkedin: formData.linkedin,
+        twitter: formData.twitter,
+        video_apresentacao: formData.video_apresentacao,
+        // Não incluir: produtos, arquivos, perfil_empresa (são relações, não campos da tabela)
       });
 
+      // A função criarEmpresa agora lança erro específico se falhar
       if (!empresa) {
         throw new Error("Erro ao criar empresa. Tente novamente.");
       }
@@ -463,6 +470,7 @@ export default function CadastroPage() {
                         value={userEmail}
                         onChange={e => setUserEmail(e.target.value)}
                         required
+                        autoComplete="email"
                       />
                       {validationErrors.userEmail && (
                         <p className="text-red-500 text-xs mt-1">{validationErrors.userEmail}</p>
@@ -477,6 +485,7 @@ export default function CadastroPage() {
                         value={userPassword}
                         onChange={e => setUserPassword(e.target.value)}
                         required
+                        autoComplete="new-password"
                       />
                       {validationErrors.userPassword && (
                         <p className="text-red-500 text-xs mt-1">{validationErrors.userPassword}</p>
@@ -508,6 +517,7 @@ export default function CadastroPage() {
                         value={contactName}
                         onChange={e => setContactName(e.target.value)}
                         required
+                        autoComplete="name"
                       />
                       {validationErrors.contactName && (
                         <p className="text-red-500 text-xs mt-1">{validationErrors.contactName}</p>
@@ -522,6 +532,7 @@ export default function CadastroPage() {
                         placeholder="(XX) XXXXX-XXXX"
                         value={contactPhone}
                         onChange={(e) => setContactPhone(e.target.value)}
+                        autoComplete="tel"
                       />
                     </div>
                     <div>
@@ -531,6 +542,7 @@ export default function CadastroPage() {
                         placeholder="Ex: Diretor, Gerente"
                         value={contactRole}
                         onChange={(e) => setContactRole(e.target.value)}
+                        autoComplete="organization-title"
                       />
                     </div>
                   </div>
@@ -544,6 +556,7 @@ export default function CadastroPage() {
                         value={formData.nome_fantasia || ""}
                         onChange={e => setFormData(prev => ({ ...prev, nome_fantasia: e.target.value }))}
                         required
+                        autoComplete="organization"
                       />
                       {validationErrors.nome_fantasia && (
                         <p className="text-red-500 text-xs mt-1">{validationErrors.nome_fantasia}</p>
@@ -556,6 +569,7 @@ export default function CadastroPage() {
                         value={formData.razao_social || ""}
                         onChange={e => setFormData(prev => ({ ...prev, razao_social: e.target.value }))}
                         required
+                        autoComplete="organization"
                       />
                       {validationErrors.razao_social && (
                         <p className="text-red-500 text-xs mt-1">{validationErrors.razao_social}</p>
@@ -605,6 +619,7 @@ export default function CadastroPage() {
                         value={formData.cnpj || ""}
                         onChange={e => setFormData(prev => ({ ...prev, cnpj: e.target.value }))}
                         required
+                        autoComplete="off"
                       />
                       {validationErrors.cnpj && <p className="text-red-500 text-xs mt-1">{validationErrors.cnpj}</p>}
                     </div>
@@ -662,6 +677,7 @@ export default function CadastroPage() {
                         id="segmento"
                         value={formData.segmento || ""}
                         onChange={e => setFormData(prev => ({ ...prev, segmento: e.target.value }))}
+                        autoComplete="off"
                       />
                     </div>
                   </div>
@@ -672,6 +688,7 @@ export default function CadastroPage() {
                       placeholder="Ex: Alimentos - Açaí, Alimentos - Sorvetes"
                       value={formData.tema_segmento || ""}
                       onChange={e => setFormData(prev => ({ ...prev, tema_segmento: e.target.value }))}
+                      autoComplete="off"
                     />
                   </div>
                   <div>
@@ -750,6 +767,7 @@ export default function CadastroPage() {
                         placeholder="@suaempresa"
                         value={formData.instagram || ""}
                         onChange={e => setFormData(prev => ({ ...prev, instagram: e.target.value }))}
+                        autoComplete="off"
                       />
                     </div>
                     <div>
@@ -759,6 +777,7 @@ export default function CadastroPage() {
                         placeholder="facebook.com/suaempresa"
                         value={formData.facebook || ""}
                         onChange={e => setFormData(prev => ({ ...prev, facebook: e.target.value }))}
+                        autoComplete="off"
                       />
                     </div>
                   </div>
@@ -770,6 +789,7 @@ export default function CadastroPage() {
                         placeholder="youtube.com/suaempresa"
                         value={formData.youtube || ""}
                         onChange={e => setFormData(prev => ({ ...prev, youtube: e.target.value }))}
+                        autoComplete="off"
                       />
                     </div>
                     <div>
@@ -779,6 +799,7 @@ export default function CadastroPage() {
                         placeholder="linkedin.com/company/suaempresa"
                         value={formData.linkedin || ""}
                         onChange={e => setFormData(prev => ({ ...prev, linkedin: e.target.value }))}
+                        autoComplete="off"
                       />
                     </div>
                   </div>
@@ -789,6 +810,7 @@ export default function CadastroPage() {
                       placeholder="@suaempresa"
                       value={formData.twitter || ""}
                       onChange={e => setFormData(prev => ({ ...prev, twitter: e.target.value }))}
+                      autoComplete="off"
                     />
                   </div>
                   <div>
@@ -798,6 +820,7 @@ export default function CadastroPage() {
                       placeholder="Link do vídeo no YouTube"
                       value={formData.video_apresentacao || ""}
                       onChange={e => setFormData(prev => ({ ...prev, video_apresentacao: e.target.value }))}
+                      autoComplete="url"
                     />
                   </div>
                   <div className="space-y-4">

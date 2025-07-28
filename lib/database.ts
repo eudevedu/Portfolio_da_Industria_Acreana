@@ -190,7 +190,7 @@ export async function buscarEmpresaPorId(id: string): Promise<Empresa | null> {
 }
 
 export async function criarEmpresa(
-  empresa: Omit<Empresa, "id" | "created_at" | "updated_at" | "status">,
+  empresa: Omit<Empresa, "id" | "created_at" | "updated_at" | "status" | "produtos" | "arquivos" | "perfil_empresa">,
 ): Promise<Empresa | null> {
   if (!isSupabaseConfigured()) {
     const newId = `mock-empresa-${Date.now()}`
@@ -207,10 +207,14 @@ export async function criarEmpresa(
     mockEmpresasStore!.push(novaEmpresa)
     return novaEmpresa
   }
+  
+  console.log("Criando empresa no Supabase:", empresa)
   const { data, error } = await supabase!.from("empresas").insert([empresa]).select().single()
   if (error) {
-    return null
+    console.error("Erro ao criar empresa no Supabase:", error)
+    throw new Error(`Erro ao criar empresa: ${error.message}`)
   }
+  console.log("Empresa criada com sucesso:", data)
   return data as Empresa
 }
 
