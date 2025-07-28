@@ -184,6 +184,7 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId }: Configura
                 onChange={(e) => setSenhaAtual(e.target.value)}
                 placeholder="Digite sua senha atual"
                 required
+                autoComplete="current-password"
               />
             </div>
             <div>
@@ -196,6 +197,7 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId }: Configura
                 placeholder="Digite a nova senha (mín. 6 caracteres)"
                 required
                 minLength={6}
+                autoComplete="new-password"
               />
             </div>
             <div>
@@ -208,6 +210,7 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId }: Configura
                 placeholder="Confirme a nova senha"
                 required
                 minLength={6}
+                autoComplete="new-password"
               />
             </div>
             <Button type="submit" disabled={loading}>
@@ -252,17 +255,19 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId }: Configura
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Tem certeza absoluta?</AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-2">
-                    <div>Esta ação excluirá permanentemente sua conta e todos os dados associados:</div>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
-                      <li>Informações da empresa</li>
-                      <li>Todos os produtos cadastrados</li>
-                      <li>Todos os arquivos e imagens</li>
-                      <li>Histórico de atividades</li>
-                      <li>Dados de autenticação</li>
-                    </ul>
-                    <div className="font-medium text-red-600">
-                      Esta ação NÃO PODE ser desfeita.
+                  <AlertDialogDescription asChild>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <div>Esta ação excluirá permanentemente sua conta e todos os dados associados:</div>
+                      <ul className="list-disc list-inside space-y-1 text-sm">
+                        <li>Informações da empresa</li>
+                        <li>Todos os produtos cadastrados</li>
+                        <li>Todos os arquivos e imagens</li>
+                        <li>Histórico de atividades</li>
+                        <li>Dados de autenticação</li>
+                      </ul>
+                      <div className="font-medium text-red-600">
+                        Esta ação NÃO PODE ser desfeita.
+                      </div>
                     </div>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
