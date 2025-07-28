@@ -197,7 +197,7 @@ export async function criarEmpresa(
     const novaEmpresa = {
       ...empresa,
       id: newId,
-      status: "pendente",
+      status: "ativo",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       produtos: [],
