@@ -7,7 +7,6 @@ const USER_COOKIE_NAME = "user_session"
 const protectedRoutes = [
   '/dashboard',
   '/admin',
-  '/api/upload',
   '/api/produtos',
   '/api/arquivos',
   '/api/auth/update-email',
@@ -85,6 +84,11 @@ export function middleware(request: NextRequest) {
     }
   }
   
+  // Libera a rota de upload para qualquer usuário
+  if (request.nextUrl.pathname.startsWith("/api/upload")) {
+    return NextResponse.next()
+  }
+
   return NextResponse.next()
 }
 
