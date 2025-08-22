@@ -75,44 +75,54 @@ export default function ArquivosManager() {
       return
     }
 
-    try {
-      setUploading(true)
-      
-      // Criar FormData para upload
-      const formData = new FormData()
-      formData.append('file', selectedFile)
-      formData.append('nome', arquivoForm.nome)
-      formData.append('tipo', arquivoForm.tipo)
-      formData.append('categoria', arquivoForm.categoria)
+    setUploading(true)
+    
+    // Use requestIdleCallback or setTimeout to prevent blocking
+    const processUpload = async () => {
+      try {
+        // Criar FormData para upload
+        const formData = new FormData()
+        formData.append('file', selectedFile)
+        formData.append('nome', arquivoForm.nome)
+        formData.append('tipo', arquivoForm.tipo)
+        formData.append('categoria', arquivoForm.categoria)
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
 
-      const result = await response.json()
-      
-      if (result.success) {
-        // Adicionar arquivo à lista com os dados retornados da API
-        const novoArquivo = result.arquivo
+        const result = await response.json()
         
-        setArquivos([novoArquivo, ...arquivos])
-        setArquivoForm({ nome: '', tipo: 'pdf', categoria: 'documento' })
-        setSelectedFile(null)
-        setShowForm(false)
-        setMessage({ type: 'success', text: result.message || 'Arquivo enviado com sucesso!' })
-        
-        // Reset file input
-        const fileInput = document.getElementById('arquivo-file') as HTMLInputElement
-        if (fileInput) fileInput.value = ''
-      } else {
-        setMessage({ type: 'error', text: result.error || 'Erro ao enviar arquivo' })
+        if (result.success) {
+          // Adicionar arquivo à lista com os dados retornados da API
+          const novoArquivo = result.arquivo
+          
+          setArquivos([novoArquivo, ...arquivos])
+          setArquivoForm({ nome: '', tipo: 'pdf', categoria: 'documento' })
+          setSelectedFile(null)
+          setShowForm(false)
+          setMessage({ type: 'success', text: result.message || 'Arquivo enviado com sucesso!' })
+          
+          // Reset file input
+          const fileInput = document.getElementById('arquivo-file') as HTMLInputElement
+          if (fileInput) fileInput.value = ''
+        } else {
+          setMessage({ type: 'error', text: result.error || 'Erro ao enviar arquivo' })
+        }
+      } catch (error) {
+        console.error('Erro ao enviar arquivo:', error)
+        setMessage({ type: 'error', text: 'Erro ao enviar arquivo' })
+      } finally {
+        setUploading(false)
       }
-    } catch (error) {
-      console.error('Erro ao enviar arquivo:', error)
-      setMessage({ type: 'error', text: 'Erro ao enviar arquivo' })
-    } finally {
-      setUploading(false)
+    }
+
+    // Use setTimeout to defer processing and prevent UI blocking
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => processUpload())
+    } else {
+      setTimeout(processUpload, 0)
     }
   }
 

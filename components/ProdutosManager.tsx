@@ -56,30 +56,37 @@ export default function ProdutosManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      const response = await fetch('/api/produtos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...produtoForm,
-          preco: produtoForm.preco ? parseFloat(produtoForm.preco) : null
+    
+    // Defer processing to prevent UI blocking
+    const processSubmit = async () => {
+      try {
+        const response = await fetch('/api/produtos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...produtoForm,
+            preco: produtoForm.preco ? parseFloat(produtoForm.preco) : null
+          })
         })
-      })
 
-      const result = await response.json()
-      
-      if (result.success) {
-        setProdutos([result.produto, ...produtos])
-        setProdutoForm({ nome: '', descricao: '', preco: '', categoria: '' })
-        setShowForm(false)
-        setMessage({ type: 'success', text: 'Produto adicionado com sucesso!' })
-      } else {
-        setMessage({ type: 'error', text: result.error || 'Erro ao adicionar produto' })
+        const result = await response.json()
+        
+        if (result.success) {
+          setProdutos([result.produto, ...produtos])
+          setProdutoForm({ nome: '', descricao: '', preco: '', categoria: '' })
+          setShowForm(false)
+          setMessage({ type: 'success', text: 'Produto adicionado com sucesso!' })
+        } else {
+          setMessage({ type: 'error', text: result.error || 'Erro ao adicionar produto' })
+        }
+      } catch (error) {
+        console.error('Erro ao adicionar produto:', error)
+        setMessage({ type: 'error', text: 'Erro ao adicionar produto' })
       }
-    } catch (error) {
-      console.error('Erro ao adicionar produto:', error)
-      setMessage({ type: 'error', text: 'Erro ao adicionar produto' })
     }
+
+    // Use setTimeout to defer processing
+    setTimeout(processSubmit, 0)
   }
 
   const deleteProduto = async (id: string) => {

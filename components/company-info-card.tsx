@@ -101,29 +101,36 @@ export function CompanyInfoCard({ initialData, empresaId }: CompanyInfoCardProps
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true)
-    try {
-      const updatedData: Partial<Empresa> = {
-        ...values,
-        cnpj: unformatCnpj(values.cnpj), // Desformata o CNPJ antes de enviar
-      }
-      
-      console.log("Atualizando empresa com dados:", updatedData)
-      const result = await atualizarEmpresa(empresaId, updatedData)
+    
+    // Defer processing to prevent UI blocking
+    const processUpdate = async () => {
+      try {
+        const updatedData: Partial<Empresa> = {
+          ...values,
+          cnpj: unformatCnpj(values.cnpj), // Desformata o CNPJ antes de enviar
+        }
+        
+        console.log("Atualizando empresa com dados:", updatedData)
+        const result = await atualizarEmpresa(empresaId, updatedData)
 
-      if (result) {
-        console.log("Empresa atualizada com sucesso:", result)
-        toast.success("Informações da empresa atualizadas com sucesso!")
-        setIsEditing(false) // Sai do modo de edição após salvar
-      } else {
-        console.error("Erro: resultado null ao atualizar empresa")
-        toast.error("Erro ao atualizar informações da empresa.")
+        if (result) {
+          console.log("Empresa atualizada com sucesso:", result)
+          toast.success("Informações da empresa atualizadas com sucesso!")
+          setIsEditing(false) // Sai do modo de edição após salvar
+        } else {
+          console.error("Erro: resultado null ao atualizar empresa")
+          toast.error("Erro ao atualizar informações da empresa.")
+        }
+      } catch (error) {
+        console.error("Erro ao salvar:", error)
+        toast.error("Ocorreu um erro inesperado ao salvar.")
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error) {
-      console.error("Erro ao salvar:", error)
-      toast.error("Ocorreu um erro inesperado ao salvar.")
-    } finally {
-      setIsLoading(false)
     }
+
+    // Use setTimeout to defer heavy operations
+    setTimeout(processUpdate, 0)
   }
 
   const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {

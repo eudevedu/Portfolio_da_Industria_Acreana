@@ -182,6 +182,30 @@ export default function CadastroPage() {
 
     setLoading(true)
     try {
+      // Show immediate feedback to user
+      toast({
+        title: "Processando...",
+        description: "Criando sua conta e empresa. Isso pode levar alguns segundos.",
+      })
+
+      // Use setTimeout to defer heavy operations and prevent UI blocking
+      setTimeout(async () => {
+        await processarCadastroCompleto()
+      }, 0)
+
+    } catch (error) {
+      console.error("Erro no cadastro:", error)
+      toast({
+        variant: "destructive",
+        title: "Erro no Cadastro",
+        description: error instanceof Error ? error.message : "Ocorreu um erro inesperado. Tente novamente.",
+      })
+      setLoading(false)
+    }
+  }
+
+  const processarCadastroCompleto = async () => {
+    try {
       // 1. Register user usando a função register
       const { success, message, userId } = await register(
         userEmail,
@@ -196,17 +220,10 @@ export default function CadastroPage() {
       }
 
       // 2. Upload da logo
-      // Se já existe uma logo_url no formData, use ela, senão faça upload (ajuste conforme sua lógica)
       const logoUrl = formData.logo_url || "";
 
-      // 3. Monta os dados da empresa
+      // 3. Create company - prioritize core company data first
       const empresaData = {
-        ...formData,
-        logo_url: logoUrl,
-      };
-
-      // 4. Envia para o backend e recebe a empresa criada
-      const empresa = await criarEmpresa({
         logo_url: logoUrl,
         nome_fantasia: formData.nome_fantasia ?? "",
         razao_social: formData.razao_social ?? "",
@@ -225,139 +242,35 @@ export default function CadastroPage() {
         linkedin: formData.linkedin,
         twitter: formData.twitter,
         video_apresentacao: formData.video_apresentacao,
-        // Não incluir: produtos, arquivos, perfil_empresa (são relações, não campos da tabela)
-      });
+      };
 
-      // A função criarEmpresa agora lança erro específico se falhar
+      const empresa = await criarEmpresa(empresaData);
       if (!empresa) {
         throw new Error("Erro ao criar empresa. Tente novamente.");
       }
 
-      // 5. (Opcional) Registrar a logo na tabela de arquivos, só
-      await criarArquivo({
-        empresa_id: empresa.id, // ID real da empresa!
-        nome: "Logo da Empresa",
-        url: logoUrl,
-        tipo: "imagem",
-        categoria: "logo",
-      })
-
-      // 6. Link company to user profile
+      // 4. Link company to user profile immediately
       const { success: linkSuccess, error: linkError } = await vincularEmpresaAoPerfil(userId, empresa.id)
       if (!linkSuccess) {
         throw new Error(linkError?.message || "Falha ao vincular empresa ao perfil do usuário.")
       }
 
-      // 7. Save products
-      for (const produto of produtos) {
-        if (produto.nome) {
-          const novoProduto = await criarProduto({
-            empresa_id: empresa.id,
-            nome: produto.nome!,
-            nome_tecnico: produto.nome_tecnico,
-            linha: produto.linha,
-            descricao: produto.descricao,
-            status: produto.status || "ativo",
-          })
-
-          if (novoProduto) {
-            // Save product-specific files
-            if (produto.ficha_tecnica_url) {
-              await criarArquivo({
-                empresa_id: empresa.id,
-                nome: `Ficha Técnica - ${produto.nome}`,
-                url: produto.ficha_tecnica_url,
-                tipo: "pdf",
-                categoria: "produto_ficha_tecnica",
-              })
-            }
-            if (produto.folder_produto_url) {
-              await criarArquivo({
-                empresa_id: empresa.id,
-                nome: `Folder Produto - ${produto.nome}`,
-                url: produto.folder_produto_url,
-                tipo: "pdf",
-                categoria: "produto_folder",
-              })
-            }
-            if (produto.imagens_produto_urls && produto.imagens_produto_urls.length > 0) {
-              for (const imageUrl of produto.imagens_produto_urls) {
-                await criarArquivo({
-                  empresa_id: empresa.id,
-                  nome: `Imagem Produto - ${produto.nome}`,
-                  url: imageUrl,
-                  tipo: "imagem",
-                  categoria: "produto_imagem",
-                })
-              }
-            }
-          }
-        }
-      }
-
-      // 8. Save company files
-      if (folderApresentacaoUrl) {
-        await criarArquivo({
-          empresa_id: empresa.id,
-          nome: "Folder de Apresentação",
-          url: folderApresentacaoUrl,
-          tipo: "pdf",
-          categoria: "institucional_folder",
-        })
-      }
-      if (outrosArquivosUrls.length > 0) {
-        for (const url of outrosArquivosUrls) {
-          await criarArquivo({
-            empresa_id: empresa.id,
-            nome: "Outro Arquivo da Empresa", // Generic name, can be improved
-            url: url,
-            tipo: url.endsWith(".pdf") ? "pdf" : "imagem", // Infer type
-            categoria: "institucional_outros",
-          })
-        }
-      }
-
+      // Show success message early - user can navigate while background tasks complete
       toast({
         title: "Sucesso!",
-        description: "Empresa e conta de usuário cadastrados com sucesso! Sua empresa já está ativa e visível no portfólio. Você será redirecionado para o login.",
-        duration: 8000,
+        description: "Empresa e conta cadastrados! Processando arquivos em segundo plano...",
+        duration: 6000,
       })
 
-      // Limpe os arquivos e estados APENAS após cadastro bem-sucedido!
-      setFormData({
-        nome_fantasia: "",
-        razao_social: "",
-        cnpj: "",
-        setor_economico: "",
-        setor_empresa: "",
-        segmento: "",
-        tema_segmento: "",
-        descricao_produtos: "",
-        apresentacao: "",
-        endereco: "",
-        municipio: "",
-        logo_url: "", // Limpa só após cadastro!
-        instagram: "",
-        facebook: "",
-        youtube: "",
-        linkedin: "",
-        twitter: "",
-        video_apresentacao: "",
-        status: "ativo",
-      })
-      setUserEmail("")
-      setUserPassword("")
-      setConfirmPassword("")
-      setContactName("")
-      setContactPhone("")
-      setContactRole("")
-      setProdutos([])
-      setFolderApresentacaoUrl(null) // <-- Limpa só aqui!
-      setOutrosArquivosUrls([])      // <-- Limpa só aqui!
-      setValidationErrors({})
+      // Defer non-critical file operations to background
+      processarArquivosSegundoPlano(empresa.id, logoUrl)
+
+      // Clean up state and redirect
+      limparEstadoCadastro()
       setTimeout(() => {
         window.location.href = "/login"
       }, 2000)
+
     } catch (err: any) {
       console.error("Erro ao cadastrar empresa:", err)
       toast({
@@ -369,6 +282,156 @@ export default function CadastroPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Background processing for files and products
+  const processarArquivosSegundoPlano = async (empresaId: string, logoUrl: string) => {
+    try {
+      // Process in parallel where possible
+      const filePromises: Promise<any>[] = []
+
+      // Logo file registration
+      if (logoUrl) {
+        filePromises.push(
+          criarArquivo({
+            empresa_id: empresaId,
+            nome: "Logo da Empresa",
+            url: logoUrl,
+            tipo: "imagem",
+            categoria: "logo",
+          })
+        )
+      }
+
+      // Save products and their files
+      produtos.forEach((produto) => {
+        if (produto.nome) {
+          filePromises.push(
+            criarProduto({
+              empresa_id: empresaId,
+              nome: produto.nome!,
+              nome_tecnico: produto.nome_tecnico,
+              linha: produto.linha,
+              descricao: produto.descricao,
+              status: produto.status || "ativo",
+            }).then(async (novoProduto) => {
+              if (novoProduto) {
+                // Create sub-promises for product files
+                const productFilePromises = []
+                
+                if (produto.ficha_tecnica_url) {
+                  productFilePromises.push(
+                    criarArquivo({
+                      empresa_id: empresaId,
+                      nome: `Ficha Técnica - ${produto.nome}`,
+                      url: produto.ficha_tecnica_url,
+                      tipo: "pdf",
+                      categoria: "produto_ficha_tecnica",
+                    })
+                  )
+                }
+                
+                if (produto.folder_produto_url) {
+                  productFilePromises.push(
+                    criarArquivo({
+                      empresa_id: empresaId,
+                      nome: `Folder Produto - ${produto.nome}`,
+                      url: produto.folder_produto_url,
+                      tipo: "pdf",
+                      categoria: "produto_folder",
+                    })
+                  )
+                }
+                
+                if (produto.imagens_produto_urls && produto.imagens_produto_urls.length > 0) {
+                  produto.imagens_produto_urls.forEach((imageUrl) => {
+                    productFilePromises.push(
+                      criarArquivo({
+                        empresa_id: empresaId,
+                        nome: `Imagem Produto - ${produto.nome}`,
+                        url: imageUrl,
+                        tipo: "imagem",
+                        categoria: "produto_imagem",
+                      })
+                    )
+                  })
+                }
+                
+                // Wait for all product files
+                await Promise.allSettled(productFilePromises)
+              }
+            })
+          )
+        }
+      })
+
+      // Company files
+      if (folderApresentacaoUrl) {
+        filePromises.push(
+          criarArquivo({
+            empresa_id: empresaId,
+            nome: "Folder de Apresentação",
+            url: folderApresentacaoUrl,
+            tipo: "pdf",
+            categoria: "institucional_folder",
+          })
+        )
+      }
+
+      outrosArquivosUrls.forEach((url) => {
+        filePromises.push(
+          criarArquivo({
+            empresa_id: empresaId,
+            nome: "Outro Arquivo da Empresa",
+            url: url,
+            tipo: url.endsWith(".pdf") ? "pdf" : "imagem",
+            categoria: "institucional_outros",
+          })
+        )
+      })
+
+      // Execute all file operations in parallel
+      await Promise.allSettled(filePromises)
+      
+      console.log("Todos os arquivos processados em segundo plano")
+    } catch (error) {
+      console.error("Erro no processamento em segundo plano:", error)
+      // Don't show error to user as they've already been redirected
+    }
+  }
+
+  const limparEstadoCadastro = () => {
+    setFormData({
+      nome_fantasia: "",
+      razao_social: "",
+      cnpj: "",
+      setor_economico: "",
+      setor_empresa: "",
+      segmento: "",
+      tema_segmento: "",
+      descricao_produtos: "",
+      apresentacao: "",
+      endereco: "",
+      municipio: "",
+      logo_url: "",
+      instagram: "",
+      facebook: "",
+      youtube: "",
+      linkedin: "",
+      twitter: "",
+      video_apresentacao: "",
+      status: "ativo",
+    })
+    setUserEmail("")
+    setUserPassword("")
+    setConfirmPassword("")
+    setContactName("")
+    setContactPhone("")
+    setContactRole("")
+    setProdutos([])
+    setFolderApresentacaoUrl(null)
+    setOutrosArquivosUrls([])
+    setValidationErrors({})
   }
 
   const adicionarProduto = () => {
