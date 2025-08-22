@@ -421,11 +421,10 @@ export async function register(
       if (tipo === "empresa") {
         console.log("Criando perfil da empresa para usuário:", data.user.id)
         const { error: profileError } = await criarPerfilEmpresa(data.user.id, null, {
-          email: email,                // Email do cadastro
           nome_contato: nome_contato,  // Nome do contato do cadastro
           telefone: telefone,          // Telefone do contato do cadastro
           cargo: cargo,                // Cargo do contato do cadastro
-          // Adicione outros campos se necessário
+          // Não incluir email aqui pois está no auth.users
         })
         if (profileError) {
           // If profile creation fails, consider rolling back user creation or logging

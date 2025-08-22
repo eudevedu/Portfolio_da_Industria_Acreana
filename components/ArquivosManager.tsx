@@ -299,8 +299,8 @@ export default function ArquivosManager() {
               {arquivosPorTipo.pdfs.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">Nenhum PDF cadastrado</p>
               ) : (
-                arquivosPorTipo.pdfs.map((arquivo) => (
-                  <div key={arquivo.id} className="flex justify-between items-center p-3 border rounded-lg">
+                arquivosPorTipo.pdfs.map((arquivo, index) => (
+                  <div key={arquivo.id || `pdf-${index}`} className="flex justify-between items-center p-3 border rounded-lg">
                     <div className="flex-1">
                       <div className="font-medium">{arquivo.nome}</div>
                       <div className="flex items-center gap-2 mt-1">
@@ -356,8 +356,8 @@ export default function ArquivosManager() {
               </div>
             ) : (
               <div className="space-y-3">
-                {arquivosPorTipo.imagens.map((arquivo) => (
-                  <div key={arquivo.id} className="flex justify-between items-center p-3 border rounded-lg">
+                {arquivosPorTipo.imagens.map((arquivo, index) => (
+                  <div key={arquivo.id || `imagem-${index}`} className="flex justify-between items-center p-3 border rounded-lg">
                     <div className="flex-1">
                       <div className="font-medium">{arquivo.nome}</div>
                       <div className="flex items-center gap-2 mt-1">
@@ -397,8 +397,8 @@ export default function ArquivosManager() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {arquivosPorTipo.outros.map((arquivo) => (
-                <div key={arquivo.id} className="flex justify-between items-center p-3 border rounded-lg">
+              {arquivosPorTipo.outros.map((arquivo, index) => (
+                <div key={arquivo.id || `outros-${index}`} className="flex justify-between items-center p-3 border rounded-lg">
                   <div className="flex-1">
                     <div className="font-medium">{arquivo.nome}</div>
                     <div className="flex items-center gap-2 mt-1">

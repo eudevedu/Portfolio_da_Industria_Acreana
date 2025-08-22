@@ -73,7 +73,6 @@ export interface PerfilEmpresa {
   id: string
   empresa_id: string | null
   nome_contato: string
-  email: string
   telefone?: string
   cargo?: string
   created_at: string

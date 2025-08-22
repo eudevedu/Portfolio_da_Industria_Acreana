@@ -689,12 +689,10 @@ export async function criarPerfilEmpresa(
     id: userId,
     empresa_id: empresaId,
     nome_contato: profileData.nome_contato || '',
-    email: profileData.email || '',
     telefone: profileData.telefone || null,
     cargo: profileData.cargo || null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    ...profileData, // Sobrescreve com dados fornecidos
   }
   
   // Usar UPSERT para evitar erro de chave duplicada
