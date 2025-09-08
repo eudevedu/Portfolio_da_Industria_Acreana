@@ -433,6 +433,17 @@ export default function EmpresaDashboard({ user }: EmpresaDashboardProps) {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Exemplo de renderização */}
+      <ul>
+        {arquivos.map(arquivo => (
+          <li key={arquivo.id}>
+            <a href={arquivo.url} target="_blank" rel="noopener noreferrer">
+              {arquivo.nome}
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

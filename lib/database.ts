@@ -659,17 +659,22 @@ export async function criarArquivo(arquivo: Omit<Arquivo, "id" | "created_at">):
   return data as Arquivo
 }
 
-export async function buscarArquivosPorEmpresa(empresaId: string): Promise<Arquivo[]> {
-  if (!isSupabaseConfigured()) {
-    const mockEmpresas = await buscarEmpresas()
-    const empresa = mockEmpresas.find((e) => e.id === empresaId)
-    return empresa?.arquivos || []
-  }
-  const { data, error } = await supabase!.from("arquivos").select("*").eq("empresa_id", empresaId)
-  if (error) {
+export async function buscarArquivosPorEmpresa(empresaId: string) {
+  if (!supabase) {
+    console.error("Supabase não está configurado.")
     return []
   }
-  return data as Arquivo[]
+  const { data, error } = await supabase
+    .from('arquivos')
+    .select('*')
+    .eq('empresa_id', empresaId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error("Erro ao buscar arquivos:", error)
+    return []
+  }
+  return data || []
 }
 
 // Novas funções para gerenciar perfis de empresa (vinculados a auth.users)

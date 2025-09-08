@@ -78,17 +78,45 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 }
 
-// 1. UploadComponent faz upload, retorna apenas a URL
-// onUploadSuccess(url) // salva url no estado
+async function uploadFileToStorage(file: File): Promise<string> {
+  // Implementação simples usando Vercel Blob (igual ao POST)
+  const timestamp = Date.now();
+  const uniqueFilename = `arquivos/${timestamp}-${file.name}`;
+  try {
+    const blob = await put(uniqueFilename, file, { access: "public" });
+    return blob.url;
+  } catch (error) {
+    console.error("Erro no upload do blob:", error);
+    return `https://fake-storage.com/arquivos/${timestamp}-${file.name}`;
+  }
+}
 
-// 2. Cadastro da empresa
-// const empresa = await criarEmpresa({ ... })
 
-// 3. Agora registre o arquivo na tabela 'arquivos'
-// await criarArquivo({
-//   empresa_id: empresa.id,
-//   nome: "Logo da Empresa",
-//   url: logoUrl,
-//   tipo: "imagem",
-//   categoria: "logo",
-// })
+import { criarArquivo } from '../../../lib/database'
+
+// Importe ou defina a função reloadArquivos antes de usá-la
+// Exemplo de importação (ajuste o caminho conforme necessário):
+// import { reloadArquivos } from '../../../lib/arquivos';
+
+const reloadArquivos = async () => {
+  // Implemente a lógica de atualização dos arquivos aqui
+  // Por exemplo, buscar novamente os arquivos do banco de dados
+  console.log("Arquivos recarregados.");
+};
+
+const handleUpload = async (file: File, empresa: { id: string }) => {
+  // 1. Upload para storage
+  const fileUrl = await uploadFileToStorage(file);
+
+  // 2. Registrar no banco de dados
+  await criarArquivo({
+    empresa_id: empresa.id, // ID da empresa logada
+    nome: file.name,
+    url: fileUrl,
+    tipo: file.type,
+    categoria: "documento",
+  });
+
+  // 3. Atualizar lista de arquivos (opcional)
+  await reloadArquivos();
+};

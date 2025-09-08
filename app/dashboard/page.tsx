@@ -1,4 +1,3 @@
-
 import {
   
   Package,
@@ -17,7 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { buscarEmpresaPorId, buscarProdutosPorEmpresa, obterAnalytics } from "../../lib/database" // Caminho relativo
+import { buscarEmpresaPorId, buscarProdutosPorEmpresa, obterAnalytics, buscarArquivosPorEmpresa } from "../../lib/database" // Caminho relativo
 import { isSupabaseConfigured } from "../../lib/supabase" // Caminho relativo
 import type { Empresa, Produto } from "../../lib/supabase.types" // Caminho relativo
 import { AuthGuard } from "@/components/auth-guard"
@@ -48,6 +47,7 @@ export default async function DashboardPage() {
 
   let empresa: Empresa | null = null
   let produtos: Produto[] = []
+  let arquivos: any[] = []
   let analytics: DashboardData = {
     totalVisualizacoes: 0,
     visualizacoesMes: 0,
@@ -58,14 +58,16 @@ export default async function DashboardPage() {
 
   if (isConfigured && empresaId) {
     try {
-      const [empresaData, produtosData, analyticsData] = await Promise.all([
+      const [empresaData, produtosData, analyticsData, arquivosData] = await Promise.all([
         buscarEmpresaPorId(empresaId),
         buscarProdutosPorEmpresa(empresaId),
         obterAnalytics(empresaId),
+        buscarArquivosPorEmpresa(empresaId),
       ])
       empresa = empresaData
       produtos = produtosData
       analytics = analyticsData
+      arquivos = arquivosData
     } catch (error) {
       console.error("Erro ao carregar dashboard:", error)
     } finally {
@@ -199,7 +201,7 @@ export default async function DashboardPage() {
                 <ProdutosManager />
               </TabsContent>
               <TabsContent value="arquivos">
-                <ArquivosManager />
+                <ArquivosManager arquivos={arquivos} empresaId={empresaId} />
               </TabsContent>
               <TabsContent value="analytics">
                 <div className="grid md:grid-cols-2 gap-6">

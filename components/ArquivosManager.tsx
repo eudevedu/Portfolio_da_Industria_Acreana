@@ -19,9 +19,14 @@ interface Arquivo {
   created_at: string
 }
 
-export default function ArquivosManager() {
-  const [arquivos, setArquivos] = useState<Arquivo[]>([])
-  const [loading, setLoading] = useState(true)
+interface ArquivosManagerProps {
+  arquivos: Arquivo[];
+  empresaId: string;
+}
+
+export default function ArquivosManager({ arquivos: arquivosProp, empresaId }: ArquivosManagerProps) {
+  const [arquivos, setArquivos] = useState<Arquivo[]>(arquivosProp || []);
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -34,8 +39,8 @@ export default function ArquivosManager() {
   })
 
   useEffect(() => {
-    loadArquivos()
-  }, [])
+    setArquivos(arquivosProp || []);
+  }, [arquivosProp]);
 
   const loadArquivos = async () => {
     try {
@@ -76,11 +81,10 @@ export default function ArquivosManager() {
     }
 
     setUploading(true)
-    
-    // Use requestIdleCallback or setTimeout to prevent blocking
+
     const processUpload = async () => {
       try {
-        // Criar FormData para upload
+        // 1. Upload para o Blob
         const formData = new FormData()
         formData.append('file', selectedFile)
         formData.append('nome', arquivoForm.nome)
@@ -93,20 +97,35 @@ export default function ArquivosManager() {
         })
 
         const result = await response.json()
-        
+
         if (result.success) {
-          // Adicionar arquivo à lista com os dados retornados da API
-          const novoArquivo = result.arquivo
-          
-          setArquivos([novoArquivo, ...arquivos])
-          setArquivoForm({ nome: '', tipo: 'pdf', categoria: 'documento' })
-          setSelectedFile(null)
-          setShowForm(false)
-          setMessage({ type: 'success', text: result.message || 'Arquivo enviado com sucesso!' })
-          
-          // Reset file input
-          const fileInput = document.getElementById('arquivo-file') as HTMLInputElement
-          if (fileInput) fileInput.value = ''
+          // 2. Registrar no banco de dados
+          const salvar = await fetch('/api/arquivos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              empresa_id: empresaId,
+              nome: result.arquivo.nome,
+              url: result.arquivo.url,
+              tipo: arquivoForm.tipo,
+              categoria: arquivoForm.categoria,
+            }),
+          });
+          const registro = await salvar.json();
+
+          if (registro.success) {
+            const novoArquivo = registro.arquivo;
+            setArquivos([novoArquivo, ...arquivos]);
+            setArquivoForm({ nome: '', tipo: 'pdf', categoria: 'documento' });
+            setSelectedFile(null);
+            setShowForm(false);
+            setMessage({ type: 'success', text: result.message || 'Arquivo enviado com sucesso!' });
+            // Reset file input
+            const fileInput = document.getElementById('arquivo-file') as HTMLInputElement
+            if (fileInput) fileInput.value = ''
+          } else {
+            setMessage({ type: 'error', text: registro.error || 'Erro ao registrar arquivo' });
+          }
         } else {
           setMessage({ type: 'error', text: result.error || 'Erro ao enviar arquivo' })
         }
@@ -118,7 +137,6 @@ export default function ArquivosManager() {
       }
     }
 
-    // Use setTimeout to defer processing and prevent UI blocking
     if ('requestIdleCallback' in window) {
       requestIdleCallback(() => processUpload())
     } else {
