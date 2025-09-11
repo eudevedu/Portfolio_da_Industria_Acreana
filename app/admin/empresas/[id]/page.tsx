@@ -63,7 +63,7 @@ export default async function AdminEmpresaDetailPage({ params }: { params: { id:
               <span className="font-bold text-lg">Detalhes da Empresa</span>
             </div>
             <div className="flex items-center gap-2">
-              <Link href="/admin/empresas">
+              <Link href="/admin">
                 <Button variant="outline">Voltar</Button>
               </Link>
               <Link href="/admin/configuracoes">
