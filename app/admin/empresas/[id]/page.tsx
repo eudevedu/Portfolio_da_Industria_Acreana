@@ -8,7 +8,7 @@ import { isSupabaseConfigured } from "@/lib/supabase"
 import type { Empresa } from "@/lib/supabase.types"
 import { notFound, redirect } from "next/navigation"
 import { EmpresaDetailAdminContent } from "@/components/empresa-detail-admin-content"
-import { BrasaoAcre } from "@/components/LogoIndustria"
+import { LogoSeict } from "@/components/LogoIndustria"
 
 export const dynamic = "force-dynamic"
 
@@ -59,7 +59,7 @@ export default async function AdminEmpresaDetailPage({ params }: { params: { id:
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BrasaoAcre className="h-6 w-6 text-blue-600" />
+              <LogoSeict className="h-6 w-6 text-blue-600" />
               <span className="font-bold text-lg">Detalhes da Empresa</span>
             </div>
             <div className="flex items-center gap-2">
