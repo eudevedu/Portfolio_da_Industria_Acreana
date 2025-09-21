@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { login } from "@/lib/auth" // Importa a Server Action de login para empresas
-import Image from "next/image"
+
 import { LogoSeict } from "@/components/LogoIndustria"
 
 export default function LoginPage() {
