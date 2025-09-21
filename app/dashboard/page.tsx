@@ -26,7 +26,7 @@ import { CompanyInfoCard } from "@/components/company-info-card" // Importa o co
 import EmpresaDashboard from "./EmpresaDashboard"
 import ProdutosManager from "@/components/ProdutosManager"
 import ArquivosManager from "@/components/ArquivosManager"
-import { BrasaoAcre } from "@/components/LogoIndustria"
+import { LogoSeict } from "@/components/LogoIndustria"
 import EmpresaDashboardWrapper from "@/components/EmpresaDashboardWrapper"
 
 // Força renderização dinâmica devido ao uso de cookies
@@ -91,7 +91,7 @@ export default async function DashboardPage() {
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-4">
                 <Link href="/" className="flex items-center space-x-2">
-                  <BrasaoAcre className="h-6 w-6 text-green-600" />
+                  <LogoSeict className="h-6 w-6 text-green-600" />
                   <span className="font-bold text-gray-900">Indústrias do Acre</span>
                 </Link>
                 <span className="text-gray-400">|</span>

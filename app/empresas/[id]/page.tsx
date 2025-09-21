@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator"
 import { buscarEmpresaPorId } from "@/lib/database"
 import { isSupabaseConfigured } from "@/lib/supabase"
 import { notFound } from "next/navigation" // Importa notFound para lidar com empresas não encontradas
-import { BrasaoAcre } from "@/components/LogoIndustria"
+import { LogoSeict } from "@/components/LogoIndustria"
 import ImageGallery from "@/components/ImageGallery"
 import AnalyticsTracker from "@/components/AnalyticsTracker"
 
@@ -334,7 +334,7 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <BrasaoAcre className="h-6 w-6" />
+                <LogoSeict className="h-6 w-6" />
                 <span className="font-bold">Governo do Estado do Acre</span>
               </div>
               <p className="text-sm text-slate-50">

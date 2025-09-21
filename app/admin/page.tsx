@@ -7,7 +7,7 @@ import { logout, isLoggedIn, isAdmin as checkIsAdmin } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import type { Empresa } from "@/lib/supabase.types"
 import { AdminContent } from "@/components/admin-content" // Importa o Client Component
-import { BrasaoAcre } from "@/components/LogoIndustria"
+import { LogoSeict } from "@/components/LogoIndustria"
 
 // Garante que esta página seja sempre renderizada no servidor
 export const dynamic = "force-dynamic"
@@ -57,7 +57,7 @@ export default async function AdminDashboardPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <Link href="/admin" className="flex items-center space-x-2">
-                <BrasaoAcre className="h-6 w-6 text-green-600" />
+                <LogoSeict className="h-6 w-6 text-green-600" />
                 <span className="font-bold text-slate-50">Admin Indústrias do Acre</span>
               </Link>
               <span className="text-gray-400">|</span>

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { buscarEmpresas } from "@/lib/database"
 import type { Empresa } from "@/lib/supabase.types" // Importa o tipo do novo arquivo
 import { useSearchParams } from "next/navigation"
-import { BrasaoAcre } from "@/components/LogoIndustria"
+import { LogoSeict } from "@/components/LogoIndustria"
 import { SafeImage } from "@/components/SafeImage"
 import { useAuth } from "@/hooks/use-auth"
 import { logout } from "@/lib/auth"
@@ -102,7 +102,7 @@ export default function BuscarPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <BrasaoAcre className="h-8 w-8 " />
+              <LogoSeict className="h-8 w-8 " />
               <h1 className="text-xl font-bold text-slate-50">Indústrias do Acre</h1>
             </div>
             <nav className="flex items-center space-x-4">
@@ -198,18 +198,6 @@ export default function BuscarPage() {
                 ))}
               </SelectContent>
             </Select>
-
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Status</SelectItem>
-                <SelectItem value="ativo">Ativo</SelectItem>
-                <SelectItem value="pendente">Pendente</SelectItem>
-                <SelectItem value="inativo">Inativo</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
       </section>
@@ -283,7 +271,7 @@ export default function BuscarPage() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <BrasaoAcre className="h-6 w-6" />
+                <LogoSeict className="h-6 w-6" />
                 <span className="font-bold">Governo do Estado do Acre</span>
               </div>
               <p className="text-sm text-slate-50">

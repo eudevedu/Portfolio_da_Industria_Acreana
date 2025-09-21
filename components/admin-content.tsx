@@ -210,25 +210,26 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
     setCreatingEmpresa(true)
     try {
       const empresaData = {
-        nome_fantasia: novaEmpresa.nome_fantasia,
-        razao_social: novaEmpresa.razao_social,
-        cnpj: novaEmpresa.cnpj,
-        setor_economico: novaEmpresa.setor_economico,
-        setor_empresa: novaEmpresa.setor_empresa,
-        segmento: novaEmpresa.segmento,
-        tema_segmento: novaEmpresa.tema_segmento,
-        municipio: novaEmpresa.municipio,
-        endereco: novaEmpresa.endereco,
-        apresentacao: novaEmpresa.apresentacao,
-        descricao_produtos: novaEmpresa.descricao_produtos,
-        instagram: novaEmpresa.instagram,
-        facebook: novaEmpresa.facebook,
-        youtube: novaEmpresa.youtube,
-        linkedin: novaEmpresa.linkedin,
-        twitter: novaEmpresa.twitter,
-        video_apresentacao: novaEmpresa.video_apresentacao,
-        produtos: [],
-        arquivos: []
+  nome_fantasia: novaEmpresa.nome_fantasia,
+  razao_social: novaEmpresa.razao_social,
+  cnpj: novaEmpresa.cnpj,
+  setor_economico: novaEmpresa.setor_economico,
+  setor_empresa: novaEmpresa.setor_empresa,
+  segmento: novaEmpresa.segmento,
+  tema_segmento: novaEmpresa.tema_segmento,
+  municipio: novaEmpresa.municipio,
+  endereco: novaEmpresa.endereco,
+  apresentacao: novaEmpresa.apresentacao,
+  descricao_produtos: novaEmpresa.descricao_produtos,
+  instagram: novaEmpresa.instagram,
+  facebook: novaEmpresa.facebook,
+  youtube: novaEmpresa.youtube,
+  linkedin: novaEmpresa.linkedin,
+  twitter: novaEmpresa.twitter,
+  video_apresentacao: novaEmpresa.video_apresentacao,
+  status: "ativo",
+  produtos: [],
+  arquivos: []
       }
       
       const result = await criarEmpresa(empresaData)

@@ -36,10 +36,8 @@ const formSchema = z.object({
   youtube: z.string().optional(),
   linkedin: z.string().optional(),
   twitter: z.string().optional(),
-  video_apresentacao: z.string().optional(),
-  status: z.enum(["ativo", "pendente", "inativo"], {
-    required_error: "Status é obrigatório.",
-  }),
+  video_apresentacao: z.string().optional()
+  
 })
 
 interface CompanyInfoCardProps {

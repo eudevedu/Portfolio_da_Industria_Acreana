@@ -1,13 +1,13 @@
 import * as React from "react"
 import Image from "next/image"
 
-export function BrasaoAcre({ className, ...props }: { className?: string; width?: number; height?: number }) {
+export function LogoSeict({ className, ...props }: { className?: string; width?: number; height?: number }) {
   return (
     <Image
-      src="/BrasaoAcre.png" // Caminho relativo à pasta public
+      src="/SEICT-Logo.svg" // Caminho relativo à pasta public
       alt="Logo Indústria"
-      width={props.width || 50} // ou o tamanho desejado
-      height={props.height || 50}
+      width={props.width || 125} // ou o tamanho desejado
+      height={props.height || 125}
       className={className}
     />
   )

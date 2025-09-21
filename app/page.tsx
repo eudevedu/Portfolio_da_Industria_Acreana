@@ -1,5 +1,5 @@
 import { Search, MapPin, Plus } from "lucide-react"
-import {  BrasaoAcre } from "@/components/LogoIndustria"
+import {  LogoSeict } from "@/components/LogoIndustria"
 import { SafeImage } from "@/components/SafeImage"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -40,7 +40,7 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <BrasaoAcre  className="h-8 w-8 text-green-600" />
+              <LogoSeict className="h-14 w-14" />
               <h1 className="text-xl font-bold text-slate-50">Portfólio das Indústrias do Acre</h1>
             </div>
             <nav className="flex items-center space-x-4">
@@ -266,7 +266,7 @@ export default async function HomePage() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <BrasaoAcre className="h-6 w-6" />
+                <LogoSeict />
                 <span className="font-bold">Governo do Estado do Acre</span>
               </div>
               <p className="text-sm text-slate-50">
