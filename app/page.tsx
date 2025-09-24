@@ -62,7 +62,7 @@ export default async function HomePage() {
               ) : (
                 <>
                   <Link href="/login">
-                    <Button variant="outline">Entrar</Button>
+                    <Button variant="outline">Login</Button>
                   </Link>
                   <Link href="/cadastro">
                     <Button>Cadastrar Empresa</Button>
