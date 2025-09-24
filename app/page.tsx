@@ -164,11 +164,11 @@ export default async function HomePage() {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
+                      {/* <div className="flex flex-col items-end gap-1">
                         <Badge variant={empresa.status === 'ativo' ? 'default' : 'secondary'} className="text-xs">
                           {empresa.status === 'ativo' ? 'Ativo' : empresa.status === 'pendente' ? 'Pendente' : 'Inativo'}
                         </Badge>
-                      </div>
+                      </div> */}
                     </div>
                   </CardHeader>
                   <CardContent>
