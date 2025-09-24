@@ -102,7 +102,9 @@ export default function BuscarPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <LogoSeict className="h-8 w-8 " />
+              <Link href="/">
+                <LogoSeict className="h-8 w-8 " />
+              </Link>
               <h1 className="text-xl font-bold text-slate-50">Indústrias do Acre</h1>
             </div>
             <nav className="flex items-center space-x-4">
