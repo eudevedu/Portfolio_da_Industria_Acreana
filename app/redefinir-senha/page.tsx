@@ -117,7 +117,7 @@ export default function RedefinirSenhaPage() {
             </Button>
           </form>
           <div className="mt-6 text-center text-sm">
-            <Link href="/login" className="text-green-600 hover:underline">
+            <Link href="/" className="text-green-600 hover:underline">
               Voltar para o Login
             </Link>
           </div>
