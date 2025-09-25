@@ -24,15 +24,24 @@ export default function RedefinirSenhaPage() {
     const access_token = searchParams.get("access_token")
     const type = searchParams.get("type")
     if (access_token && type === "recovery") {
+      // Troque para o método correto da sua versão do Supabase
       if (supabase) {
-        supabase.auth.setSession({ access_token, refresh_token: access_token })
-          .then(() => setReady(true))
-          .catch(() => setReady(false))
+        supabase.auth.exchangeCodeForSession(access_token)
+          .then(({ error }) => {
+            if (error) setError(error.message)
+            setReady(true)
+          })
+          .catch((err) => {
+            setError("Erro ao validar sessão de recuperação.")
+            setReady(true)
+          })
       } else {
-        setReady(false)
+        setError("Serviço de autenticação indisponível.")
+        setReady(true)
       }
     } else {
-      setReady(false)
+      setError("Link de recuperação inválido.")
+      setReady(true)
     }
   }, [searchParams])
 
@@ -83,6 +92,10 @@ export default function RedefinirSenhaPage() {
 
   if (!ready) {
     return <div>Verificando sessão de recuperação...</div>
+  }
+
+  if (error) {
+    return <div className="text-red-600">{error}</div>
   }
 
   return (
