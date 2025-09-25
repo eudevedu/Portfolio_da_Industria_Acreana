@@ -59,7 +59,7 @@ export default async function AdminEmpresaDetailPage({ params }: { params: { id:
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <LogoSeict className="h-6 w-6 text-blue-600" />
+              <LogoSeict className="h-14 w-14 " />
               <span className="font-bold text-lg">Detalhes da Empresa</span>
             </div>
             <div className="flex items-center gap-2">

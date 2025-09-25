@@ -91,8 +91,8 @@ export default async function DashboardPage() {
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-4">
                 <Link href="/" className="flex items-center space-x-2">
-                  <LogoSeict className="h-6 w-6 text-green-600" />
-                  <span className="font-bold text-gray-900">Indústrias do Acre</span>
+                  <LogoSeict className="h-14 w-14 text-green-600" />
+                  <span className="font-bold text-gray-900">Portfólio das Indústrias do Acre</span>
                 </Link>
                 <span className="text-gray-400">|</span>
                 <span className="text-gray-600">Dashboard</span>
