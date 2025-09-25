@@ -106,7 +106,7 @@ export default function BuscarPage() {
               <Link href="/">
                 <LogoSeict className="h-14 w-14 " />
               </Link>
-              <h1 className="text-xl font-bold text-slate-50">Indústrias do Acre</h1>
+              <h1 className="text-xl font-bold text-slate-50">Portfólio das Indústrias do Acre</h1>
             </div>
             <nav className="flex items-center space-x-4">
               <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
