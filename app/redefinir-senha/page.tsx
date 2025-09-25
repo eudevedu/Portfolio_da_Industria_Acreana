@@ -22,23 +22,18 @@ export default function RedefinirSenhaPage() {
 
   useEffect(() => {
     const access_token = searchParams.get("access_token")
-    const type = searchParams.get("type")
     const code = searchParams.get("code")
+    const type = searchParams.get("type")
     if (code && type === "recovery") {
-      if (supabase) {
-        supabase.auth.exchangeCodeForSession(code)
-          .then(({ error }) => {
-            if (error) setError(error.message)
-            setReady(true)
-          })
-          .catch((err) => {
-            setError("Erro ao validar sessão de recuperação.")
-            setReady(true)
-          })
-      } else {
-        setError("Serviço de autenticação indisponível.")
-        setReady(true)
-      }
+      supabase.auth.exchangeCodeForSession(code)
+        .then(({ error }) => {
+          if (error) setError(error.message)
+          setReady(true)
+        })
+        .catch((err) => {
+          setError("Erro ao validar sessão de recuperação.")
+          setReady(true)
+        })
     } else {
       setError("Link de recuperação inválido.")
       setReady(true)
