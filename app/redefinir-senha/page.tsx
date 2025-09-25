@@ -1,15 +1,14 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
-import Link from "next/link"
+import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Building2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { resetPassword } from "@/lib/auth" // Importa a nova Server Action
+import { supabase } from "@/lib/supabase"
+import Link from "next/link"
 
 export default function RedefinirSenhaPage() {
   const [newPassword, setNewPassword] = useState("")
@@ -17,17 +16,25 @@ export default function RedefinirSenhaPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [ready, setReady] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Supabase automaticamente lida com o token e o tipo na URL
-  // e define a sessão do usuário temporariamente para que updateUser funcione.
-  // Não precisamos extrair o token manualmente aqui para `updateUser`.
-
-  // Adicione este console.log dentro da função RedefinirSenhaPage, antes do return
-  // para ver os parâmetros da URL quando a página é carregada via link de redefinição.
-  // Isso ajuda a confirmar se o token está sendo passado corretamente.
-  console.log("URL Search Params:", Array.from(searchParams.entries()))
+  useEffect(() => {
+    const access_token = searchParams.get("access_token")
+    const type = searchParams.get("type")
+    if (access_token && type === "recovery") {
+      if (supabase) {
+        supabase.auth.setSession({ access_token, refresh_token: access_token })
+          .then(() => setReady(true))
+          .catch(() => setReady(false))
+      } else {
+        setReady(false)
+      }
+    } else {
+      setReady(false)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,18 +55,23 @@ export default function RedefinirSenhaPage() {
     }
 
     try {
-      const result = await resetPassword(newPassword) // Chama a Server Action
-      // Adicione este console.log dentro do bloco try do handleSubmit, antes do if (result.success)
-      // para ver o resultado exato da Server Action resetPassword.
-      console.log("Resultado da redefinição de senha:", result)
-      if (result.success) {
-        setSuccess(result.message)
+      // Função para redefinir a senha usando Supabase
+      if (!supabase) {
+        setError("Serviço de autenticação indisponível.")
+        setLoading(false)
+        return
+      }
+      const { error: resetError } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+      if (!resetError) {
+        setSuccess("Senha redefinida com sucesso! Redirecionando para o login...")
         // Redireciona para a página de login após um pequeno atraso
         setTimeout(() => {
           router.push("/login")
         }, 3000)
       } else {
-        setError(result.message)
+        setError(resetError.message || "Erro ao redefinir a senha.")
       }
     } catch (err) {
       console.error("Erro na redefinição de senha:", err)
@@ -67,6 +79,10 @@ export default function RedefinirSenhaPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!ready) {
+    return <div>Verificando sessão de recuperação...</div>
   }
 
   return (
