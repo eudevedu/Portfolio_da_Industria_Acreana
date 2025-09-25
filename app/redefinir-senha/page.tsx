@@ -21,22 +21,29 @@ export default function RedefinirSenhaPage() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    const code = searchParams.get("code")
-    const type = searchParams.get("type")
-    if (code && type === "recovery") {
-      await supabase.auth.exchangeCodeForSession(code)
-        .then(({ error }) => {
+    const checkRecoverySession = async () => {
+      const code = searchParams.get("code")
+      const type = searchParams.get("type")
+      if (code && type === "recovery") {
+        try {
+          if (!supabase) {
+            setError("Serviço de autenticação indisponível.")
+            setReady(true)
+            return
+          }
+          const { error } = await supabase.auth.exchangeCodeForSession(code)
           if (error) setError(error.message)
           setReady(true)
-        })
-        .catch((err) => {
+        } catch (err) {
           setError("Erro ao validar sessão de recuperação.")
           setReady(true)
-        })
-    } else {
-      setError("Link de recuperação inválido.")
-      setReady(true)
+        }
+      } else {
+        setError("Link de recuperação inválido.")
+        setReady(true)
+      }
     }
+    checkRecoverySession()
   }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
