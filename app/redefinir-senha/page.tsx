@@ -21,11 +21,10 @@ export default function RedefinirSenhaPage() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    const access_token = searchParams.get("access_token")
     const code = searchParams.get("code")
     const type = searchParams.get("type")
     if (code && type === "recovery") {
-      supabase.auth.exchangeCodeForSession(code)
+      await supabase.auth.exchangeCodeForSession(code)
         .then(({ error }) => {
           if (error) setError(error.message)
           setReady(true)
