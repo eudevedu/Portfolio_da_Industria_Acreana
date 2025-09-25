@@ -142,6 +142,7 @@ export default function BuscarPage() {
               </nav>
             </div>
           </div>
+        </div>
       </header>
 
       {/* Search and Filters Section */}
@@ -263,8 +264,6 @@ export default function BuscarPage() {
           )}
         </div>
       </section>
-
-      {/* Footer */}
       <div className="mt-auto">
         <Footer />
       </div>
