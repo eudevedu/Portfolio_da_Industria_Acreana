@@ -23,10 +23,10 @@ export default function RedefinirSenhaPage() {
   useEffect(() => {
     const access_token = searchParams.get("access_token")
     const type = searchParams.get("type")
-    if (access_token && type === "recovery") {
-      // Troque para o método correto da sua versão do Supabase
+    const code = searchParams.get("code")
+    if (code && type === "recovery") {
       if (supabase) {
-        supabase.auth.exchangeCodeForSession(access_token)
+        supabase.auth.exchangeCodeForSession(code)
           .then(({ error }) => {
             if (error) setError(error.message)
             setReady(true)
