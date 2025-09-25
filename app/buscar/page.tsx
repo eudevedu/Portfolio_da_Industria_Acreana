@@ -15,11 +15,12 @@ import { LogoSeict } from "@/components/LogoIndustria"
 import { SafeImage } from "@/components/SafeImage"
 import { useAuth } from "@/hooks/use-auth"
 import { logout } from "@/lib/auth"
+import Footer from "@/components/footer"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
   const { user, loading: authLoading, isLoggedIn } = useAuth()
-  
+
   const initialSearchTerm = searchParams.get("busca") || ""
   const initialStatus = searchParams.get("status") || "ativo" // Default to active companies
   const initialSector = searchParams.get("setor_economico") || "all"
@@ -80,7 +81,7 @@ export default function BuscarPage() {
         municipio: selectedCity === "all" ? undefined : selectedCity,
         busca: searchTerm,
       })
-      
+
       console.log('✅ Frontend - Empresas encontradas:', fetchedEmpresas.length)
       setEmpresas(fetchedEmpresas)
     } catch (error) {
@@ -106,42 +107,41 @@ export default function BuscarPage() {
                 <LogoSeict className="h-8 w-8 " />
               </Link>
               <h1 className="text-xl font-bold text-slate-50">Indústrias do Acre</h1>
+              <nav className="flex items-center space-x-4">
+                <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
+                  Buscar Empresas
+                </Link>
+                {!authLoading && (
+                  <>
+                    {isLoggedIn ? (
+                      <>
+                        <span className="text-slate-50 text-sm hidden sm:inline">
+                          Olá, {user?.email}
+                        </span>
+                        <Link href={user?.tipo === "admin" ? "/admin" : "/dashboard"}>
+                          <Button variant="outline">Meu Painel</Button>
+                        </Link>
+                        <form action={logout} method="post" className="inline">
+                          <Button type="submit" variant="ghost" className="text-slate-50">
+                            Sair
+                          </Button>
+                        </form>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login">
+                          <Button variant="outline">Entrar</Button>
+                        </Link>
+                        <Link href="/cadastro">
+                          <Button>Cadastrar Empresa</Button>
+                        </Link>
+                      </>
+                    )}
+                  </>
+                )}
+              </nav>
             </div>
-            <nav className="flex items-center space-x-4">
-              <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
-                Buscar Empresas
-              </Link>
-              {!authLoading && (
-                <>
-                  {isLoggedIn ? (
-                    <>
-                      <span className="text-slate-50 text-sm hidden sm:inline">
-                        Olá, {user?.email}
-                      </span>
-                      <Link href={user?.tipo === "admin" ? "/admin" : "/dashboard"}>
-                        <Button variant="outline">Meu Painel</Button>
-                      </Link>
-                      <form action={logout} method="post" className="inline">
-                        <Button type="submit" variant="ghost" className="text-slate-50">
-                          Sair
-                        </Button>
-                      </form>
-                    </>
-                  ) : (
-                    <>
-                      <Link href="/login">
-                        <Button variant="outline">Entrar</Button>
-                      </Link>
-                      <Link href="/cadastro">
-                        <Button>Cadastrar Empresa</Button>
-                      </Link>
-                    </>
-                  )}
-                </>
-              )}
-            </nav>
           </div>
-        </div>
       </header>
 
       {/* Search and Filters Section */}
@@ -218,102 +218,56 @@ export default function BuscarPage() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {empresas.map((empresa) => (
-                    <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        {empresa.logo_url && (
-                          <img
-                            src={empresa.logo_url}
-                            alt={`Logo da ${empresa.nome_fantasia}`}
-                            className="w-12 h-12 object-contain rounded bg-white border"
-                          />
-                        )}
-                        
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{empresa.nome_fantasia}</CardTitle>
-                          <CardDescription>{empresa.razao_social}</CardDescription>
-                        </div>
-                        <Badge variant="secondary">{empresa.setor_empresa}</Badge>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-3">
-                          {empresa.apresentacao || "Nenhuma apresentação disponível."}
-                        </p>
-                        <div className="flex items-center text-sm text-gray-500 mb-2">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {empresa.municipio}, AC
-                        </div>
-                        <div className="flex gap-2 flex-wrap">
-                          {empresa.descricao_produtos?.split(",").map((tag, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {tag.trim()}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="mt-4">
-                          <Link href={`/empresas/${empresa.id}`}>
-                            <Button variant="outline" size="sm">
-                              Ver Detalhes
-                            </Button>
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+                <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    {empresa.logo_url && (
+                      <img
+                        src={empresa.logo_url}
+                        alt={`Logo da ${empresa.nome_fantasia}`}
+                        className="w-12 h-12 object-contain rounded bg-white border"
+                      />
+                    )}
+
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{empresa.nome_fantasia}</CardTitle>
+                      <CardDescription>{empresa.razao_social}</CardDescription>
+                    </div>
+                    <Badge variant="secondary">{empresa.setor_empresa}</Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                      {empresa.apresentacao || "Nenhuma apresentação disponível."}
+                    </p>
+                    <div className="flex items-center text-sm text-gray-500 mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {empresa.municipio}, AC
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {empresa.descricao_produtos?.split(",").map((tag, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {tag.trim()}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="mt-4">
+                      <Link href={`/empresas/${empresa.id}`}>
+                        <Button variant="outline" size="sm">
+                          Ver Detalhes
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </section>
+          )}
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90% text-white py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <LogoSeict className="h-6 w-6" />
-                <span className="font-bold">Governo do Estado do Acre</span>
-              </div>
-              <p className="text-sm text-slate-50">
-                Plataforma oficial para o desenvolvimento industrial do Estado do Acre.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Empresas</h4>
-              <ul className="space-y-2 text-sm text-slate-50">
-                <li>
-                  <Link href="/cadastro">Cadastrar Empresa</Link>
-                </li>
-                <li>
-                  <Link href="/dashboard">Área da Empresa</Link>
-                </li>
-                <li>
-                  <Link href="/buscar">Buscar Empresas</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Setores</h4>
-              <ul className="space-y-2 text-sm text-slate-50">
-                <li>Alimentos</li>
-                <li>Madeira</li>
-                <li>Construção</li>
-                <li>Agropecuária</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Contato</h4>
-              <p className="text-sm text-slate-50">
-                Governo do Estado do Acre
-                <br />
-                SECRETARIA DE ESTADO DE INDUSTRIA, CIÊNCIA E TECNOLOGIA
-              </p>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-slate-50">
-            © 2025 Governo do Estado do Acre. Todos os direitos reservados.
-          </div>
-        </div>
-      </footer>
+      <div className="mt-auto">
+        <Footer />
+      </div>
     </div>
   )
 }

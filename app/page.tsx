@@ -1,5 +1,5 @@
 import { Search, MapPin, Plus } from "lucide-react"
-import {  LogoSeict } from "@/components/LogoIndustria"
+import { LogoSeict } from "@/components/LogoIndustria"
 import { SafeImage } from "@/components/SafeImage"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth" // Importa Server Actions e funções de auth
 import { getLastCompanies } from "@/lib/empresa" // Importe sua função de busca
 import { obterEstatisticasHome } from "@/lib/database" // Importa função de estatísticas
+import Footer from "@/components/footer"
 
 // Força renderização dinâmica devido ao uso de cookies
 export const dynamic = 'force-dynamic'
@@ -22,7 +23,7 @@ export default async function HomePage() {
   // Busque as últimas 6 empresas cadastradas
   let empresas: any[] = []
   let errorMsg = null
-  
+
   try {
     empresas = await getLastCompanies(6)
   } catch (error) {
@@ -153,7 +154,7 @@ export default async function HomePage() {
                           />
                         </div>
                       )}
-                      
+
                       <div className="flex-1">
                         <CardTitle className="text-lg">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
                         <CardDescription className="mb-2">{empresa.razao_social || "Razão social não informada"}</CardDescription>
@@ -175,7 +176,7 @@ export default async function HomePage() {
                     <p className="text-sm text-gray-600 mb-3 line-clamp-3">
                       {empresa.apresentacao || empresa.descricao_produtos || "Empresa cadastrada na plataforma."}
                     </p>
-                    
+
                     {/* Localização */}
                     <div className="flex items-center text-sm text-gray-500 mb-2">
                       <MapPin className="h-4 w-4 mr-1 shrink-0" />
@@ -183,7 +184,7 @@ export default async function HomePage() {
                         {empresa.municipio || "Acre"}{empresa.endereco && `, ${empresa.endereco}`}
                       </span>
                     </div>
-                    
+
                     {/* Segmentos e temas */}
                     {(empresa.segmento || empresa.tema_segmento) && (
                       <div className="flex gap-1 flex-wrap mb-3">
@@ -199,7 +200,7 @@ export default async function HomePage() {
                         )}
                       </div>
                     )}
-                    
+
                     {/* Redes sociais */}
                     {(empresa.instagram || empresa.facebook || empresa.linkedin) && (
                       <div className="flex gap-2 flex-wrap mb-3">
@@ -220,7 +221,7 @@ export default async function HomePage() {
                         )}
                       </div>
                     )}
-                    
+
                     <Link href={`/empresas/${empresa.id}`} className="block mt-3">
                       <Button variant="outline" size="sm" className="w-full">
                         Ver mais detalhes
@@ -261,57 +262,10 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90% text-white py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <LogoSeict />
-                <span className="font-bold">Governo do Estado do Acre</span>
-              </div>
-              <p className="text-sm text-slate-50">
-                Plataforma oficial para o desenvolvimento industrial do Estado do Acre.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Empresas</h4>
-              <ul className="space-y-2 text-sm text-slate-50">
-                <li>
-                  <Link href="/cadastro">Cadastrar Empresa</Link>
-                </li>
-                <li>
-                  <Link href="/dashboard">Área da Empresa</Link>
-                </li>
-                <li>
-                  <Link href="/buscar">Buscar Empresas</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Setores</h4>
-              <ul className="space-y-2 text-sm text-slate-50">
-                <li>Alimentos</li>
-                <li>Madeira</li>
-                <li>Construção</li>
-                <li>Agropecuária</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Contato</h4>
-              <p className="text-sm text-slate-50">
-                Governo do Estado do Acre
-                <br />
-                SECRETARIA DE ESTADO DE INDUSTRIA, CIÊNCIA E TECNOLOGIA
-              </p>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-slate-50">
-            © 2025 Governo do Estado do Acre. Todos os direitos reservados.
+          <div className="mt-auto">
+            <Footer />
           </div>
         </div>
-      </footer>
-    </div>
-  )
-}
+      )
+    }
