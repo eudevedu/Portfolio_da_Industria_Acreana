@@ -111,9 +111,6 @@ export default function BuscarPage() {
               <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
                 Buscar Empresas
               </Link>
-              <Link href="/" className="text-slate-50 hover:text-gray-900">
-                Início
-              </Link>
               {!authLoading && (
                 <>
                   {isLoggedIn ? (
