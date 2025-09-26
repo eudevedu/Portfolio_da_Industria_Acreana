@@ -1,5 +1,5 @@
 import { Search, MapPin, Plus } from "lucide-react"
-import {  LogoSeict } from "@/components/LogoIndustria"
+import { LogoSeict } from "@/components/LogoIndustria"
 import { SafeImage } from "@/components/SafeImage"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,7 @@ export default async function HomePage() {
   // Busque as últimas 6 empresas cadastradas
   let empresas: any[] = []
   let errorMsg = null
-  
+
   try {
     empresas = await getLastCompanies(6)
   } catch (error) {
@@ -154,7 +154,7 @@ export default async function HomePage() {
                           />
                         </div>
                       )}
-                      
+
                       <div className="flex-1">
                         <CardTitle className="text-lg">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
                         <CardDescription className="mb-2">{empresa.razao_social || "Razão social não informada"}</CardDescription>
@@ -165,18 +165,14 @@ export default async function HomePage() {
                           )}
                         </div>
                       </div>
-                      {/* <div className="flex flex-col items-end gap-1">
-                        <Badge variant={empresa.status === 'ativo' ? 'default' : 'secondary'} className="text-xs">
-                          {empresa.status === 'ativo' ? 'Ativo' : empresa.status === 'pendente' ? 'Pendente' : 'Inativo'}
-                        </Badge>
-                      </div> */}
+                      
                     </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-gray-600 mb-3 line-clamp-3">
                       {empresa.apresentacao || empresa.descricao_produtos || "Empresa cadastrada na plataforma."}
                     </p>
-                    
+
                     {/* Localização */}
                     <div className="flex items-center text-sm text-gray-500 mb-2">
                       <MapPin className="h-4 w-4 mr-1 shrink-0" />
@@ -184,7 +180,7 @@ export default async function HomePage() {
                         {empresa.municipio || "Acre"}{empresa.endereco && `, ${empresa.endereco}`}
                       </span>
                     </div>
-                    
+
                     {/* Segmentos e temas */}
                     {(empresa.segmento || empresa.tema_segmento) && (
                       <div className="flex gap-1 flex-wrap mb-3">
@@ -200,7 +196,7 @@ export default async function HomePage() {
                         )}
                       </div>
                     )}
-                    
+
                     {/* Redes sociais */}
                     {(empresa.instagram || empresa.facebook || empresa.linkedin) && (
                       <div className="flex gap-2 flex-wrap mb-3">
@@ -221,7 +217,7 @@ export default async function HomePage() {
                         )}
                       </div>
                     )}
-                    
+
                     <Link href={`/empresas/${empresa.id}`} className="block mt-3">
                       <Button variant="outline" size="sm" className="w-full">
                         Ver mais detalhes
@@ -263,7 +259,7 @@ export default async function HomePage() {
         </div>
       </section>
       <div className="mt-auto">
-          <Footer />
+        <Footer />
       </div>
     </div>
   )
