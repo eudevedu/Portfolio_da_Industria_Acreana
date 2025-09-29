@@ -258,6 +258,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      {/* Footer Section */}
       <div className="mt-auto">
         <Footer />
       </div>
