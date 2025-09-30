@@ -55,7 +55,7 @@ export default async function HomePage() {
               </Link>
               {loggedIn ? (
                 <>
-                  <span className="text-slate-50 text-sm hidden sm:inline">Olá, {empresa?.nome_fantasia || "Usuário"}!</span>
+                  <span className="text-slate-50 text-sm hidden sm:inline">Olá, {empresa?.nome_fantasia}!</span>
                   <Link href={dashboardLink}>
                     <Button variant="outline">Meu Painel</Button>
                   </Link>
