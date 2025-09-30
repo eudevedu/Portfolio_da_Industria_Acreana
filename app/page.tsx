@@ -9,6 +9,7 @@ import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth" // Importa Serve
 import { getLastCompanies } from "@/lib/empresa" // Importe sua função de busca
 import { obterEstatisticasHome } from "@/lib/database" // Importa função de estatísticas
 import Footer from "@/components/footer"
+import { Empresa } from "@/lib/supabase.types"
 
 // Força renderização dinâmica devido ao uso de cookies
 export const dynamic = 'force-dynamic'
@@ -31,6 +32,8 @@ export default async function HomePage() {
     empresas = []
   }
 
+    let empresa: Empresa | null = null
+
   // Busca estatísticas dinâmicas
   const stats = await obterEstatisticasHome()
 
@@ -52,7 +55,7 @@ export default async function HomePage() {
               </Link>
               {loggedIn ? (
                 <>
-                  <span className="text-slate-50 text-sm hidden sm:inline">Olá, {user?.email}</span>
+                  <span className="text-slate-50 text-sm hidden sm:inline">Olá, {empresa?.nome_fantasia || "Usuário"}!</span>
                   <Link href={dashboardLink}>
                     <Button variant="outline">Meu Painel</Button>
                   </Link>
