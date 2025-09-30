@@ -21,7 +21,7 @@ export default async function HomePage() {
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
   // Busque a empresa se o usuário estiver logado e não for admin
-  let empresa = {nome_fantasia: null};
+  let empresa = {nome_fantasia: '', razao_social: ''};
 
   // Busque as últimas 6 empresas cadastradas
   let empresas: any[] = []
