@@ -22,7 +22,6 @@ export default async function HomePage() {
 
   // Busque a empresa se o usuário estiver logado e não for admin
   let empresaRazaoSocial = {nome_fantasia: '', razao_social: ''};
-  // Removido: buscarEmpresaPorId não está disponível
 
   // Busque as últimas 6 empresas cadastradas
   let empresas: any[] = []
@@ -57,7 +56,7 @@ export default async function HomePage() {
               {loggedIn ? (
                 <>
                   <span className="text-slate-50 text-sm hidden sm:inline">
-                    Olá{empresaRazaoSocial ? `, ${empresaRazaoSocial}` : ""}
+                    Olá{empresaRazaoSocial.nome_fantasia}
                   </span>
                   <Link href={dashboardLink}>
                     <Button variant="outline">Meu Painel</Button>
