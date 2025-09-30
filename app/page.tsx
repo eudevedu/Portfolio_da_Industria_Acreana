@@ -21,7 +21,7 @@ export default async function HomePage() {
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
   // Busque a empresa se o usuário estiver logado e não for admin
-  let empresaRazaoSocial = ""
+  let empresaRazaoSocial = {nome_fantasia: ''};
   // Removido: buscarEmpresaPorId não está disponível
 
   // Busque as últimas 6 empresas cadastradas
@@ -51,9 +51,9 @@ export default async function HomePage() {
               <h1 className="text-xl font-bold text-slate-50">Portfólio das Indústrias do Acre</h1>
             </div>
             <nav className="flex items-center space-x-4">
-              <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
+              {/* <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
                 Buscar Empresas
-              </Link>
+              </Link> */}
               {loggedIn ? (
                 <>
                   <span className="text-slate-50 text-sm hidden sm:inline">
