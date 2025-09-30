@@ -55,7 +55,7 @@ export default async function HomePage() {
               {loggedIn ? (
                 <>
                   <span className="text-slate-50 text-sm hidden sm:inline">
-                    Olá{user?.email}
+                    Olá {user?.email}
                   </span>
                   <Link href={dashboardLink}>
                     <Button variant="outline">Meu Painel</Button>
