@@ -21,7 +21,7 @@ export default async function HomePage() {
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
   // Busque a empresa se o usuário estiver logado e não for admin
-  let empresaRazaoSocial = {nome_fantasia: '', razao_social: ''};
+  let empresa = {nome_fantasia: null};
 
   // Busque as últimas 6 empresas cadastradas
   let empresas: any[] = []
@@ -56,7 +56,7 @@ export default async function HomePage() {
               {loggedIn ? (
                 <>
                   <span className="text-slate-50 text-sm hidden sm:inline">
-                    Olá{empresaRazaoSocial.nome_fantasia}
+                    Olá{empresa?.nome_fantasia}
                   </span>
                   <Link href={dashboardLink}>
                     <Button variant="outline">Meu Painel</Button>
