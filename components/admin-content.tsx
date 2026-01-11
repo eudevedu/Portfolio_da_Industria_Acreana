@@ -749,11 +749,11 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
                                   <SelectValue placeholder="Selecione o município" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="Rio Branco">Rio Branco</SelectItem>
-                                  <SelectItem value="Cruzeiro do Sul">Cruzeiro do Sul</SelectItem>
-                                  <SelectItem value="Sena Madureira">Sena Madureira</SelectItem>
-                                  <SelectItem value="Feijo">Feijó</SelectItem>
-                                  <SelectItem value="Tarauaca">Tarauacá</SelectItem>
+                                  {municipios.map((municipio) => (
+                                    <SelectItem key={municipio.value} value={municipio.value}>
+                                      {municipio.label}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -778,10 +778,11 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
                                   <SelectValue placeholder="Selecione o setor" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="industria">Indústria</SelectItem>
-                                  <SelectItem value="comercio">Comércio</SelectItem>
-                                  <SelectItem value="servicos">Serviços</SelectItem>
-                                  <SelectItem value="agropecuaria">Agropecuária</SelectItem>
+                                  {setoresEconomicos.map((setor) => (
+                                    <SelectItem key={setor.value} value={setor.value}>
+                                      {setor.label}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             </div>
