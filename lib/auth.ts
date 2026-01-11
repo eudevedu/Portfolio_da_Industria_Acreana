@@ -1,7 +1,7 @@
 "use server" // Todas as funções exportadas deste arquivo são Server Actions
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { supabase, isSupabaseConfigured } from "./supabase"
+import { supabase, isSupabaseConfigured, supabaseAdmin, isSupabaseAdminConfigured } from "./supabase"
 import type { User } from "./supabase.types" // Importa o tipo User do novo arquivo de tipos
 import { criarPerfilEmpresa } from "./database" // Importa a nova função (corrigido para 'data' se for o arquivo correto)
 
@@ -171,21 +171,38 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
     }
 
     // Verificar se o usuário é admin na tabela admins
-    const { data: admin, error: adminError } = await supabase!
+    // Usar supabaseAdmin se disponível (ignora RLS) para operações sensíveis
+    const adminClient = isSupabaseAdminConfigured() ? supabaseAdmin : supabase
+    
+    if (!adminClient) {
+      return { success: false, message: 'Erro de configuração do servidor' }
+    }
+    
+    const { data: admins, error: adminError } = await adminClient
       .from('admins')
       .select('*')
       .eq('email', email)
       .eq('ativo', true)
-      .single();
 
-    console.log("Admin table verification:", { admin: admin?.email, error: adminError?.message });
+    console.log("Admin table verification:", { 
+      count: admins?.length, 
+      error: adminError?.message,
+      usedAdminClient: isSupabaseAdminConfigured()
+    })
 
-    if (adminError || !admin) {
-      console.log('Usuário não é admin ou conta inativa');
-      // Fazer logout do Supabase se não for admin
-      await supabase!.auth.signOut();
-      return { success: false, message: 'Acesso negado. Usuário não é administrador' };
+    if (adminError) {
+      console.log('Erro ao buscar admin:', adminError.message)
+      return { success: false, message: 'Erro ao verificar credenciais de admin' }
     }
+    
+    if (!admins || admins.length === 0) {
+      console.log('Usuário não é admin ou conta inativa')
+      // Fazer logout do Supabase se não for admin
+      await supabase!.auth.signOut()
+      return { success: false, message: 'Acesso negado. Usuário não é administrador' }
+    }
+    
+    const admin = admins[0]
     
     console.log('Admin autenticado com sucesso:', admin.nome);
     
