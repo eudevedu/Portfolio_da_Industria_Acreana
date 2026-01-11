@@ -500,13 +500,27 @@ export async function recoverPassword(email: string): Promise<{ success: boolean
     return { success: true, message: "Se as credenciais estiverem corretas, um link de recuperação foi enviado." }
   }
   try {
+    // Determina o URL de redirecionamento baseado no ambiente
+    const redirectUrl = typeof window !== 'undefined' 
+      ? `${window.location.origin}/redefinir-senha`
+      : process.env.NEXT_PUBLIC_BASE_URL 
+        ? `${process.env.NEXT_PUBLIC_BASE_URL}/redefinir-senha`
+        : 'http://localhost:3000/redefinir-senha'
+    
+    console.log("Enviando email de recuperação para:", email)
+    console.log("URL de redirecionamento:", redirectUrl)
+    
     const { error } = await supabase!.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/redefinir-senha`, // Replace with your actual reset password page URL
+      redirectTo: redirectUrl,
     })
+    
     if (error) {
+      console.error("Erro ao enviar email de recuperação:", error)
       return { success: false, message: error.message }
     }
-    return { success: true, message: "Um link de redefinição de senha foi enviado para o seu email." }
+    
+    console.log("Email de recuperação enviado com sucesso")
+    return { success: true, message: "Um link de redefinição de senha foi enviado para o seu email. Verifique sua caixa de entrada e spam." }
   } catch (err: any) {
     console.error("Erro na recuperação de senha:", err)
     return { success: false, message: err.message || "Ocorreu um erro inesperado durante a recuperação de senha." }
