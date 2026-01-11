@@ -141,9 +141,9 @@ export default async function HomePage() {
               </div>
             ) : (
               empresas.map((empresa) => (
-                <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-3">
+                <Card key={empresa.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-3">
                       {/* Logo da empresa */}
                       {empresa.logo_url && (
                         <div className="flex-shrink-0">
@@ -155,33 +155,28 @@ export default async function HomePage() {
                         </div>
                       )}
                       
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
-                        <CardDescription className="mb-2">{empresa.razao_social || "Razão social não informada"}</CardDescription>
-                        <div className="flex gap-2 flex-wrap">
-                          <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
-                          {empresa.setor_empresa && (
-                            <Badge variant="outline">{empresa.setor_empresa}</Badge>
-                          )}
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg truncate">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
+                        <CardDescription className="truncate">{empresa.razao_social || "Razão social não informada"}</CardDescription>
                       </div>
-                      {/* <div className="flex flex-col items-end gap-1">
-                        <Badge variant={empresa.status === 'ativo' ? 'default' : 'secondary'} className="text-xs">
-                          {empresa.status === 'ativo' ? 'Ativo' : empresa.status === 'pendente' ? 'Pendente' : 'Inativo'}
-                        </Badge>
-                      </div> */}
+                    </div>
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
+                      {empresa.setor_empresa && (
+                        <Badge variant="outline">{empresa.setor_empresa}</Badge>
+                      )}
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                  <CardContent className="flex-1 flex flex-col">
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                       {empresa.apresentacao || empresa.descricao_produtos || "Empresa cadastrada na plataforma."}
                     </p>
                     
                     {/* Localização */}
-                    <div className="flex items-center text-sm text-gray-500 mb-2">
+                    <div className="flex items-center text-sm text-gray-500 mb-3">
                       <MapPin className="h-4 w-4 mr-1 shrink-0" />
                       <span className="truncate">
-                        {empresa.municipio || "Acre"}{empresa.endereco && `, ${empresa.endereco}`}
+                        {empresa.municipio || "Acre"}, AC
                       </span>
                     </div>
                     
@@ -201,32 +196,13 @@ export default async function HomePage() {
                       </div>
                     )}
                     
-                    {/* Redes sociais */}
-                    {(empresa.instagram || empresa.facebook || empresa.linkedin) && (
-                      <div className="flex gap-2 flex-wrap mb-3">
-                        {empresa.instagram && (
-                          <Badge variant="outline" className="text-xs bg-pink-50 text-pink-700">
-                            Instagram
-                          </Badge>
-                        )}
-                        {empresa.facebook && (
-                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
-                            Facebook
-                          </Badge>
-                        )}
-                        {empresa.linkedin && (
-                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600">
-                            LinkedIn
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                    
-                    <Link href={`/empresas/${empresa.id}`} className="block mt-3">
-                      <Button variant="outline" size="sm" className="w-full">
-                        Ver mais detalhes
-                      </Button>
-                    </Link>
+                    <div className="mt-auto pt-3">
+                      <Link href={`/empresas/${empresa.id}`}>
+                        <Button variant="outline" size="sm" className="w-full">
+                          Ver Detalhes
+                        </Button>
+                      </Link>
+                    </div>
                   </CardContent>
                 </Card>
               ))
