@@ -158,7 +158,6 @@ export default async function HomePage() {
                           />
                         </div>
                       )}
-<<<<<<< HEAD
                       
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg truncate">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
@@ -170,20 +169,6 @@ export default async function HomePage() {
                       {empresa.setor_empresa && (
                         <Badge variant="outline">{empresa.setor_empresa}</Badge>
                       )}
-=======
-
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
-                        <CardDescription className="mb-2">{empresa.razao_social || "Razão social não informada"}</CardDescription>
-                        <div className="flex gap-2 flex-wrap">
-                          <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
-                          {empresa.setor_empresa && (
-                            <Badge variant="outline">{empresa.setor_empresa}</Badge>
-                          )}
-                        </div>
-                      </div>
-                      
->>>>>>> 5fc842d6adf2c458a0282af21bc1858f091c2dbf
                     </div>
                   </CardHeader>
                   <CardContent className="flex-1 flex flex-col">
@@ -214,7 +199,6 @@ export default async function HomePage() {
                         )}
                       </div>
                     )}
-<<<<<<< HEAD
                     
                     <div className="mt-auto pt-3">
                       <Link href={`/empresas/${empresa.id}`}>
@@ -223,35 +207,6 @@ export default async function HomePage() {
                         </Button>
                       </Link>
                     </div>
-=======
-
-                    {/* Redes sociais */}
-                    {(empresa.instagram || empresa.facebook || empresa.linkedin) && (
-                      <div className="flex gap-2 flex-wrap mb-3">
-                        {empresa.instagram && (
-                          <Badge variant="outline" className="text-xs bg-pink-50 text-pink-700">
-                            Instagram
-                          </Badge>
-                        )}
-                        {empresa.facebook && (
-                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
-                            Facebook
-                          </Badge>
-                        )}
-                        {empresa.linkedin && (
-                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600">
-                            LinkedIn
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-
-                    <Link href={`/empresas/${empresa.id}`} className="block mt-3">
-                      <Button variant="outline" size="sm" className="w-full">
-                        Ver mais detalhes
-                      </Button>
-                    </Link>
->>>>>>> 5fc842d6adf2c458a0282af21bc1858f091c2dbf
                   </CardContent>
                 </Card>
               ))

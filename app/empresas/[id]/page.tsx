@@ -25,12 +25,13 @@ import ImageGallery from "@/components/ImageGallery"
 import AnalyticsTracker from "@/components/AnalyticsTracker"
 import Footer from "@/components/footer"
 import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from "react"
+import { Empresa } from "@/lib/supabase.types"
 
 export default async function EmpresaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: empresaId } = await params
   const isConfigured = isSupabaseConfigured()
 
-  let empresa = null
+  let empresa: Empresa | null | undefined = null
   let empresasRelacionadas: any[] = []
   
   if (isConfigured) {
@@ -42,7 +43,7 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
         empresasRelacionadas = todasEmpresas
           .filter((e: any) => 
             e.id !== empresaId && 
-            (e.segmento === empresa.segmento || e.setor_economico === empresa.setor_economico)
+            (e.segmento === empresa!.segmento || e.setor_economico === empresa!.setor_economico)
           )
           .slice(0, 10) // Limitar a 10 empresas relacionadas
       }
@@ -62,7 +63,7 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
       empresasRelacionadas = mockEmpresas
         .filter((e) => 
           e.id !== empresaId && 
-          (e.segmento === empresa.segmento || e.setor_economico === empresa.setor_economico)
+          (e.segmento === empresa!.segmento || e.setor_economico === empresa!.setor_economico)
         )
         .slice(0, 10) // Limitar a 10 empresas relacionadas
     }
