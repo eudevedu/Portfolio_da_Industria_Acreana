@@ -187,7 +187,7 @@ export default function EmpresaDashboard({ user }: EmpresaDashboardProps) {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Dashboard da Empresa</h1>
-      <p className="text-gray-600 mb-8">Bem-vindo(a), {user.email}!</p>
+      <p className="text-gray-600 mb-8">Bem-vindo(a), {user?.email}!</p>
 
       {message && (
         <Alert className={`mb-6 ${message.type === 'error' ? 'border-red-500' : 'border-green-500'}`}>

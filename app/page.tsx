@@ -1,5 +1,5 @@
 import { Search, MapPin, Plus } from "lucide-react"
-import {  LogoSeict } from "@/components/LogoIndustria"
+import { LogoSeict } from "@/components/LogoIndustria"
 import { SafeImage } from "@/components/SafeImage"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -20,10 +20,12 @@ export default async function HomePage() {
   const user = await getCurrentUser()
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
+ 
+
   // Busque as últimas 6 empresas cadastradas
   let empresas: any[] = []
   let errorMsg = null
-  
+
   try {
     empresas = await getLastCompanies(6)
   } catch (error) {
@@ -47,12 +49,14 @@ export default async function HomePage() {
               <h1 className="text-xl font-bold text-slate-50">Portfólio das Indústrias do Acre</h1>
             </div>
             <nav className="flex items-center space-x-4">
-              <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
+              {/* <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
                 Buscar Empresas
-              </Link>
+              </Link> */}
               {loggedIn ? (
                 <>
-                  <span className="text-slate-50 text-sm hidden sm:inline">Olá, {user?.email}</span>
+                  <span className="text-slate-50 text-sm hidden sm:inline">
+                    Olá {user?.email}
+                  </span>
                   <Link href={dashboardLink}>
                     <Button variant="outline">Meu Painel</Button>
                   </Link>
@@ -154,6 +158,7 @@ export default async function HomePage() {
                           />
                         </div>
                       )}
+<<<<<<< HEAD
                       
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg truncate">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
@@ -165,13 +170,27 @@ export default async function HomePage() {
                       {empresa.setor_empresa && (
                         <Badge variant="outline">{empresa.setor_empresa}</Badge>
                       )}
+=======
+
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
+                        <CardDescription className="mb-2">{empresa.razao_social || "Razão social não informada"}</CardDescription>
+                        <div className="flex gap-2 flex-wrap">
+                          <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
+                          {empresa.setor_empresa && (
+                            <Badge variant="outline">{empresa.setor_empresa}</Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+>>>>>>> 5fc842d6adf2c458a0282af21bc1858f091c2dbf
                     </div>
                   </CardHeader>
                   <CardContent className="flex-1 flex flex-col">
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                       {empresa.apresentacao || empresa.descricao_produtos || "Empresa cadastrada na plataforma."}
                     </p>
-                    
+
                     {/* Localização */}
                     <div className="flex items-center text-sm text-gray-500 mb-3">
                       <MapPin className="h-4 w-4 mr-1 shrink-0" />
@@ -179,7 +198,7 @@ export default async function HomePage() {
                         {empresa.municipio || "Acre"}, AC
                       </span>
                     </div>
-                    
+
                     {/* Segmentos e temas */}
                     {(empresa.segmento || empresa.tema_segmento) && (
                       <div className="flex gap-1 flex-wrap mb-3">
@@ -195,6 +214,7 @@ export default async function HomePage() {
                         )}
                       </div>
                     )}
+<<<<<<< HEAD
                     
                     <div className="mt-auto pt-3">
                       <Link href={`/empresas/${empresa.id}`}>
@@ -203,6 +223,35 @@ export default async function HomePage() {
                         </Button>
                       </Link>
                     </div>
+=======
+
+                    {/* Redes sociais */}
+                    {(empresa.instagram || empresa.facebook || empresa.linkedin) && (
+                      <div className="flex gap-2 flex-wrap mb-3">
+                        {empresa.instagram && (
+                          <Badge variant="outline" className="text-xs bg-pink-50 text-pink-700">
+                            Instagram
+                          </Badge>
+                        )}
+                        {empresa.facebook && (
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                            Facebook
+                          </Badge>
+                        )}
+                        {empresa.linkedin && (
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600">
+                            LinkedIn
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+
+                    <Link href={`/empresas/${empresa.id}`} className="block mt-3">
+                      <Button variant="outline" size="sm" className="w-full">
+                        Ver mais detalhes
+                      </Button>
+                    </Link>
+>>>>>>> 5fc842d6adf2c458a0282af21bc1858f091c2dbf
                   </CardContent>
                 </Card>
               ))
@@ -238,8 +287,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      {/* Footer Section */}
       <div className="mt-auto">
-          <Footer />
+        <Footer />
       </div>
     </div>
   )
