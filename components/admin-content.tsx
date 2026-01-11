@@ -229,7 +229,8 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
   video_apresentacao: novaEmpresa.video_apresentacao,
   status: "ativo",
   produtos: [],
-  arquivos: []
+  arquivos: [],
+  relacionadas: []
       }
       
       const result = await criarEmpresa(empresaData)
