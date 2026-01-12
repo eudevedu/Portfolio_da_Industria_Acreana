@@ -49,7 +49,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-slate-50">
-          © 2025 Governo do Estado do Acre. Todos os direitos reservados.
+          © 2025 SEICT. Todos os direitos reservados.
         </div>
       </div>
     </footer>
