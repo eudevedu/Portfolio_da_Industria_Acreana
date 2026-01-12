@@ -10,7 +10,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <LogoSeict />
-              <span className="font-bold">SEICT</span>
+              
             </div>
             <p className="text-sm text-slate-50">
               Plataforma oficial para o desenvolvimento industrial do Estado do Acre.
