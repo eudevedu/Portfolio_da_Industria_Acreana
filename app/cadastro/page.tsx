@@ -698,10 +698,11 @@ export default function CadastroPage() {
                           <SelectValue placeholder="Selecione o setor" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="industria">Indústria</SelectItem>
-                          <SelectItem value="comercio">Comércio</SelectItem>
-                          <SelectItem value="servicos">Serviços</SelectItem>
-                          <SelectItem value="agropecuaria">Agropecuária</SelectItem>
+                          {setoresEconomicos.map((setor) => (
+                            <SelectItem key={setor.value} value={setor.value}>
+                              {setor.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       {validationErrors.setor_economico && (
@@ -721,14 +722,11 @@ export default function CadastroPage() {
                           <SelectValue placeholder="Selecione o setor" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="alimentos">Alimentos</SelectItem>
-                          <SelectItem value="construcao">Construção</SelectItem>
-                          <SelectItem value="ceramico">Cerâmico</SelectItem>
-                          <SelectItem value="madeireiro">Madeireiro</SelectItem>
-                          <SelectItem value="grafico">Gráfico</SelectItem>
-                          <SelectItem value="textil">Têxtil</SelectItem>
-                          <SelectItem value="metalurgico">Metalúrgico</SelectItem>
-                          <SelectItem value="outros">Outros</SelectItem>
+                          {setoresEmpresa.map((setor) => (
+                            <SelectItem key={setor.value} value={setor.value}>
+                              {setor.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       {validationErrors.setor_empresa && (

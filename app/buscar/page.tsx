@@ -222,40 +222,62 @@ export default function BuscarPage() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {empresas.map((empresa) => (
-                    <Card key={empresa.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        {empresa.logo_url && (
-                          <img
-                            src={empresa.logo_url}
-                            alt={`Logo da ${empresa.nome_fantasia}`}
-                            className="w-12 h-12 object-contain rounded bg-white border"
-                          />
-                        )}
-                        
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{empresa.nome_fantasia}</CardTitle>
-                          <CardDescription>{empresa.razao_social}</CardDescription>
+                    <Card key={empresa.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          {/* Logo da empresa */}
+                          {empresa.logo_url && (
+                            <div className="flex-shrink-0">
+                              <img
+                                src={empresa.logo_url}
+                                alt={`Logo da ${empresa.nome_fantasia}`}
+                                className="w-12 h-12 object-contain rounded bg-white border"
+                              />
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-lg truncate">{empresa.nome_fantasia}</CardTitle>
+                            <CardDescription className="truncate">{empresa.razao_social}</CardDescription>
+                          </div>
                         </div>
-                        <Badge variant="secondary">{empresa.setor_empresa}</Badge>
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
+                          {empresa.setor_empresa && (
+                            <Badge variant="outline">{empresa.setor_empresa}</Badge>
+                          )}
+                        </div>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                      <CardContent className="flex-1 flex flex-col">
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                           {empresa.apresentacao || "Nenhuma apresentação disponível."}
                         </p>
-                        <div className="flex items-center text-sm text-gray-500 mb-2">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {empresa.municipio}, AC
+                        
+                        <div className="flex items-center text-sm text-gray-500 mb-3">
+                          <MapPin className="h-4 w-4 mr-1 shrink-0" />
+                          <span className="truncate">
+                            {empresa.municipio}, AC
+                          </span>
                         </div>
-                        <div className="flex gap-2 flex-wrap">
-                          {empresa.descricao_produtos?.split(",").map((tag, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {tag.trim()}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="mt-4">
+                        
+                        {(empresa.segmento || empresa.tema_segmento) && (
+                          <div className="flex gap-1 flex-wrap mb-3">
+                            {empresa.segmento && (
+                              <Badge variant="outline" className="text-xs">
+                                {empresa.segmento}
+                              </Badge>
+                            )}
+                            {empresa.tema_segmento && (
+                              <Badge variant="outline" className="text-xs">
+                                {empresa.tema_segmento}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="mt-auto pt-3">
                           <Link href={`/empresas/${empresa.id}`}>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className="w-full">
                               Ver Detalhes
                             </Button>
                           </Link>

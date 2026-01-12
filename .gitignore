@@ -27,3 +27,4 @@ yarn-error.log*
 next-env.d.ts
 *.md
 fix-foreign-key-constraints.sql
+scripts/04-rls-policies.sql

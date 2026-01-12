@@ -24,15 +24,29 @@ import { LogoSeict } from "@/components/LogoIndustria"
 import ImageGallery from "@/components/ImageGallery"
 import AnalyticsTracker from "@/components/AnalyticsTracker"
 import Footer from "@/components/footer"
+import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from "react"
+import { Empresa } from "@/lib/supabase.types"
 
 export default async function EmpresaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: empresaId } = await params
   const isConfigured = isSupabaseConfigured()
 
-  let empresa = null
+  let empresa: Empresa | null | undefined = null
+  let empresasRelacionadas: any[] = []
+  
   if (isConfigured) {
     try {
       empresa = await buscarEmpresaPorId(empresaId)
+      // Buscar empresas relacionadas pelo segmento
+      if (empresa) {
+        const todasEmpresas = await import("@/lib/database").then(m => m.buscarEmpresas())
+        empresasRelacionadas = todasEmpresas
+          .filter((e: any) => 
+            e.id !== empresaId && 
+            (e.segmento === empresa!.segmento || e.setor_economico === empresa!.setor_economico)
+          )
+          .slice(0, 10) // Limitar a 10 empresas relacionadas
+      }
     } catch (error) {
       console.error("Erro ao buscar detalhes da empresa:", error)
       // Em caso de erro na busca, tratamos como não encontrado ou erro genérico
@@ -43,6 +57,16 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
     const mockEmpresasModule = await import("@/lib/database")
     const mockEmpresas = await mockEmpresasModule.buscarEmpresas()
     empresa = mockEmpresas.find((emp) => emp.id === empresaId)
+    
+    // Buscar empresas relacionadas pelo segmento (modo mock)
+    if (empresa) {
+      empresasRelacionadas = mockEmpresas
+        .filter((e) => 
+          e.id !== empresaId && 
+          (e.segmento === empresa!.segmento || e.setor_economico === empresa!.setor_economico)
+        )
+        .slice(0, 10) // Limitar a 10 empresas relacionadas
+    }
   }
 
   if (!empresa) {
@@ -324,6 +348,50 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
                   })()}
                 </div>
               </>
+            )}
+
+            <Separator className="my-4" />
+            
+            {/* Carrossel de Empresas Relacionadas */}
+            {empresasRelacionadas.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-2xl font-semibold mb-4">Empresas Relacionadas</h2>
+                <div className="relative">
+                  <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth scrollbar-hide">
+                    {empresasRelacionadas.map((relacionada: any) => (
+                      <Link key={relacionada.id} href={`/empresas/${relacionada.id}`} className="flex-shrink-0 w-64 snap-start">
+                        <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                          <CardContent className="p-4">
+                            <div className="flex flex-col items-center text-center">
+                              {relacionada.logo_url && (
+                                <div className="w-20 h-20 mb-3 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                                  <img
+                                    src={relacionada.logo_url}
+                                    alt={relacionada.nome_fantasia}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              <h3 className="font-semibold text-lg mb-2">{relacionada.nome_fantasia}</h3>
+                              {relacionada.municipio && (
+                                <p className="text-sm text-gray-500 flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {relacionada.municipio}
+                                </p>
+                              )}
+                              {relacionada.segmento && (
+                                <Badge variant="secondary" className="mt-2">
+                                  {relacionada.segmento}
+                                </Badge>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>

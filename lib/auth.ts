@@ -1,7 +1,7 @@
 "use server" // Todas as funções exportadas deste arquivo são Server Actions
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { supabase, isSupabaseConfigured } from "./supabase"
+import { supabase, isSupabaseConfigured, supabaseAdmin, isSupabaseAdminConfigured } from "./supabase"
 import type { User } from "./supabase.types" // Importa o tipo User do novo arquivo de tipos
 import { criarPerfilEmpresa } from "./database" // Importa a nova função (corrigido para 'data' se for o arquivo correto)
 
@@ -171,21 +171,38 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
     }
 
     // Verificar se o usuário é admin na tabela admins
-    const { data: admin, error: adminError } = await supabase!
+    // Usar supabaseAdmin se disponível (ignora RLS) para operações sensíveis
+    const adminClient = isSupabaseAdminConfigured() ? supabaseAdmin : supabase
+    
+    if (!adminClient) {
+      return { success: false, message: 'Erro de configuração do servidor' }
+    }
+    
+    const { data: admins, error: adminError } = await adminClient
       .from('admins')
       .select('*')
       .eq('email', email)
       .eq('ativo', true)
-      .single();
 
-    console.log("Admin table verification:", { admin: admin?.email, error: adminError?.message });
+    console.log("Admin table verification:", { 
+      count: admins?.length, 
+      error: adminError?.message,
+      usedAdminClient: isSupabaseAdminConfigured()
+    })
 
-    if (adminError || !admin) {
-      console.log('Usuário não é admin ou conta inativa');
-      // Fazer logout do Supabase se não for admin
-      await supabase!.auth.signOut();
-      return { success: false, message: 'Acesso negado. Usuário não é administrador' };
+    if (adminError) {
+      console.log('Erro ao buscar admin:', adminError.message)
+      return { success: false, message: 'Erro ao verificar credenciais de admin' }
     }
+    
+    if (!admins || admins.length === 0) {
+      console.log('Usuário não é admin ou conta inativa')
+      // Fazer logout do Supabase se não for admin
+      await supabase!.auth.signOut()
+      return { success: false, message: 'Acesso negado. Usuário não é administrador' }
+    }
+    
+    const admin = admins[0]
     
     console.log('Admin autenticado com sucesso:', admin.nome);
     
@@ -500,13 +517,27 @@ export async function recoverPassword(email: string): Promise<{ success: boolean
     return { success: true, message: "Se as credenciais estiverem corretas, um link de recuperação foi enviado." }
   }
   try {
+    // Determina o URL de redirecionamento baseado no ambiente
+    const redirectUrl = typeof window !== 'undefined' 
+      ? `${window.location.origin}/redefinir-senha`
+      : process.env.NEXT_PUBLIC_BASE_URL 
+        ? `${process.env.NEXT_PUBLIC_BASE_URL}/redefinir-senha`
+        : 'http://localhost:3000/redefinir-senha'
+    
+    console.log("Enviando email de recuperação para:", email)
+    console.log("URL de redirecionamento:", redirectUrl)
+    
     const { error } = await supabase!.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/redefinir-senha`, // Replace with your actual reset password page URL
+      redirectTo: redirectUrl,
     })
+    
     if (error) {
+      console.error("Erro ao enviar email de recuperação:", error)
       return { success: false, message: error.message }
     }
-    return { success: true, message: "Um link de redefinição de senha foi enviado para o seu email." }
+    
+    console.log("Email de recuperação enviado com sucesso")
+    return { success: true, message: "Um link de redefinição de senha foi enviado para o seu email. Verifique sua caixa de entrada e spam." }
   } catch (err: any) {
     console.error("Erro na recuperação de senha:", err)
     return { success: false, message: err.message || "Ocorreu um erro inesperado durante a recuperação de senha." }
