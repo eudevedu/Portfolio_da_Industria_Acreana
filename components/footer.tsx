@@ -42,7 +42,7 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contato</h4>
             <p className="text-sm text-slate-50">
-              Governo do Estado do Acre
+              SEICT
               <br />
               SECRETARIA DE ESTADO DE INDUSTRIA, CIÊNCIA E TECNOLOGIA
             </p>
