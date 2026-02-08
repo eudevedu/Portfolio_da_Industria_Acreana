@@ -49,7 +49,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-slate-50">
-          © 2025 <span href="https://eudevedu.github.io/">Devedu</span>. Todos os direitos reservados.
+          © 2025 <a href="https://eudevedu.github.io/">Eduardo Batista</a>. Todos os direitos reservados.
         </div>
       </div>
     </footer>
