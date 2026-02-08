@@ -40,7 +40,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@supabase/supabase-js": "^2.52.0",
     "@types/bcryptjs": "^2.4.6",
-    "@vercel/blob": "latest",
+    "@vercel/blob": "^2.2.0",
     "autoprefixer": "^10.4.20",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
