@@ -29,6 +29,7 @@ import { CompanyInfoCard } from "@/components/company-info-card"
 import ProdutosManager from "@/components/ProdutosManager"
 import ArquivosManager from "@/components/ArquivosManager"
 import { LogoSeict } from "@/components/LogoIndustria"
+import { ViewProfileButton } from "@/components/ViewProfileButton"
 
 export const dynamic = 'force-dynamic'
 
@@ -120,10 +121,7 @@ export default async function DashboardPage() {
 
             <div className="pt-8 space-y-2">
               <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Atalhos</p>
-              <Link href={`/empresas/${empresaId}`} target="_blank" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group">
-                <ExternalLink className="h-5 w-5 text-slate-400 group-hover:text-blue-500" />
-                <span>Ver Perfil Público</span>
-              </Link>
+              <ViewProfileButton company={empresa} />
               <Link href="/dashboard/configuracoes" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group">
                 <Settings className="h-5 w-5 text-slate-400 group-hover:text-slate-900" />
                 <span>Configurações</span>
@@ -144,17 +142,16 @@ export default async function DashboardPage() {
         {/* Main Content Area */}
         <div className="flex-1 lg:ml-72 flex flex-col min-h-screen">
             {/* Mobile Header */}
-            <header className="lg:hidden bg-white border-b px-4 h-16 flex items-center justify-between sticky top-0 z-40">
+            <header className="lg:hidden bg-gradient-to-r from-green-900 to-green-700 px-4 h-16 flex items-center justify-between sticky top-0 z-40 shadow-md">
               <div className="flex items-center gap-2">
-                <LogoSeict className="h-8 w-8" />
-                <span className="font-display font-black text-sm">PORTFÓLIO</span>
+                <h1 className="text-xl font-display font-black tracking-tight text-white uppercase">Dashboard</h1>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" asChild>
+              <div className="flex items-center gap-2 text-white">
+                <Button variant="ghost" size="icon" asChild className="hover:bg-white/10 text-white">
                   <Link href="/dashboard/configuracoes"><Settings className="h-5 w-5" /></Link>
                 </Button>
                 <form action={logout}>
-                  <Button type="submit" variant="ghost" size="icon" className="text-red-600">
+                  <Button type="submit" variant="ghost" size="icon" className="text-white hover:bg-white/10">
                     <LogOut className="h-5 w-5" />
                   </Button>
                 </form>
@@ -162,22 +159,23 @@ export default async function DashboardPage() {
             </header>
 
             {/* Content Header */}
-            <header className="bg-white/80 backdrop-blur-xl sticky top-0 z-30 border-b border-slate-200/60 px-8 py-6 hidden lg:flex items-center justify-between">
+            <header className="bg-gradient-to-r from-green-900 to-green-700 h-24 sticky top-0 z-30 px-8 hidden lg:flex items-center justify-between shadow-lg">
               <div>
-                <h1 className="text-2xl font-display font-black tracking-tight text-slate-900">
+                <h1 className="text-2xl font-display font-black tracking-tight text-white">
                   Dashboard Industrial
                 </h1>
-                <p className="text-sm text-slate-500 font-medium">Bem-vindo(a) de volta, <span className="text-green-600 font-bold">{empresa?.nome_fantasia || "Admin"}</span></p>
+                <p className="text-sm text-green-50/80 font-medium">Bem-vindo(a) de volta, <span className="text-white font-bold">{empresa?.nome_fantasia || "Admin"}</span></p>
               </div>
               
               <div className="flex items-center gap-4">
-                <div className="flex flex-col items-end mr-2">
-                  <span className="text-sm font-bold text-slate-900">{user?.email}</span>
-                  <Badge variant="outline" className="text-[0.6rem] uppercase tracking-wider font-bold bg-slate-50 text-slate-500 border-slate-200">
-                    {user?.tipo} - {empresa?.status || 'Ativo'}
+                <div className="flex flex-col items-end mr-2 text-white">
+                  <span className="text-sm font-bold leading-tight">{empresa?.nome_fantasia || user?.email?.split('@')[0]}</span>
+                  <span className="text-[10px] font-bold text-green-100/70 uppercase tracking-tighter leading-none mb-1">{user?.tipo === 'admin' ? 'Administrador' : 'Gestor Industrial'}</span>
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-extrabold bg-white/10 text-white border-white/20 h-5 px-2">
+                    {empresa?.status || 'Ativo'}
                   </Badge>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-200 flex items-center justify-center text-white font-black">
+                <div className="w-11 h-11 rounded-full bg-white shadow-xl flex items-center justify-center text-green-900 font-black border-2 border-green-500/20">
                   {user?.email?.charAt(0).toUpperCase()}
                 </div>
               </div>
@@ -233,9 +231,7 @@ export default async function DashboardPage() {
                 <Card className="glass shadow-xl shadow-slate-200/50 border-white/40 overflow-hidden group">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                     <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500">Status Perfil</CardTitle>
-                    <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
-                      <Building2 className="h-5 w-5" />
-                    </div>
+                    <ViewProfileButton company={empresa} variant="stats" />
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2 mb-2">

@@ -93,7 +93,7 @@ export async function buscarEmpresasAdmin(filters?: {
     return mockEmpresas
   }
 
-  let query = supabase!.from("empresas").select("*")
+  let query = supabase!.from("empresas").select("*, produtos(*), arquivos(*)")
 
   if (filters?.status && filters.status !== "all") {
     query = query.eq("status", filters.status)

@@ -25,8 +25,13 @@ import {
   LogOut,
   Users,
   ExternalLink,
-  BarChart3
+  BarChart3,
+  X,
+  Printer,
+  Share2,
+  ListFilter
 } from "lucide-react"
+import { IndustrialDetailsModal } from "@/components/IndustrialDetailsModal"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -64,7 +69,7 @@ import {
 import { criarEmpresa } from "@/lib/database"
 import { logout } from "@/lib/auth"
 import type { Empresa, Admin } from "@/lib/supabase.types"
-import { formatBrazilianShortDate } from "@/lib/utils"
+import { formatBrazilianShortDate, cn } from "@/lib/utils"
 import { LogoSeict } from "@/components/LogoIndustria"
 
 interface AdminContentProps {
@@ -122,6 +127,9 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
   const [showEditCompanyDialog, setShowEditCompanyDialog] = useState(false)
   const [updatingCompany, setUpdatingCompany] = useState(false)
   const [companyToEdit, setCompanyToEdit] = useState<Empresa | null>(null)
+
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false)
+  const [companyToView, setCompanyToView] = useState<Empresa | null>(null)
 
   const [showCreateAdminDialog, setShowCreateAdminDialog] = useState(false)
   const [creatingAdmin, setCreatingAdmin] = useState(false)
@@ -221,6 +229,11 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
     setShowEditCompanyDialog(true)
   }
 
+  const handleViewDetails = (empresa: Empresa) => {
+    setCompanyToView(empresa)
+    setShowDetailsDialog(true)
+  }
+
   const handleDeleteCompany = async (empresa: Empresa) => {
     if (!confirm(`Excluir permanentemente "${empresa.nome_fantasia}"?`)) return
     try {
@@ -257,12 +270,12 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
         <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col z-50">
           <div className="p-8 border-b border-slate-100">
             <Link href="/admin" className="flex items-center gap-3 group">
-              <div className="p-2 bg-slate-900 rounded-xl shadow-lg shadow-slate-900/20 group-hover:scale-110 transition-transform">
+              <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
                 <LogoSeict className="h-8 w-8 text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-display font-black tracking-tight leading-none text-slate-900 uppercase">ADMIN</span>
-                <span className="text-[0.6rem] font-bold tracking-[0.2em] text-slate-400 uppercase leading-none mt-1">Portal da Indústria</span>
+                <span className="text-lg font-display font-black leading-none text-slate-900 uppercase">ADMIN</span>
+                <span className="text-[0.6rem] font-bold tracking-[0.2em] text-green-600 uppercase leading-none mt-1">Portal da Indústria</span>
               </div>
             </Link>
           </div>
@@ -312,23 +325,24 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
         {/* Main Content Area */}
         <div className="flex-1 lg:ml-72 flex flex-col min-h-screen">
           {/* Header Area */}
-          <header className="bg-white/80 backdrop-blur-xl sticky top-0 z-30 border-b border-slate-200/60 px-8 py-6 flex items-center justify-between">
+          <header className="bg-gradient-to-r from-green-900 to-green-700 h-24 sticky top-0 z-30 px-8 flex items-center justify-between shadow-lg">
             <div>
-              <h1 className="text-2xl font-display font-black tracking-tight text-slate-900 uppercase">
+              <h1 className="text-2xl font-display font-black tracking-tight text-white uppercase">
                 {activeTab === 'dashboard' ? 'Painel de Controle' : activeTab === 'empresas' ? 'Indústrias' : 'Administradores'}
               </h1>
-              <p className="text-sm text-slate-500 font-medium">Gestão centralizada do Portfólio Industrial</p>
+              <p className="text-sm text-green-50/80 font-medium">Gestão centralizada do Portfólio Industrial</p>
             </div>
             
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex flex-col items-end mr-2">
-                <span className="text-sm font-bold text-slate-900">{user?.nome || 'Administrador'}</span>
-                <Badge variant="outline" className="text-[0.6rem] uppercase tracking-wider font-bold bg-green-50 text-green-700 border-green-100 flex items-center gap-1">
+                <span className="text-sm font-bold text-white leading-tight">{user?.nome || user?.email?.split('@')[0]}</span>
+                <span className="text-[10px] font-bold text-green-100/70 uppercase tracking-tighter leading-none mb-1">Administrador</span>
+                <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-extrabold bg-white/10 text-white border-white/20 flex items-center gap-1 h-5 px-2">
                   <ShieldCheck className="h-3 w-3" />
                   Sistema Seguro
                 </Badge>
               </div>
-              <div className="w-10 h-10 rounded-full bg-slate-900 shadow-lg flex items-center justify-center text-white font-black text-xs">
+              <div className="w-11 h-11 rounded-full bg-white shadow-xl flex items-center justify-center text-green-900 font-black text-xs border-2 border-green-500/20">
                 AD
               </div>
             </div>
@@ -364,8 +378,13 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                           <TableRow key={e.id}>
                             <TableCell className="pl-6 py-4 font-bold text-slate-800">{e.nome_fantasia}</TableCell>
                             <TableCell><Badge className="rounded-full">{e.status}</Badge></TableCell>
-                            <TableCell className="text-right pr-6">
-                              <Button variant="ghost" size="icon" onClick={() => handleEditCompany(e)}><Edit className="h-4 w-4" /></Button>
+                            <TableCell className="text-right pr-6 space-x-1">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400" onClick={() => handleViewDetails(e)}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400" onClick={() => handleEditCompany(e)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -463,8 +482,12 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="rounded-xl"><ChevronDown className="h-4 w-4 text-slate-400" /></Button></DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="min-w-[180px] rounded-xl p-2">
-                                <Link href={`/empresas/${empresa.id}`} target="_blank"><DropdownMenuItem className="gap-2 rounded-lg cursor-pointer"><Eye className="h-4 w-4" /> Visualizar</DropdownMenuItem></Link>
-                                <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => handleEditCompany(empresa)}><Edit className="h-4 w-4" /> Editar Perfil</DropdownMenuItem>
+                                 <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => handleViewDetails(empresa)}>
+                                   <Eye className="h-4 w-4" /> Visualizar Detalhes
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => handleEditCompany(empresa)}>
+                                   <Edit className="h-4 w-4" /> Editar Perfil
+                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuLabel className="text-[0.6rem] uppercase tracking-[0.2em] opacity-50 px-2 py-2">Alterar Status</DropdownMenuLabel>
                                 <DropdownMenuCheckboxItem className="rounded-lg" checked={empresa.status === 'ativo'} onCheckedChange={() => handleStatusChange(empresa.id, 'ativo')}>Ativo</DropdownMenuCheckboxItem>
@@ -653,6 +676,12 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Details Modal - Resized to Reusable Component */}
+      <IndustrialDetailsModal 
+        isOpen={showDetailsDialog} 
+        onClose={() => setShowDetailsDialog(false)} 
+        company={companyToView} 
+      />
     </div>
   )
 }
