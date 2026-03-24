@@ -2,22 +2,22 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { 
-  Factory, 
-  Package, 
-  Plus, 
-  Eye, 
-  CheckCircle, 
-  Clock, 
-  Search, 
-  ChevronDown, 
-  Loader2, 
-  UserPlus, 
-  Edit, 
-  Key, 
-  UserX, 
-  UserCheck, 
-  Trash2, 
+import {
+  Factory,
+  Package,
+  Plus,
+  Eye,
+  CheckCircle,
+  Clock,
+  Search,
+  ChevronDown,
+  Loader2,
+  UserPlus,
+  Edit,
+  Key,
+  UserX,
+  UserCheck,
+  Trash2,
   Building2,
   LayoutDashboard,
   ShieldCheck,
@@ -58,14 +58,14 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { 
-  obterEstatisticasAdmin, 
-  buscarEmpresasAdmin, 
-  atualizarStatusEmpresa, 
-  obterTodosAdmins, 
+import {
+  obterEstatisticasAdmin,
+  buscarEmpresasAdmin,
+  atualizarStatusEmpresa,
+  obterTodosAdmins,
   atualizarStatusAdmin,
   atualizarEmpresa,
-  excluirEmpresa 
+  excluirEmpresa
 } from "@/lib/admin"
 import { criarEmpresa } from "@/lib/database"
 import { logout } from "@/lib/auth"
@@ -195,7 +195,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
     }
     setCreatingEmpresa(true)
     try {
-      const result = await criarEmpresa({...novaEmpresa})
+      const result = await criarEmpresa({ ...novaEmpresa })
       if (result) {
         const updatedStats = await obterEstatisticasAdmin()
         setStats(updatedStats)
@@ -271,7 +271,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
         {/* Sidebar Navigation - Mirroring Dashboard */}
         <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col z-50">
           <div className="p-8 border-b border-slate-100">
-            <Link href="/admin" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center gap-3 group">
               <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
                 <LogoSeict className="h-8 w-8 text-white" />
               </div>
@@ -290,8 +290,8 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                 { id: 'empresas', label: 'Gestão de Empresas', icon: Building2 },
                 { id: 'administradores', label: 'Equipe Admin', icon: Users },
               ].map((item) => (
-                <TabsTrigger 
-                  key={item.id} 
+                <TabsTrigger
+                  key={item.id}
                   value={item.id}
                   className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent"
                 >
@@ -307,8 +307,8 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                 <ExternalLink className="h-5 w-5 text-slate-400 group-hover:text-blue-500" />
                 <span>Ver Site Público</span>
               </Link>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => setShowSettingsModal(true)}
                 className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group text-left"
               >
@@ -338,7 +338,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
               </h1>
               <p className="text-sm text-green-50/80 font-medium">Gestão centralizada do Portfólio Industrial</p>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex flex-col items-end mr-2">
                 <span className="text-sm font-bold text-white leading-tight">{user?.nome || user?.email?.split('@')[0]}</span>
@@ -373,7 +373,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <Card className="lg:col-span-2 glass rounded-[2rem] border-white/40 shadow-xl overflow-hidden">
-                   <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
+                  <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
                     <CardTitle className="font-display font-black text-slate-900">Indústrias Recentes</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
@@ -400,7 +400,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                 </Card>
 
                 <Card className="glass rounded-[2rem] border-white/40 shadow-xl overflow-hidden">
-                   <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
+                  <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
                     <CardTitle className="font-display font-black text-slate-900">Atividade</CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
@@ -476,11 +476,10 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                           </TableCell>
                           <TableCell className="text-sm font-medium text-slate-600">{empresa.setor_economico}</TableCell>
                           <TableCell>
-                            <Badge className={`rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                              empresa.status === 'ativo' ? 'bg-green-50 text-green-700 border-green-100' : 
-                              empresa.status === 'pendente' ? 'bg-amber-50 text-amber-700 border-amber-100' : 
-                              'bg-slate-50 text-slate-700 border-slate-100'
-                            }`}>
+                            <Badge className={`rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${empresa.status === 'ativo' ? 'bg-green-50 text-green-700 border-green-100' :
+                                empresa.status === 'pendente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                  'bg-slate-50 text-slate-700 border-slate-100'
+                              }`}>
                               {empresa.status}
                             </Badge>
                           </TableCell>
@@ -488,12 +487,12 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="rounded-xl"><ChevronDown className="h-4 w-4 text-slate-400" /></Button></DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="min-w-[180px] rounded-xl p-2">
-                                 <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => handleViewDetails(empresa)}>
-                                   <Eye className="h-4 w-4" /> Visualizar Detalhes
-                                 </DropdownMenuItem>
-                                 <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => handleEditCompany(empresa)}>
-                                   <Edit className="h-4 w-4" /> Editar Perfil
-                                 </DropdownMenuItem>
+                                <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => handleViewDetails(empresa)}>
+                                  <Eye className="h-4 w-4" /> Visualizar Detalhes
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => handleEditCompany(empresa)}>
+                                  <Edit className="h-4 w-4" /> Editar Perfil
+                                </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuLabel className="text-[0.6rem] uppercase tracking-[0.2em] opacity-50 px-2 py-2">Alterar Status</DropdownMenuLabel>
                                 <DropdownMenuCheckboxItem className="rounded-lg" checked={empresa.status === 'ativo'} onCheckedChange={() => handleStatusChange(empresa.id, 'ativo')}>Ativo</DropdownMenuCheckboxItem>
@@ -514,36 +513,36 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
 
             {/* Administradores View */}
             <TabsContent value="administradores" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
-               <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-bold text-slate-900">Equipe Técnica Aleac</h2>
-                  <Button onClick={() => setShowCreateAdminDialog(true)} className="bg-slate-900 rounded-xl font-bold"><UserPlus className="h-4 w-4 mr-2" /> Novo Administrador</Button>
-               </div>
-               
-               <Card className="rounded-[2rem] overflow-hidden border-slate-200 shadow-xl">
-                 <CardContent className="p-0">
-                   <Table>
-                      <TableHeader className="bg-slate-50/50"><TableRow><TableHead className="pl-8">Nome</TableHead><TableHead>Acesso</TableHead><TableHead>Status</TableHead><TableHead className="text-right pr-8">Ações</TableHead></TableRow></TableHeader>
-                      <TableBody>
-                        {admins.map(admin => (
-                          <TableRow key={admin.id}>
-                            <TableCell className="pl-8 py-4">
-                              <div className="flex flex-col">
-                                <span className="font-bold text-slate-800">{admin.nome}</span>
-                                <span className="text-xs text-slate-400">{admin.email}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-xs font-medium uppercase tracking-widest text-slate-500">{admin.cargo || 'Gestor'}</TableCell>
-                            <TableCell><Badge className="rounded-full">{admin.ativo ? 'Conectado' : 'Bloqueado'}</Badge></TableCell>
-                            <TableCell className="text-right pr-8 space-x-2">
-                              <Button variant="ghost" size="icon" className="rounded-lg" onClick={() => { setAdminToEdit(admin); setShowEditAdminDialog(true); }}><Edit className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="icon" className="rounded-lg text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                   </Table>
-                 </CardContent>
-               </Card>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold text-slate-900">Equipe Técnica Aleac</h2>
+                <Button onClick={() => setShowCreateAdminDialog(true)} className="bg-slate-900 rounded-xl font-bold"><UserPlus className="h-4 w-4 mr-2" /> Novo Administrador</Button>
+              </div>
+
+              <Card className="rounded-[2rem] overflow-hidden border-slate-200 shadow-xl">
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader className="bg-slate-50/50"><TableRow><TableHead className="pl-8">Nome</TableHead><TableHead>Acesso</TableHead><TableHead>Status</TableHead><TableHead className="text-right pr-8">Ações</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {admins.map(admin => (
+                        <TableRow key={admin.id}>
+                          <TableCell className="pl-8 py-4">
+                            <div className="flex flex-col">
+                              <span className="font-bold text-slate-800">{admin.nome}</span>
+                              <span className="text-xs text-slate-400">{admin.email}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs font-medium uppercase tracking-widest text-slate-500">{admin.cargo || 'Gestor'}</TableCell>
+                          <TableCell><Badge className="rounded-full">{admin.ativo ? 'Conectado' : 'Bloqueado'}</Badge></TableCell>
+                          <TableCell className="text-right pr-8 space-x-2">
+                            <Button variant="ghost" size="icon" className="rounded-lg" onClick={() => { setAdminToEdit(admin); setShowEditAdminDialog(true); }}><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="rounded-lg text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             </TabsContent>
           </main>
         </div>
@@ -555,23 +554,23 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
           <DialogHeader><DialogTitle className="text-2xl font-black">Cadastrar Nova Indústria</DialogTitle></DialogHeader>
           <div className="grid md:grid-cols-2 gap-6 py-6">
             <div className="space-y-4">
-               <div><Label className="text-xs font-black uppercase text-slate-400">E-mail de Acesso *</Label><Input className="rounded-xl mt-1.5" value={novaEmpresa.email} onChange={e => setNovaEmpresa({...novaEmpresa, email: e.target.value})} /></div>
-               <div><Label className="text-xs font-black uppercase text-slate-400">Senha Padrão *</Label><Input type="password" className="rounded-xl mt-1.5" value={novaEmpresa.password} onChange={e => setNovaEmpresa({...novaEmpresa, password: e.target.value})} /></div>
-               <div><Label className="text-xs font-black uppercase text-slate-400">Nome Fantasia *</Label><Input className="rounded-xl mt-1.5" value={novaEmpresa.nome_fantasia} onChange={e => setNovaEmpresa({...novaEmpresa, nome_fantasia: e.target.value})} /></div>
+              <div><Label className="text-xs font-black uppercase text-slate-400">E-mail de Acesso *</Label><Input className="rounded-xl mt-1.5" value={novaEmpresa.email} onChange={e => setNovaEmpresa({ ...novaEmpresa, email: e.target.value })} /></div>
+              <div><Label className="text-xs font-black uppercase text-slate-400">Senha Padrão *</Label><Input type="password" className="rounded-xl mt-1.5" value={novaEmpresa.password} onChange={e => setNovaEmpresa({ ...novaEmpresa, password: e.target.value })} /></div>
+              <div><Label className="text-xs font-black uppercase text-slate-400">Nome Fantasia *</Label><Input className="rounded-xl mt-1.5" value={novaEmpresa.nome_fantasia} onChange={e => setNovaEmpresa({ ...novaEmpresa, nome_fantasia: e.target.value })} /></div>
             </div>
             <div className="space-y-4">
-               <div><Label className="text-xs font-black uppercase text-slate-400">Município Sede *</Label>
-                <Select value={novaEmpresa.municipio} onValueChange={v => setNovaEmpresa({...novaEmpresa, municipio: v})}>
+              <div><Label className="text-xs font-black uppercase text-slate-400">Município Sede *</Label>
+                <Select value={novaEmpresa.municipio} onValueChange={v => setNovaEmpresa({ ...novaEmpresa, municipio: v })}>
                   <SelectTrigger className="rounded-xl mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>{municipios.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
                 </Select></div>
-               <div><Label className="text-xs font-black uppercase text-slate-400">Apresentação Breve *</Label><Textarea className="rounded-xl mt-1.5 min-h-[100px]" value={novaEmpresa.apresentacao} onChange={e => setNovaEmpresa({...novaEmpresa, apresentacao: e.target.value})} /></div>
+              <div><Label className="text-xs font-black uppercase text-slate-400">Apresentação Breve *</Label><Textarea className="rounded-xl mt-1.5 min-h-[100px]" value={novaEmpresa.apresentacao} onChange={e => setNovaEmpresa({ ...novaEmpresa, apresentacao: e.target.value })} /></div>
             </div>
           </div>
           <DialogFooter className="pt-4"><Button onClick={handleCreateEmpresa} className="w-full md:w-auto rounded-xl bg-slate-900 h-11 px-8 font-bold">{creatingEmpresa ? "Sincronizando..." : "Concluir Cadastro"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Edit Company Dialog */}
       <Dialog open={showEditCompanyDialog} onOpenChange={setShowEditCompanyDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl p-8 border-none shadow-2xl">
@@ -581,49 +580,49 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
               Editar Perfil Industrial
             </DialogTitle>
           </DialogHeader>
-          
+
           {companyToEdit && (
             <div className="grid md:grid-cols-2 gap-6 py-6">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase text-slate-400">Nome Fantasia</Label>
-                  <Input 
-                    className="rounded-xl" 
-                    value={companyToEdit.nome_fantasia} 
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, nome_fantasia: e.target.value })} 
+                  <Input
+                    className="rounded-xl"
+                    value={companyToEdit.nome_fantasia}
+                    onChange={e => setCompanyToEdit({ ...companyToEdit, nome_fantasia: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase text-slate-400">Razão Social</Label>
-                  <Input 
-                    className="rounded-xl" 
-                    value={companyToEdit.razao_social || ""} 
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, razao_social: e.target.value })} 
+                  <Input
+                    className="rounded-xl"
+                    value={companyToEdit.razao_social || ""}
+                    onChange={e => setCompanyToEdit({ ...companyToEdit, razao_social: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase text-slate-400">CNPJ</Label>
-                  <Input 
-                    className="rounded-xl" 
-                    value={companyToEdit.cnpj || ""} 
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, cnpj: e.target.value })} 
+                  <Input
+                    className="rounded-xl"
+                    value={companyToEdit.cnpj || ""}
+                    onChange={e => setCompanyToEdit({ ...companyToEdit, cnpj: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase text-slate-400">Setor Econômico</Label>
-                  <Input 
-                    className="rounded-xl" 
-                    value={companyToEdit.setor_economico || ""} 
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, setor_economico: e.target.value })} 
+                  <Input
+                    className="rounded-xl"
+                    value={companyToEdit.setor_economico || ""}
+                    onChange={e => setCompanyToEdit({ ...companyToEdit, setor_economico: e.target.value })}
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase text-slate-400">Município</Label>
-                  <Select 
-                    value={companyToEdit.municipio} 
+                  <Select
+                    value={companyToEdit.municipio}
                     onValueChange={v => setCompanyToEdit({ ...companyToEdit, municipio: v })}
                   >
                     <SelectTrigger className="rounded-xl">
@@ -638,35 +637,35 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase text-slate-400">Apresentação</Label>
-                  <Textarea 
-                    className="rounded-xl min-h-[120px] resize-none" 
-                    value={companyToEdit.apresentacao || ""} 
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, apresentacao: e.target.value })} 
+                  <Textarea
+                    className="rounded-xl min-h-[120px] resize-none"
+                    value={companyToEdit.apresentacao || ""}
+                    onChange={e => setCompanyToEdit({ ...companyToEdit, apresentacao: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase text-slate-400">Vídeo de Apresentação (URL)</Label>
-                  <Input 
-                    className="rounded-xl" 
+                  <Input
+                    className="rounded-xl"
                     placeholder="https://youtube.com/..."
-                    value={companyToEdit.video_apresentacao || ""} 
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, video_apresentacao: e.target.value })} 
+                    value={companyToEdit.video_apresentacao || ""}
+                    onChange={e => setCompanyToEdit({ ...companyToEdit, video_apresentacao: e.target.value })}
                   />
                 </div>
               </div>
             </div>
           )}
-          
+
           <DialogFooter className="gap-3 pt-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowEditCompanyDialog(false)}
               className="rounded-xl h-12 px-8 font-bold"
             >
               Cancelar
             </Button>
-            <Button 
-              onClick={handleUpdateCompany} 
+            <Button
+              onClick={handleUpdateCompany}
               disabled={updatingCompany}
               className="rounded-xl bg-slate-900 hover:bg-slate-800 h-12 px-8 font-bold shadow-lg shadow-slate-900/20"
             >
@@ -682,10 +681,10 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <IndustrialDetailsModal 
-        isOpen={showDetailsDialog} 
-        onClose={() => setShowDetailsDialog(false)} 
-        company={companyToView} 
+      <IndustrialDetailsModal
+        isOpen={showDetailsDialog}
+        onClose={() => setShowDetailsDialog(false)}
+        company={companyToView}
       />
 
       <ConfiguracoesModal
