@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Factory, Package, Plus, Eye, CheckCircle, Clock, Search, ChevronDown, Loader2, UserPlus, Edit, Key, UserX, UserCheck, Trash2 } from "lucide-react"
+import { Factory, Package, Plus, Eye, CheckCircle, Clock, Search, ChevronDown, Loader2, UserPlus, Edit, Key, UserX, UserCheck, Trash2, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -572,51 +572,59 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
       )}
 
       <div className="max-w-7xl mx-auto py-8 px-4">
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Empresas</CardTitle>
-              <Factory className="h-4 w-4 text-muted-foreground" />
+        {/* Premium Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <Card className="glass shadow-xl shadow-slate-200/50 border-white/40 overflow-hidden group hover:translate-y-[-4px] transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500">Total de Empresas</CardTitle>
+              <div className="w-10 h-10 bg-slate-900/5 rounded-xl flex items-center justify-center text-slate-900 group-hover:scale-110 transition-transform">
+                <Factory className="h-5 w-5" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{loading ? "..." : stats.totalEmpresas}</div>
-              <p className="text-xs text-muted-foreground">
-                +{loading ? "..." : stats.novosCadastrosMes} novos este mês
+              <div className="text-4xl font-display font-black text-slate-900 mb-1">{loading ? "..." : stats.totalEmpresas}</div>
+              <p className="text-[0.7rem] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                +{loading ? "..." : stats.novosCadastrosMes} novos <span className="text-slate-400 font-medium">este mês</span>
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Empresas Ativas</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          <Card className="glass shadow-xl shadow-slate-200/50 border-white/40 overflow-hidden group hover:translate-y-[-4px] transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500">Empresas Ativas</CardTitle>
+              <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                <CheckCircle className="h-5 w-5" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{loading ? "..." : stats.empresasAtivas}</div>
-              <p className="text-xs text-muted-foreground">Perfis aprovados</p>
+              <div className="text-4xl font-display font-black text-slate-900 mb-1">{loading ? "..." : stats.empresasAtivas}</div>
+              <p className="text-[0.7rem] font-medium text-slate-400">Públicas no portal</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Empresas Pendentes</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+          <Card className="glass shadow-xl shadow-slate-200/50 border-white/40 overflow-hidden group hover:translate-y-[-4px] transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500">Pendentes</CardTitle>
+              <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
+                <Clock className="h-5 w-5" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{loading ? "..." : stats.empresasPendentes}</div>
-              <p className="text-xs text-muted-foreground">Aguardando aprovação</p>
+              <div className="text-4xl font-display font-black text-slate-900 mb-1">{loading ? "..." : stats.empresasPendentes}</div>
+              <p className="text-[0.7rem] font-medium text-slate-400">Aguardando análise</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
+          <Card className="glass shadow-xl shadow-slate-200/50 border-white/40 overflow-hidden group hover:translate-y-[-4px] transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500">Total Produtos</CardTitle>
+              <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                <Package className="h-5 w-5" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{loading ? "..." : stats.totalProdutos}</div>
-              <p className="text-xs text-muted-foreground">Em toda a plataforma</p>
+              <div className="text-4xl font-display font-black text-slate-900 mb-1">{loading ? "..." : stats.totalProdutos}</div>
+              <p className="text-[0.7rem] font-medium text-slate-400">Itens cadastrados</p>
             </CardContent>
           </Card>
         </div>
@@ -636,23 +644,75 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="empresas">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>Gerenciamento de Empresas</CardTitle>
-                    <CardDescription>Visualize e gerencie as empresas cadastradas.</CardDescription>
+          <TabsContent value="empresas" className="outline-none animate-in fade-in-50 duration-500">
+            <div className="space-y-6">
+              {/* Search and Filters Bar */}
+              <div className="flex flex-col md:flex-row gap-4 items-end bg-white p-6 rounded-[1.5rem] border border-slate-200 shadow-sm">
+                <div className="flex-1 w-full space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Buscar Empresa</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input 
+                      placeholder="Nome, CNPJ ou e-mail..." 
+                      className="pl-10 rounded-xl border-slate-200 focus:ring-green-500"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
-                  <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Nova Empresa
-                      </Button>
-                    </DialogTrigger>
-                    
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                </div>
+                
+                <div className="w-full md:w-48 space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Status</Label>
+                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger className="rounded-xl border-slate-200">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Status</SelectItem>
+                      <SelectItem value="ativo">Ativo</SelectItem>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="inativo">Inativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="w-full md:w-48 space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Município</Label>
+                  <Select value={selectedCity} onValueChange={setSelectedCity}>
+                    <SelectTrigger className="rounded-xl border-slate-200">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Municípios</SelectItem>
+                      {municipios.map(m => (
+                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button variant="default" className="rounded-xl bg-slate-900 hover:bg-slate-800 h-10 px-6">
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+                  Filtrar
+                </Button>
+              </div>
+
+              <Card className="rounded-[2rem] border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden">
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100 px-8 py-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle className="font-display font-black text-slate-900">Gerenciamento de Empresas</CardTitle>
+                      <CardDescription className="font-medium">Total de {empresas.length} empresas encontradas</CardDescription>
+                    </div>
+                    <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                      <DialogTrigger asChild>
+                        <Button className="rounded-xl bg-green-600 hover:bg-green-700 shadow-lg shadow-green-200">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Nova Empresa
+                        </Button>
+                      </DialogTrigger>
+                      {/* Original Dialog Content starts here */}
+                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Cadastrar Nova Empresa</DialogTitle>
                         <DialogDescription>
@@ -883,399 +943,163 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp }
                     </DialogContent>
                   </Dialog>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                    <Input
-                      type="text"
-                      placeholder="Buscar por nome, CNPJ, razão social..."
-                      className="pl-10 pr-4 py-2 w-full"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="ativo">Ativo</SelectItem>
-                      <SelectItem value="pendente">Pendente</SelectItem>
-                      <SelectItem value="inativo">Inativo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedSector} onValueChange={setSelectedSector}>
-                    <SelectTrigger className="w-full sm:w-[200px]">
-                      <SelectValue placeholder="Setor Econômico" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Setores</SelectItem>
-                      {setoresEconomicos.map((sector) => (
-                        <SelectItem key={sector.value} value={sector.value}>
-                          {sector.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedCity} onValueChange={setSelectedCity}>
-                    <SelectTrigger className="w-full sm:w-[200px]">
-                      <SelectValue placeholder="Município" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Municípios</SelectItem>
-                      {municipios.map((city) => (
-                        <SelectItem key={city.value} value={city.value}>
-                          {city.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8">Carregando empresas...</div>
-                ) : empresas.length === 0 ? (
-                  <div className="text-center py-8 text-gray-600">Nenhuma empresa encontrada.</div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nome Fantasia</TableHead>
-                        <TableHead>CNPJ</TableHead>
-                        <TableHead>Município</TableHead>
-                        <TableHead>Setor</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Cadastro</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
+              <CardContent className="p-0">
+                <Table>
+                    <TableHeader className="bg-slate-50/50">
+                      <TableRow className="border-slate-100 hover:bg-transparent">
+                        <TableHead className="pl-8 font-bold text-slate-500 h-14">Empresa / Razão Social</TableHead>
+                        <TableHead className="font-bold text-slate-500 h-14">Localização</TableHead>
+                        <TableHead className="font-bold text-slate-500 h-14">Status</TableHead>
+                        <TableHead className="font-bold text-slate-500 h-14">Cadastro</TableHead>
+                        <TableHead className="pr-8 text-right font-bold text-slate-500 h-14">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {empresas.map((empresa) => (
-                        <TableRow key={empresa.id}>
-                          <TableCell className="font-medium">{empresa.nome_fantasia}</TableCell>
-                          <TableCell>{empresa.cnpj}</TableCell>
-                          <TableCell>{empresa.municipio}</TableCell>
-                          <TableCell>{empresa.setor_empresa}</TableCell>
-                          <TableCell>
-                            <Badge variant={getStatusBadgeVariant(empresa.status)}>
-                              {empresa.status.charAt(0).toUpperCase() + empresa.status.slice(1)}
-                            </Badge>
+                      {empresas.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="h-32 text-center text-slate-400 font-medium">
+                            Nenhuma empresa encontrada com os filtros selecionados.
                           </TableCell>
-                          <TableCell className="text-sm text-gray-500">
-                            {formatBrazilianShortDate(empresa.created_at)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Link href={`/admin/empresas/${empresa.id}`}>
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </Link>
+                        </TableRow>
+                      ) : (
+                        empresas.map((empresa) => (
+                          <TableRow key={empresa.id} className="border-slate-100 hover:bg-slate-50/50 transition-colors group">
+                            <TableCell className="pl-8 py-4">
+                              <div className="flex items-center gap-3">
+                                {empresa.logo_url ? (
+                                  <img src={empresa.logo_url} className="w-10 h-10 rounded-lg object-contain bg-white border border-slate-100 shadow-sm" alt="" />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
+                                    <Building2 className="h-5 w-5" />
+                                  </div>
+                                )}
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-slate-900 group-hover:text-green-700 transition-colors">{empresa.nome_fantasia}</span>
+                                  <span className="text-xs text-slate-400 font-medium">{empresa.razao_social}</span>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-bold text-slate-700">{empresa.municipio}</span>
+                                <span className="text-[0.65rem] text-slate-400 uppercase tracking-wider font-bold">{empresa.setor_empresa}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={`rounded-full px-3 py-0.5 text-[0.65rem] font-black uppercase tracking-wider ${
+                                empresa.status === 'ativo' ? 'bg-green-50 text-green-700 border-green-100' :
+                                empresa.status === 'pendente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                'bg-slate-100 text-slate-600 border-slate-200'
+                              }`}>
+                                {empresa.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm font-medium text-slate-500">
+                              {formatBrazilianShortDate(empresa.created_at)}
+                            </TableCell>
+                            <TableCell className="pr-8 text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
+                                  <Button variant="ghost" size="icon" className="rounded-xl hover:bg-white hover:shadow-md transition-all">
                                     <ChevronDown className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Alterar Status</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <DropdownMenuCheckboxItem
-                                        checked={empresa.status === "ativo"}
-                                        onCheckedChange={() => {}}
-                                        disabled={empresa.status === "ativo"}
-                                        onSelect={(e) => e.preventDefault()}
-                                      >
-                                        Ativar
-                                      </DropdownMenuCheckboxItem>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Confirmar Ativação</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Tem certeza que deseja ativar a empresa "{empresa.nome_fantasia}"? Ela ficará
-                                          visível publicamente.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleStatusChange(empresa.id, "ativo")}>
-                                          Confirmar
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <DropdownMenuCheckboxItem
-                                        checked={empresa.status === "pendente"}
-                                        onCheckedChange={() => {}}
-                                        disabled={empresa.status === "pendente"}
-                                        onSelect={(e) => e.preventDefault()}
-                                      >
-                                        Marcar como Pendente
-                                      </DropdownMenuCheckboxItem>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Confirmar Pendência</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Tem certeza que deseja marcar a empresa "{empresa.nome_fantasia}" como
-                                          pendente? Ela não ficará visível publicamente.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleStatusChange(empresa.id, "pendente")}>
-                                          Confirmar
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <DropdownMenuCheckboxItem
-                                        checked={empresa.status === "inativo"}
-                                        onCheckedChange={() => {}}
-                                        disabled={empresa.status === "inativo"}
-                                        onSelect={(e) => e.preventDefault()}
-                                      >
-                                        Inativar
-                                      </DropdownMenuCheckboxItem>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Confirmar Inativação</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Tem certeza que deseja inativar a empresa "{empresa.nome_fantasia}"? Ela não
-                                          ficará visível publicamente.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleStatusChange(empresa.id, "inativo")}>
-                                          Confirmar
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
+                                <DropdownMenuContent align="end" className="rounded-xl border-slate-200 p-2 min-w-[160px]">
+                                  <DropdownMenuLabel className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400 px-3 py-2">Ações de Gestão</DropdownMenuLabel>
+                                  <Link href={`/empresas/${empresa.id}`} target="_blank">
+                                    <DropdownMenuCheckboxItem className="rounded-lg gap-2 cursor-pointer font-bold text-sm">
+                                      <Eye className="h-4 w-4 text-slate-400" /> Ver Perfil
+                                    </DropdownMenuCheckboxItem>
+                                  </Link>
+                                  <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                                  <DropdownMenuLabel className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400 px-3 py-2">Alterar Status</DropdownMenuLabel>
+                                  <DropdownMenuCheckboxItem 
+                                    className="rounded-lg gap-2 cursor-pointer text-green-600 font-bold text-sm"
+                                    checked={empresa.status === "ativo"}
+                                    onCheckedChange={() => handleStatusChange(empresa.id, "ativo")}
+                                  >
+                                    <CheckCircle className="h-4 w-4" /> Ativo
+                                  </DropdownMenuCheckboxItem>
+                                  <DropdownMenuCheckboxItem 
+                                    className="rounded-lg gap-2 cursor-pointer text-amber-600 font-bold text-sm"
+                                    checked={empresa.status === "pendente"}
+                                    onCheckedChange={() => handleStatusChange(empresa.id, "pendente")}
+                                  >
+                                    <Clock className="h-4 w-4" /> Pendente
+                                  </DropdownMenuCheckboxItem>
+                                  <DropdownMenuCheckboxItem 
+                                    className="rounded-lg gap-2 cursor-pointer text-slate-600 font-bold text-sm"
+                                    checked={empresa.status === "inativo"}
+                                    onCheckedChange={() => handleStatusChange(empresa.id, "inativo")}
+                                  >
+                                    <UserX className="h-4 w-4" /> Inativo
+                                  </DropdownMenuCheckboxItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
-          <TabsContent value="administradores">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
+          <TabsContent value="administradores" className="outline-none animate-in fade-in-50 duration-500">
+            <Card className="rounded-[2rem] border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden">
+               <CardHeader className="bg-slate-50/50 border-b border-slate-100 px-8 py-6 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle>Gerenciamento de Administradores</CardTitle>
-                    <CardDescription>Visualize e gerencie os administradores do sistema.</CardDescription>
+                    <CardTitle className="font-display font-black text-slate-900">Corpo Administrativo</CardTitle>
+                    <CardDescription className="font-medium">Gestão de acesso e privilégios do sistema</CardDescription>
                   </div>
-                  <Dialog open={showCreateAdminDialog} onOpenChange={setShowCreateAdminDialog}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Novo Administrador
-                      </Button>
-                    </DialogTrigger>
-                    
-                    <DialogContent className="max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Cadastrar Novo Administrador</DialogTitle>
-                        <DialogDescription>
-                          Preencha as informações do novo administrador do sistema.
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="admin_nome">Nome Completo *</Label>
-                          <Input
-                            id="admin_nome"
-                            placeholder="Nome completo do administrador"
-                            value={novoAdmin.nome}
-                            onChange={(e) => setNovoAdmin(prev => ({ ...prev, nome: e.target.value }))}
-                            required
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="admin_email">Email *</Label>
-                          <Input
-                            id="admin_email"
-                            type="email"
-                            placeholder="admin@exemplo.com"
-                            value={novoAdmin.email}
-                            onChange={(e) => setNovoAdmin(prev => ({ ...prev, email: e.target.value }))}
-                            required
-                            autoComplete="email"
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="admin_password">Senha *</Label>
-                          <Input
-                            id="admin_password"
-                            type="password"
-                            placeholder="********"
-                            value={novoAdmin.password}
-                            onChange={(e) => setNovoAdmin(prev => ({ ...prev, password: e.target.value }))}
-                            required
-                            autoComplete="new-password"
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="admin_confirmPassword">Confirmar Senha *</Label>
-                          <Input
-                            id="admin_confirmPassword"
-                            type="password"
-                            placeholder="********"
-                            value={novoAdmin.confirmPassword}
-                            onChange={(e) => setNovoAdmin(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                            required
-                            autoComplete="new-password"
-                          />
-                        </div>
-                      </div>
-                      
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowCreateAdminDialog(false)}>
-                          Cancelar
-                        </Button>
-                        <Button onClick={handleCreateAdmin} disabled={creatingAdmin}>
-                          {creatingAdmin ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Criando...
-                            </>
-                          ) : (
-                            "Criar Administrador"
-                          )}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                {admins.length === 0 ? (
-                  <div className="text-center py-8">
-                    <UserPlus className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Nenhum Administrador Encontrado</h3>
-                    <p className="text-gray-600 mb-4">
-                      Ainda não há administradores cadastrados no sistema.
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Use o botão "Novo Administrador" acima para criar o primeiro administrador.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-200">
-                      <thead>
-                        <tr className="bg-gray-50">
-                          <th className="border border-gray-200 px-4 py-2 text-left">Nome</th>
-                          <th className="border border-gray-200 px-4 py-2 text-left">Email</th>
-                          <th className="border border-gray-200 px-4 py-2 text-left">Cargo</th>
-                          <th className="border border-gray-200 px-4 py-2 text-center">Status</th>
-                          <th className="border border-gray-200 px-4 py-2 text-center">Criado em</th>
-                          <th className="border border-gray-200 px-4 py-2 text-center">Ações</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {admins.map((admin) => (
-                          <tr key={admin.id} className="hover:bg-gray-50">
-                            <td className="border border-gray-200 px-4 py-2 font-medium">
-                              {admin.nome}
-                            </td>
-                            <td className="border border-gray-200 px-4 py-2 text-gray-600">
-                              {admin.email}
-                            </td>
-                            <td className="border border-gray-200 px-4 py-2 text-gray-600">
-                              {admin.cargo || "-"}
-                            </td>
-                            <td className="border border-gray-200 px-4 py-2 text-center">
-                              <span 
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  admin.ativo
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {admin.ativo ? "Ativo" : "Inativo"}
-                              </span>
-                            </td>
-                            <td className="border border-gray-200 px-4 py-2 text-center text-sm text-gray-600">
-                              {new Date(admin.created_at).toLocaleDateString("pt-BR")}
-                            </td>
-                            <td className="border border-gray-200 px-4 py-2">
-                              <div className="flex items-center justify-center gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEditAdmin(admin)}
-                                  className="h-8 w-8 p-0"
-                                  title="Editar administrador"
-                                >
+                  <Button onClick={() => setShowCreateAdminDialog(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Novo Admin
+                  </Button>
+               </CardHeader>
+               <CardContent className="p-0">
+                  <Table>
+                    <TableHeader className="bg-slate-50/50">
+                      <TableRow className="border-slate-100 hover:bg-transparent">
+                        <TableHead className="pl-8 font-bold text-slate-500 h-14">Nome / Cargo</TableHead>
+                        <TableHead className="font-bold text-slate-500 h-14">E-mail</TableHead>
+                        <TableHead className="font-bold text-slate-500 h-14">Status</TableHead>
+                        <TableHead className="pr-8 text-right font-bold text-slate-500 h-14">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {admins.map(admin => (
+                          <TableRow key={admin.id} className="border-slate-100 hover:bg-slate-50/50 transition-colors">
+                            <TableCell className="pl-8 py-4">
+                               <div className="flex flex-col">
+                                  <span className="font-bold text-slate-900">{admin.nome}</span>
+                                  <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">{admin.cargo || 'Membro da Equipe'}</span>
+                               </div>
+                            </TableCell>
+                            <TableCell className="text-sm font-medium text-slate-600">{admin.email}</TableCell>
+                            <TableCell>
+                              <Badge className={`rounded-full px-3 py-0.5 text-[0.65rem] font-black uppercase tracking-wider ${
+                                admin.ativo ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'
+                              }`}>
+                                {admin.ativo ? 'Ativo' : 'Inativo'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="pr-8 text-right space-x-2">
+                               <Button variant="ghost" size="icon" className="rounded-lg h-8 w-8 text-slate-400 hover:text-slate-900" onClick={() => handleEditAdmin(admin)}>
                                   <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleResetPassword(admin)}
-                                  className="h-8 w-8 p-0"
-                                  title="Resetar senha"
-                                >
-                                  <Key className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleToggleAdminStatus(admin)}
-                                  className={`h-8 w-8 p-0 ${
-                                    admin.ativo 
-                                      ? "text-red-600 hover:text-red-700" 
-                                      : "text-green-600 hover:text-green-700"
-                                  }`}
-                                  title={admin.ativo ? "Desativar administrador" : "Ativar administrador"}
-                                >
-                                  {admin.ativo ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleDeleteAdmin(admin)}
-                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                  title="Excluir administrador"
-                                >
+                               </Button>
+                               <Button variant="ghost" size="icon" className="rounded-lg h-8 w-8 text-slate-400 hover:text-red-600" onClick={() => handleDeleteAdmin(admin)}>
                                   <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
+                               </Button>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </CardContent>
+                    </TableBody>
+                  </Table>
+               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>

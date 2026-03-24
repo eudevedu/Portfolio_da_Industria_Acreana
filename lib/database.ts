@@ -163,6 +163,7 @@ export async function buscarEmpresas(filters?: {
   }
   const { data, error } = await query.order("created_at", { ascending: false })
   if (error) {
+    console.error("❌ Erro ao buscar empresas no Supabase:", error)
     return []
   }
   return data as Empresa[]
@@ -848,10 +849,10 @@ export async function obterEstatisticasHome(): Promise<{
     }
 
   } catch (error) {
-    console.error("Erro geral ao buscar estatísticas:", error)
+    console.error("❌ Erro geral ao buscar estatísticas:", error)
     return {
-      totalEmpresas: 150,
-      totalProdutos: 500,
+      totalEmpresas: 0,
+      totalProdutos: 0,
       totalMunicipios: 22
     }
   }

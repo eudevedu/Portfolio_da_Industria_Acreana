@@ -1,26 +1,20 @@
 import { Search, MapPin, Plus } from "lucide-react"
 import { LogoSeict } from "@/components/LogoIndustria"
-import { SafeImage } from "@/components/SafeImage"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { isLoggedIn, getCurrentUser, logout } from "@/lib/auth" // Importa Server Actions e funções de auth
-import { getLastCompanies } from "@/lib/empresa" // Importe sua função de busca
-import { obterEstatisticasHome } from "@/lib/database" // Importa função de estatísticas
-import Footer from "@/components/footer"
+import { isLoggedIn, getCurrentUser } from "@/lib/auth"
+import { getLastCompanies } from "@/lib/empresa"
+import { obterEstatisticasHome } from "@/lib/database"
 
-// Força renderização dinâmica devido ao uso de cookies
 export const dynamic = 'force-dynamic'
-// Força Node.js runtime para compatibilidade total com Supabase
 export const runtime = 'nodejs'
 
 export default async function HomePage() {
   const loggedIn = await isLoggedIn()
   const user = await getCurrentUser()
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
-
- 
 
   // Busque as últimas 6 empresas cadastradas
   let empresas: any[] = []
@@ -37,215 +31,185 @@ export default async function HomePage() {
   const stats = await obterEstatisticasHome()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-green-900 from-10% to-green-600 to-90%">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <Link href="/">
-                <LogoSeict className="h-14 w-14" />
-              </Link>
-              <h1 className="text-xl font-bold text-slate-50">Portfólio das Indústrias do Acre</h1>
-            </div>
-            <nav className="flex items-center space-x-4">
-              {/* <Link href="/buscar" className="text-slate-50 hover:text-gray-900">
-                Buscar Empresas
-              </Link> */}
-              {loggedIn ? (
-                <>
-                  <span className="text-slate-50 text-sm hidden sm:inline">
-                    Olá {user?.email}
-                  </span>
-                  <Link href={dashboardLink}>
-                    <Button variant="outline">Meu Painel</Button>
-                  </Link>
-                  <form action={logout}>
-                    <Button type="submit" variant="outline">
-                      Sair
-                    </Button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <Button variant="outline">Login</Button>
-                  </Link>
-                  <Link href="/cadastro">
-                    <Button>Cadastrar Empresa</Button>
-                  </Link>
-                </>
-              )}
-            </nav>
-          </div>
-        </div>
-      </header>
-
+    <div className="flex flex-col w-full overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 flex flex-col items-center justify-center bg-[url('/acre.jpg')] bg-no-repeat bg-center bg-cover">
-        {/* Overlay escuro */}
-        <div className="absolute inset-0 bg-amber-900 bg-opacity-60"></div>
-        <div className="relative max-w-2xl text-center z-10">
-          <div className="flex items-center justify-center space-x-4 mb-6 ">
-            {/* <LogoIndustria className="h-16 w-16 text-green-600" /> */}
-            <h1 className="text-5xl font-extrabold text-slate-50 leading-tight">Portfólio das Indústrias Acreanas</h1>
-          </div>
-          <p className="text-xl text-slate-50 mb-8">
-            Conectando o potencial industrial do Acre ao mundo. Encontre empresas, produtos e serviços da nossa região.
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+        {/* Background Image with Parallax-like feel */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/acre.jpg"
+            alt="Acre Rural Landscape"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-green-950/80 via-green-900/60 to-background" />
+        </div>
+
+        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center animate-fade-in">
+          <Badge className="mb-6 bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-1.5 text-sm font-medium hover:bg-white/30 transition-colors">
+            Portfólio Industrial do Acre
+          </Badge>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-extrabold text-white mb-6 leading-[1.1] tracking-tight text-balance">
+            Conectando a Indústria <span className="text-primary-foreground underline decoration-primary/50 underline-offset-8">Acreana</span> ao Futuro
+          </h1>
+          <p className="text-lg md:text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed text-balance">
+            A plataforma oficial que destaca o potencial produtivo do nosso estado. Encontre empresas, produtos e serviços com excelência regional.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/buscar">
-              <Button size="lg" className="px-8 py-3 text-lg">
-                <Search className="h-5 w-5 mr-3" />
-                Buscar Empresas e Produtos
+              <Button size="lg" className="h-14 px-8 text-lg font-semibold shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
+                <Search className="h-5 w-5 mr-2" />
+                Explorar Empresas
               </Button>
             </Link>
             <Link href="/cadastro">
               <Button
                 size="lg"
                 variant="outline"
-                className="px-8 py-3 text-lg border-green-600 text-green-700 hover:bg-green-100 hover:text-green-800 bg-slate-50"
+                className="h-14 px-8 text-lg font-semibold bg-white/10 text-white border-white/30 backdrop-blur-md hover:bg-white/20 hover:scale-105 transition-transform"
               >
-                <Plus className="h-5 w-5 mr-3" />
-                Cadastre sua Empresa
+                <Plus className="h-5 w-5 mr-2" />
+                Cadastrar Indústria
               </Button>
             </Link>
           </div>
-          <div className="mt-12 text-sm text-slate-50">
-            <p>
-              Já tem uma conta?{" "}
-              <Link href="/login" className="text-green-600 hover:underline">
-                Faça login aqui
-              </Link>
-              .
-            </p>
+
+          <div className="mt-12 flex items-center justify-center space-x-2 text-white/70 text-sm">
+            <span>Potencializado por</span>
+            <div className="bg-white/90 p-1.5 rounded-md">
+              <LogoSeict className="h-6 w-auto" />
+            </div>
+          </div>
+        </div>
+
+        {/* Floating elements for visual depth */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce flex flex-col items-center text-white/40">
+          <span className="text-xs font-medium uppercase tracking-widest mb-2">Scroll</span>
+          <div className="w-0.5 h-10 bg-gradient-to-b from-white/40 to-transparent rounded-full" />
+        </div>
+      </section>
+
+      {/* Stats Section - Floated over hero transition */}
+      <section className="relative z-20 -mt-16 mb-20 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="glass grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x border-primary/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="p-8 text-center bg-white/50 hover:bg-white transition-colors duration-300">
+              <div className="text-4xl md:text-5xl font-display font-black text-primary mb-1">{stats.totalEmpresas}+</div>
+              <div className="text-muted-foreground font-medium uppercase tracking-wider text-xs">Indústrias Ativas</div>
+            </div>
+            <div className="p-8 text-center bg-white/50 hover:bg-white transition-colors duration-300">
+              <div className="text-4xl md:text-5xl font-display font-black text-primary mb-1">{stats.totalProdutos}+</div>
+              <div className="text-muted-foreground font-medium uppercase tracking-wider text-xs">Produtos Regionais</div>
+            </div>
+            <div className="p-8 text-center bg-white/50 hover:bg-white transition-colors duration-300">
+              <div className="text-4xl md:text-5xl font-display font-black text-primary mb-1">{stats.totalMunicipios}</div>
+              <div className="text-muted-foreground font-medium uppercase tracking-wider text-xs">Municípios do Acre</div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Featured Companies */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-7xl mx-auto">
-          <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Empresas em Destaque</h3>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+            <div className="max-w-xl">
+              <h2 className="text-3xl font-display font-extrabold text-foreground mb-4">Empresas em Destaque</h2>
+              <p className="text-muted-foreground">Conheça algumas das principais indústrias que impulsionam o crescimento econômico do nosso estado.</p>
+            </div>
+            <Link href="/buscar">
+              <Button variant="link" className="text-primary font-bold group">
+                Ver todas as empresas <Plus className="ml-2 h-4 w-4 transition-transform group-hover:rotate-90" />
+              </Button>
+            </Link>
+          </div>
 
           {errorMsg && (
-            <div className="mb-8 p-4 bg-red-100 border border-red-400 rounded">
-              <h4 className="font-bold text-red-800">Erro ao carregar empresas:</h4>
-              <p className="text-red-600">{errorMsg}</p>
-              <p className="text-sm text-red-500 mt-2">
-                Verifique se as variáveis de ambiente do Supabase estão configuradas corretamente.
-              </p>
+            <div className="mb-8 p-6 glass border-red-200 bg-red-50/50 rounded-xl">
+              <h4 className="font-bold text-red-800 flex items-center mb-2">
+                <span className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse" />
+                Erro ao sincronizar dados
+              </h4>
+              <p className="text-red-600 text-sm leading-relaxed">{errorMsg}</p>
             </div>
           )}
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {empresas.length === 0 ? (
-              <div className="col-span-full text-center py-8">
-                <p className="text-gray-600">Nenhuma empresa encontrada.</p>
+              <div className="col-span-full py-20 text-center glass rounded-2xl">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-8 w-8 text-muted-foreground opacity-20" />
+                </div>
+                <p className="text-muted-foreground font-medium">Nenhuma empresa em destaque no momento.</p>
               </div>
             ) : (
-              empresas.map((empresa) => (
-                <Card key={empresa.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start gap-3">
-                      {/* Logo da empresa */}
-                      {empresa.logo_url && (
-                        <div className="flex-shrink-0">
+              empresas.map((empresa, idx) => (
+                <Card key={empresa.id} className="group overflow-hidden border-border/40 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 flex flex-col h-full bg-white/60 backdrop-blur-md hover:translate-y-[-6px] rounded-[2rem]">
+                  <CardHeader className="p-8 pb-4">
+                    <div className="flex items-start gap-5">
+                      <div className="w-20 h-20 relative flex-shrink-0 bg-white rounded-2xl border border-border/50 overflow-hidden shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-500">
+                        {empresa.logo_url ? (
                           <img
                             src={empresa.logo_url}
                             alt={`Logo da ${empresa.nome_fantasia}`}
-                            className="w-12 h-12 object-contain rounded bg-white border"
+                            className="w-full h-full object-contain p-3"
                           />
-                        </div>
-                      )}
-                      
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg truncate">{empresa.nome_fantasia || empresa.nome || "Nome não disponível"}</CardTitle>
-                        <CardDescription className="truncate">{empresa.razao_social || "Razão social não informada"}</CardDescription>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/20">
+                            <span className="text-2xl font-black text-muted-foreground/20">{empresa.nome_fantasia?.charAt(0)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 pt-1">
+                        <CardTitle className="text-xl font-display font-extrabold truncate group-hover:text-primary transition-colors leading-tight">
+                          {empresa.nome_fantasia || empresa.nome}
+                        </CardTitle>
+                        <CardDescription className="text-[10px] uppercase tracking-[0.15em] font-bold text-primary/60 mt-1">
+                          {empresa.setor_economico}
+                        </CardDescription>
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-wrap mt-2">
-                      <Badge variant="secondary">{empresa.setor_economico || "Setor"}</Badge>
-                      {empresa.setor_empresa && (
-                        <Badge variant="outline">{empresa.setor_empresa}</Badge>
-                      )}
-                    </div>
                   </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {empresa.apresentacao || empresa.descricao_produtos || "Empresa cadastrada na plataforma."}
+                  <CardContent className="p-8 pt-2 flex-1 flex flex-col">
+                    <p className="text-sm text-muted-foreground/90 mb-6 line-clamp-3 leading-relaxed font-medium">
+                      {empresa.apresentacao || "Referência industrial na região do Rio Acre, comprometida com a inovação e o desenvolvimento sustentável."}
                     </p>
 
-                    {/* Localização */}
-                    <div className="flex items-center text-sm text-gray-500 mb-3">
-                      <MapPin className="h-4 w-4 mr-1 shrink-0" />
-                      <span className="truncate">
-                        {empresa.municipio || "Acre"}, AC
-                      </span>
-                    </div>
-
-                    {/* Segmentos e temas */}
-                    {(empresa.segmento || empresa.tema_segmento) && (
-                      <div className="flex gap-1 flex-wrap mb-3">
+                    <div className="space-y-4 mb-8">
+                      <div className="flex items-center text-sm font-bold text-foreground/70">
+                        <MapPin className="h-4 w-4 mr-2 text-primary/70" />
+                        {empresa.municipio || "Indefinido"}, AC
+                      </div>
+                      <div className="flex flex-wrap gap-2">
                         {empresa.segmento && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="secondary" className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-700 border-green-100 hover:bg-green-100 transition-colors">
                             {empresa.segmento}
                           </Badge>
                         )}
-                        {empresa.tema_segmento && (
-                          <Badge variant="outline" className="text-xs">
-                            {empresa.tema_segmento}
+                        {empresa.setor_empresa && (
+                          <Badge variant="outline" className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider border-slate-200 text-slate-600 bg-slate-50/50">
+                            {empresa.setor_empresa}
                           </Badge>
                         )}
                       </div>
-                    )}
-                    
-                    <div className="mt-auto pt-3">
-                      <Link href={`/empresas/${empresa.id}`}>
-                        <Button variant="outline" size="sm" className="w-full">
-                          Ver Detalhes
-                        </Button>
-                      </Link>
                     </div>
+
+                    <Link href={`/empresas/${empresa.id}`} className="mt-auto">
+                      <Button className="w-full h-12 rounded-xl group/btn relative overflow-hidden bg-primary/5 hover:bg-primary text-primary hover:text-white transition-all duration-500 border-none shadow-none font-bold">
+                        <span className="relative z-10 flex items-center justify-center">
+                          Explorar Perfil
+                          <Plus className="ml-2 h-4 w-4 transition-transform group-hover/btn:rotate-90" />
+                        </span>
+                        <div className="absolute inset-0 bg-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))
             )}
           </div>
-
-          <div className="text-center mt-8">
-            <Link href="/buscar">
-              <Button variant="outline" size="lg">
-                Ver Todas as Empresas
-              </Button>
-            </Link>
-          </div>
         </div>
       </section>
-
-      {/* Stats Section */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">{stats.totalEmpresas}+</div>
-              <div className="text-gray-600">Empresas Cadastradas</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">{stats.totalProdutos}+</div>
-              <div className="text-gray-600">Produtos Registrados</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-purple-600 mb-2">{stats.totalMunicipios}</div>
-              <div className="text-gray-600">Municípios Atendidos</div>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* Footer Section */}
-      <div className="mt-auto">
-        <Footer />
-      </div>
     </div>
   )
 }

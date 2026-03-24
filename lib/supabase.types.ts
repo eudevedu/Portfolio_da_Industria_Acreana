@@ -1,6 +1,6 @@
 // lib/supabase.types.ts
 export type Empresa = {
-  relacionadas: any
+  relacionadas?: any
   id: string
   nome_fantasia: string
   razao_social: string
