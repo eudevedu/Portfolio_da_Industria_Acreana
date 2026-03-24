@@ -30,6 +30,7 @@ import ProdutosManager from "@/components/ProdutosManager"
 import ArquivosManager from "@/components/ArquivosManager"
 import { LogoSeict } from "@/components/LogoIndustria"
 import { ViewProfileButton } from "@/components/ViewProfileButton"
+import { ConfiguracoesButton } from "@/components/ConfiguracoesButton"
 
 export const dynamic = 'force-dynamic'
 
@@ -122,10 +123,12 @@ export default async function DashboardPage() {
             <div className="pt-8 space-y-2">
               <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Atalhos</p>
               <ViewProfileButton company={empresa} />
-              <Link href="/dashboard/configuracoes" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group">
-                <Settings className="h-5 w-5 text-slate-400 group-hover:text-slate-900" />
-                <span>Configurações</span>
-              </Link>
+              <ConfiguracoesButton 
+                userEmail={user?.email || ""} 
+                empresaId={empresaId} 
+                userType="empresa" 
+                userName={empresa?.nome_fantasia} 
+              />
             </div>
           </nav>
 
@@ -147,9 +150,13 @@ export default async function DashboardPage() {
                 <h1 className="text-xl font-display font-black tracking-tight text-white uppercase">Dashboard</h1>
               </div>
               <div className="flex items-center gap-2 text-white">
-                <Button variant="ghost" size="icon" asChild className="hover:bg-white/10 text-white">
-                  <Link href="/dashboard/configuracoes"><Settings className="h-5 w-5" /></Link>
-                </Button>
+                <ConfiguracoesButton 
+                  variant="mobile"
+                  userEmail={user?.email || ""} 
+                  empresaId={empresaId} 
+                  userType="empresa" 
+                  userName={empresa?.nome_fantasia} 
+                />
                 <form action={logout}>
                   <Button type="submit" variant="ghost" size="icon" className="text-white hover:bg-white/10">
                     <LogOut className="h-5 w-5" />

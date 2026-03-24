@@ -13,7 +13,7 @@ export default async function ConfiguracoesPage() {
   const loggedIn = await isLoggedIn()
   const user = await getCurrentUser()
 
-  if (!loggedIn || user?.tipo !== "empresa") {
+  if (!loggedIn || (user?.tipo !== "empresa" && user?.tipo !== "admin")) {
     redirect("/login")
   }
 
@@ -45,6 +45,7 @@ export default async function ConfiguracoesPage() {
         <ConfiguracoesEmpresa 
           userEmail={user?.email || ''} 
           empresaId={user?.empresa_id || ''} 
+          userType={user?.tipo}
         />
       </div>
     </div>

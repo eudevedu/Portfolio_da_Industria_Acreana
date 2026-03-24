@@ -32,6 +32,7 @@ import {
   ListFilter
 } from "lucide-react"
 import { IndustrialDetailsModal } from "@/components/IndustrialDetailsModal"
+import { ConfiguracoesModal } from "@/components/ConfiguracoesModal"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -130,6 +131,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
 
   const [showDetailsDialog, setShowDetailsDialog] = useState(false)
   const [companyToView, setCompanyToView] = useState<Empresa | null>(null)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
 
   const [showCreateAdminDialog, setShowCreateAdminDialog] = useState(false)
   const [creatingAdmin, setCreatingAdmin] = useState(false)
@@ -305,10 +307,14 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                 <ExternalLink className="h-5 w-5 text-slate-400 group-hover:text-blue-500" />
                 <span>Ver Site Público</span>
               </Link>
-              <Link href="/admin/configuracoes" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group">
+              <Button 
+                variant="ghost" 
+                onClick={() => setShowSettingsModal(true)}
+                className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group text-left"
+              >
                 <Settings className="h-5 w-5 text-slate-400 group-hover:text-slate-900" />
                 <span>Configurações</span>
-              </Link>
+              </Button>
             </div>
           </nav>
 
@@ -676,11 +682,19 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* Details Modal - Resized to Reusable Component */}
       <IndustrialDetailsModal 
         isOpen={showDetailsDialog} 
         onClose={() => setShowDetailsDialog(false)} 
         company={companyToView} 
+      />
+
+      <ConfiguracoesModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        userEmail={user?.email || ""}
+        userName={user?.nome}
+        userType="admin"
+        empresaId=""
       />
     </div>
   )

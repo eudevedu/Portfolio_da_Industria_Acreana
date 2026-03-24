@@ -51,7 +51,7 @@ export function IndustrialDetailsModal({ isOpen, onClose, company }: IndustrialD
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto rounded-none p-0 border-none shadow-2xl bg-white select-none">
+      <DialogContent hideCloseButton className="max-w-5xl max-h-[95vh] overflow-y-auto rounded-none p-0 border-none shadow-2xl bg-white select-none">
         {/* Header Section */}
         <div className="p-8 pb-4 flex items-start justify-between border-b border-slate-100">
           <div className="flex flex-col gap-2">
