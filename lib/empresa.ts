@@ -1,23 +1,18 @@
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 
 export async function getLastCompanies(limit = 6) {
-  // Verifica se Supabase está configurado
+  // Verifica se Supabase está configurado. Se não, usa mock data.
   if (!isSupabaseConfigured() || !supabase) {
-    const error = new Error("Supabase não está configurado - verifique as variáveis de ambiente NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY")
-    console.error("❌ Supabase config error:", {
-      hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-      hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      nodeEnv: process.env.NODE_ENV,
-      isVercel: !!process.env.VERCEL
-    })
-    throw error
+    console.warn("Supabase não configurado em getLastCompanies, usando mock data")
+    const { buscarEmpresas } = await import("./database")
+    return await buscarEmpresas({ status: 'ativo' }).then(res => res.slice(0, limit))
   }
 
   try {
-    // Buscar apenas empresas ativas
+    // Buscar apenas empresas ativas com relações
     const { data, error } = await supabase
       .from('empresas')
-      .select('*')
+      .select('*, produtos(*), arquivos(*)')
       .eq('status', 'ativo')
       .order('created_at', { ascending: false })
       .limit(limit)
@@ -29,13 +24,8 @@ export async function getLastCompanies(limit = 6) {
     return data || []
     
   } catch (err) {
-    
-    if (err instanceof Error) {
-      // Re-throw para manter a mensagem original
-      throw err
-    } else {
-      throw new Error("Erro desconhecido na conexão com o banco de dados")
-    }
+    console.error("Erro em getLastCompanies:", err)
+    return []
   }
 }
 

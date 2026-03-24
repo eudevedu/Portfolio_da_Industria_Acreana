@@ -271,12 +271,13 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
             </section>
           )}
 
-          {/* Gallery */}
-          {empresa.arquivos && empresa.arquivos.filter(a => 
-            a.tipo === 'imagem' && 
-            a.url !== empresa?.logo_url && 
-            a.categoria?.toLowerCase() !== 'logo'
-          ).length > 0 && (
+          {/* Gallery - Modernized filtering */}
+          {empresa.arquivos && empresa.arquivos.filter(a => {
+            const tipo = a.tipo?.toLowerCase() || ''
+            const cat = a.categoria?.toLowerCase() || ''
+            const isImage = tipo.includes('image') || tipo.includes('imagem') || cat.includes('imagem') || ['jpg', 'jpeg', 'png', 'webp'].some(ext => tipo.includes(ext))
+            return isImage && a.url !== empresa?.logo_url && cat !== 'logo'
+          }).length > 0 && (
             <section>
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
@@ -284,12 +285,13 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
                 </div>
                 <h2 className="text-2xl font-display font-black tracking-tight">Registro Fotográfico</h2>
               </div>
-              <div className="glass p-4 rounded-[2.5rem] border-primary/5">
-                <ImageGallery images={empresa.arquivos.filter(a => 
-                  a.tipo === 'imagem' && 
-                  a.url !== empresa?.logo_url && 
-                  a.categoria?.toLowerCase() !== 'logo'
-                )} />
+              <div className="glass p-6 rounded-[2.5rem] border-primary/5 shadow-2xl shadow-primary/5">
+                <ImageGallery images={empresa.arquivos.filter(a => {
+                  const tipo = a.tipo?.toLowerCase() || ''
+                  const cat = a.categoria?.toLowerCase() || ''
+                  const isImage = tipo.includes('image') || tipo.includes('imagem') || cat.includes('imagem') || ['jpg', 'jpeg', 'png', 'webp'].some(ext => tipo.includes(ext))
+                  return isImage && a.url !== empresa?.logo_url && cat !== 'logo'
+                })} />
               </div>
             </section>
           )}
@@ -373,26 +375,34 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
             </div>
           </Card>
 
-          {/* Documents Section */}
-          {empresa.arquivos && empresa.arquivos.filter(a => a.tipo !== 'imagem').length > 0 && (
-            <Card className="rounded-[2.5rem] border-primary/5 bg-slate-50/50 p-8">
-              <h3 className="text-lg font-display font-black mb-6 flex items-center gap-2">
-                <FileText className="h-5 w-5 text-blue-600" />
+          {/* Documents Section - Modernized */}
+          {empresa.arquivos && empresa.arquivos.filter(a => {
+            const tipo = a.tipo?.toLowerCase() || ''
+            return tipo.includes('pdf') || tipo.includes('doc') || tipo.includes('sheet')
+          }).length > 0 && (
+            <Card className="rounded-[2.5rem] border-primary/10 bg-slate-50/50 p-8 shadow-xl shadow-slate-200/50">
+              <h3 className="text-xl font-display font-black mb-8 flex items-center gap-2">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                </div>
                 Documentação
               </h3>
-              <div className="space-y-4">
-                {empresa.arquivos.filter(a => a.tipo !== 'imagem').map(arquivo => (
-                  <div key={arquivo.id} className="group relative flex items-center justify-between p-4 bg-white rounded-2xl border border-border/50 hover:border-blue-200 transition-all shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-blue-500" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-bold text-xs truncate max-w-[120px]">{arquivo.nome}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase">{arquivo.tipo}</p>
-                      </div>
+              <div className="grid grid-cols-1 gap-4">
+                {empresa.arquivos.filter(a => {
+                  const tipo = a.tipo?.toLowerCase() || ''
+                  return tipo.includes('pdf') || tipo.includes('doc') || tipo.includes('sheet')
+                }).map(arquivo => (
+                  <div key={arquivo.id} className="group relative flex items-center gap-4 p-5 bg-white rounded-3xl border border-border/40 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
+                    <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform duration-500 shrink-0">
+                      <FileText className="h-7 w-7" />
                     </div>
-                    <a href={arquivo.url} target="_blank" rel="noopener noreferrer">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-xs text-slate-900 truncate mb-1">{arquivo.nome}</p>
+                      <Badge variant="outline" className="text-[10px] py-0 h-4 font-bold uppercase tracking-wider text-muted-foreground border-muted-foreground/20">
+                        {arquivo.categoria || 'Geral'}
+                      </Badge>
+                    </div>
+                    <a href={arquivo.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
                       <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl hover:bg-blue-100 text-blue-600 transition-colors">
                         <ExternalLink className="h-4 w-4" />
                       </Button>

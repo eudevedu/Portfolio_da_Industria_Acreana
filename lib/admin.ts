@@ -272,3 +272,54 @@ export async function atualizarStatusAdmin(
 
   return data as Admin
 }
+
+export async function atualizarEmpresa(
+  id: string,
+  dados: Partial<Empresa>
+): Promise<Empresa | null> {
+  if (!isSupabaseConfigured()) {
+    console.warn("Supabase não configurado. Não é possível atualizar empresa mock.")
+    return null
+  }
+
+  // Remover campos que não devem ser atualizados manualmente ou que podem causar erro
+  const { id: _id, created_at: _c, ...updateData } = dados as any
+
+  const { data, error } = await supabase!
+    .from("empresas")
+    .update({ 
+      ...updateData, 
+      updated_at: new Date().toISOString() 
+    })
+    .eq("id", id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error(`Erro ao atualizar empresa ${id}:`, error)
+    return null
+  }
+
+  return data as Empresa
+}
+
+export async function excluirEmpresa(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) {
+    console.warn("Supabase não configurado. Não é possível excluir empresa mock.")
+    return false
+  }
+
+  // 1. Opcional: Remover produtos relacionados primeiro se não houver CASCADE
+  // Para simplificar e assumindo que o banco está bem configurado, faremos o delete direto.
+  const { error } = await supabase!
+    .from("empresas")
+    .delete()
+    .eq("id", id)
+
+  if (error) {
+    console.error(`Erro ao excluir empresa ${id}:`, error)
+    return false
+  }
+
+  return true
+}

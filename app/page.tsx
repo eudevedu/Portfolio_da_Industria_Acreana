@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { isLoggedIn, getCurrentUser } from "@/lib/auth"
 import { getLastCompanies } from "@/lib/empresa"
 import { obterEstatisticasHome } from "@/lib/database"
+import HomeCompanyGrid from "@/components/HomeCompanyGrid"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -134,80 +135,7 @@ export default async function HomePage() {
             </div>
           )}
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {empresas.length === 0 ? (
-              <div className="col-span-full py-20 text-center glass rounded-2xl">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="h-8 w-8 text-muted-foreground opacity-20" />
-                </div>
-                <p className="text-muted-foreground font-medium">Nenhuma empresa em destaque no momento.</p>
-              </div>
-            ) : (
-              empresas.map((empresa, idx) => (
-                <Card key={empresa.id} className="group overflow-hidden border-border/40 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 flex flex-col h-full bg-white/60 backdrop-blur-md hover:translate-y-[-6px] rounded-[2rem]">
-                  <CardHeader className="p-8 pb-4">
-                    <div className="flex items-start gap-5">
-                      <div className="w-20 h-20 relative flex-shrink-0 bg-white rounded-2xl border border-border/50 overflow-hidden shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-500">
-                        {empresa.logo_url ? (
-                          <img
-                            src={empresa.logo_url}
-                            alt={`Logo da ${empresa.nome_fantasia}`}
-                            className="w-full h-full object-contain p-3"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/20">
-                            <span className="text-2xl font-black text-muted-foreground/20">{empresa.nome_fantasia?.charAt(0)}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0 pt-1">
-                        <CardTitle className="text-xl font-display font-extrabold truncate group-hover:text-primary transition-colors leading-tight">
-                          {empresa.nome_fantasia || empresa.nome}
-                        </CardTitle>
-                        <CardDescription className="text-[10px] uppercase tracking-[0.15em] font-bold text-primary/60 mt-1">
-                          {empresa.setor_economico}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-8 pt-2 flex-1 flex flex-col">
-                    <p className="text-sm text-muted-foreground/90 mb-6 line-clamp-3 leading-relaxed font-medium">
-                      {empresa.apresentacao || "Referência industrial na região do Rio Acre, comprometida com a inovação e o desenvolvimento sustentável."}
-                    </p>
-
-                    <div className="space-y-4 mb-8">
-                      <div className="flex items-center text-sm font-bold text-foreground/70">
-                        <MapPin className="h-4 w-4 mr-2 text-primary/70" />
-                        {empresa.municipio || "Indefinido"}, AC
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {empresa.segmento && (
-                          <Badge variant="secondary" className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-700 border-green-100 hover:bg-green-100 transition-colors">
-                            {empresa.segmento}
-                          </Badge>
-                        )}
-                        {empresa.setor_empresa && (
-                          <Badge variant="outline" className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider border-slate-200 text-slate-600 bg-slate-50/50">
-                            {empresa.setor_empresa}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    <Link href={`/empresas/${empresa.id}`} className="mt-auto">
-                      <Button className="w-full h-12 rounded-xl group/btn relative overflow-hidden bg-primary/5 hover:bg-primary text-primary hover:text-white transition-all duration-500 border-none shadow-none font-bold">
-                        <span className="relative z-10 flex items-center justify-center">
-                          Explorar Perfil
-                          <Plus className="ml-2 h-4 w-4 transition-transform group-hover/btn:rotate-90" />
-                        </span>
-                        <div className="absolute inset-0 bg-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+          <HomeCompanyGrid empresas={empresas} />
         </div>
       </section>
     </div>

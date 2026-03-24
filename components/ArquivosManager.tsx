@@ -39,8 +39,13 @@ export default function ArquivosManager({ arquivos: arquivosProp, empresaId }: A
   })
 
   useEffect(() => {
-    setArquivos(arquivosProp || []);
-  }, [arquivosProp]);
+    console.log("ArquivosManager mounted/updated. Prop count:", arquivosProp?.length);
+    if (arquivosProp && arquivosProp.length > 0) {
+      setArquivos(arquivosProp);
+    } else {
+      loadArquivos();
+    }
+  }, [arquivosProp, empresaId]);
 
   const loadArquivos = async () => {
     try {
@@ -166,8 +171,16 @@ export default function ArquivosManager({ arquivos: arquivosProp, empresaId }: A
 
   const arquivosPorTipo = arquivos.reduce((acc, arquivo) => {
     const tipoArquivo = arquivo.tipo?.toLowerCase() || ''
-    const isPdf = tipoArquivo === 'pdf'
-    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(tipoArquivo)
+    const categoriaArquivo = arquivo.categoria?.toLowerCase() || ''
+    
+    // Detecção mais flexível de tipos
+    const isPdf = tipoArquivo.includes('pdf') || tipoArquivo === 'doc'
+    const isImage = 
+      tipoArquivo.includes('image') || 
+      tipoArquivo.includes('imagem') || 
+      categoriaArquivo.includes('imagem') ||
+      categoriaArquivo.includes('logo') ||
+      ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(tipoArquivo)
     
     if (isPdf) {
       acc.pdfs.push(arquivo)
@@ -179,6 +192,13 @@ export default function ArquivosManager({ arquivos: arquivosProp, empresaId }: A
     
     return acc
   }, { pdfs: [] as Arquivo[], imagens: [] as Arquivo[], outros: [] as Arquivo[] })
+
+  console.log("Arquivos categorizados:", {
+    total: arquivos.length,
+    pdfs: arquivosPorTipo.pdfs.length,
+    imagens: arquivosPorTipo.imagens.length,
+    outros: arquivosPorTipo.outros.length
+  });
 
   if (loading) {
     return (
@@ -323,32 +343,38 @@ export default function ArquivosManager({ arquivos: arquivosProp, empresaId }: A
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {arquivosPorTipo.pdfs.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Nenhum PDF cadastrado</p>
+                <div className="sm:col-span-2 text-gray-500 text-center py-8 bg-slate-50 rounded-xl border border-dashed">
+                  Nenhum PDF cadastrado
+                </div>
               ) : (
                 arquivosPorTipo.pdfs.map((arquivo, index) => (
-                  <div key={arquivo.id || `pdf-${index}`} className="flex justify-between items-center p-3 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="font-medium">{arquivo.nome}</div>
+                  <div key={arquivo.id || `pdf-${index}`} className="group p-4 border rounded-xl bg-white hover:border-blue-200 hover:shadow-md transition-all flex items-start gap-4">
+                    <div className="h-12 w-12 rounded-lg bg-red-50 flex items-center justify-center text-red-600 shrink-0">
+                      <FileText className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-slate-900 truncate">{arquivo.nome}</div>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary">{arquivo.tipo?.toUpperCase() || 'ARQUIVO'}</Badge>
-                        <Badge variant="outline">{arquivo.categoria}</Badge>
+                        <Badge variant="outline" className="text-[10px] py-0 h-4 uppercase">{arquivo.categoria}</Badge>
                       </div>
-                      <a 
-                        href={arquivo.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm mt-1 inline-block"
-                      >
-                        Abrir arquivo →
-                      </a>
+                      <div className="mt-3">
+                        <a 
+                          href={arquivo.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                        >
+                          Abrir Documento →
+                        </a>
+                      </div>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => deleteArquivo(arquivo.id)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-slate-400 hover:text-red-600 -mt-1 -mr-1 h-8 w-8 p-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -369,13 +395,13 @@ export default function ArquivosManager({ arquivos: arquivosProp, empresaId }: A
           </CardHeader>
           <CardContent>
             {arquivosPorTipo.imagens.length === 0 ? (
-              <div className="text-center py-8">
+              <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed">
                 <p className="text-gray-500 mb-4">Nenhuma imagem cadastrada</p>
-                <div className="grid grid-cols-2 gap-3 opacity-50">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 opacity-30 px-4">
                   {[1, 2, 3, 4].map((i) => (
                     <div
                       key={i}
-                      className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center"
+                      className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center"
                     >
                       <ImageIcon className="h-8 w-8 text-gray-400" />
                     </div>
@@ -383,32 +409,35 @@ export default function ArquivosManager({ arquivos: arquivosProp, empresaId }: A
                 </div>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {arquivosPorTipo.imagens.map((arquivo, index) => (
-                  <div key={arquivo.id || `imagem-${index}`} className="flex justify-between items-center p-3 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="font-medium">{arquivo.nome}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary">{arquivo.tipo?.toUpperCase() || 'IMAGEM'}</Badge>
-                        <Badge variant="outline">{arquivo.categoria}</Badge>
+                  <div key={arquivo.id || `imagem-${index}`} className="group relative aspect-square rounded-xl overflow-hidden border bg-slate-100 transition-all hover:shadow-lg hover:scale-[1.02]">
+                    <img 
+                      src={arquivo.url} 
+                      alt={arquivo.nome} 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
+                      <div className="text-white text-[10px] font-medium truncate mb-2">{arquivo.nome}</div>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="secondary" 
+                          className="h-7 text-[10px] flex-1 font-semibold"
+                          onClick={() => window.open(arquivo.url, '_blank')}
+                        >
+                          Ver
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive" 
+                          className="h-7 w-7 p-0"
+                          onClick={() => deleteArquivo(arquivo.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
-                      <a 
-                        href={arquivo.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm mt-1 inline-block"
-                      >
-                        Ver imagem →
-                      </a>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteArquivo(arquivo.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
                 ))}
               </div>

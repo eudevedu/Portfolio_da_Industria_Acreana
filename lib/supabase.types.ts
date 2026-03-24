@@ -20,6 +20,8 @@ export type Empresa = {
   linkedin?: string
   twitter?: string
   video_apresentacao?: string
+  telefone?: string
+  email?: string
   status: "pendente" | "ativo" | "inativo"
   created_at: string
   updated_at: string
@@ -35,6 +37,7 @@ export interface Produto {
   nome_tecnico?: string
   linha?: string
   descricao?: string
+  imagem_url?: string
   status: string
   created_at: string
   updated_at: string

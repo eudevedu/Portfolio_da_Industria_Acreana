@@ -12,6 +12,7 @@ import { buscarEmpresas } from "@/lib/database"
 import type { Empresa } from "@/lib/supabase.types"
 import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
+import EmpresaDetailsModal from "@/components/EmpresaDetailsModal"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
@@ -28,6 +29,7 @@ export default function BuscarPage() {
   const [selectedStatus] = useState(initialStatus)
   const [selectedSector, setSelectedSector] = useState(initialSector)
   const [selectedCity, setSelectedCity] = useState(initialCity)
+  const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null)
 
   const setoresEconomicos = [
     { value: "industria", label: "Indústria" },
@@ -197,7 +199,7 @@ export default function BuscarPage() {
                       </div>
                       <div className="flex-1 min-w-0 pt-1">
                         <CardTitle className="text-lg font-bold truncate group-hover:text-primary transition-colors">
-                          {empresa.nome_fantasia || empresa.nome}
+                          {empresa.nome_fantasia}
                         </CardTitle>
                         <CardDescription className="text-xs font-medium uppercase tracking-tighter text-muted-foreground">
                           {empresa.setor_economico}
@@ -228,11 +230,12 @@ export default function BuscarPage() {
                       )}
                     </div>
                     
-                    <Link href={`/empresas/${empresa.id}`}>
-                      <Button className="w-full bg-muted hover:bg-primary text-foreground hover:text-white border-none shadow-none font-bold transition-all">
-                        Detalhes da Empresa
-                      </Button>
-                    </Link>
+                    <Button 
+                      onClick={() => setSelectedEmpresa(empresa)}
+                      className="w-full bg-muted hover:bg-primary text-foreground hover:text-white border-none shadow-none font-bold transition-all"
+                    >
+                      Detalhes da Empresa
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
@@ -240,6 +243,11 @@ export default function BuscarPage() {
           )}
         </div>
       </section>
+      <EmpresaDetailsModal 
+        empresa={selectedEmpresa} 
+        isOpen={!!selectedEmpresa} 
+        onClose={() => setSelectedEmpresa(null)} 
+      />
     </div>
   )
 }

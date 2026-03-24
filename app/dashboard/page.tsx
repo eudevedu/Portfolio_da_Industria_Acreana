@@ -83,6 +83,7 @@ export default async function DashboardPage() {
       requireAdmin={false}
     >
       <div className="min-h-screen bg-[#f8fafc] flex">
+        <Tabs defaultValue="empresa" className="flex-1 flex flex-col h-full">
         {/* Sidebar Navigation */}
         <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col z-50">
           <div className="p-8 border-b border-slate-100">
@@ -142,7 +143,6 @@ export default async function DashboardPage() {
 
         {/* Main Content Area */}
         <div className="flex-1 lg:ml-72 flex flex-col min-h-screen">
-          <Tabs defaultValue="empresa" className="flex-1 flex flex-col h-full">
             {/* Mobile Header */}
             <header className="lg:hidden bg-white border-b px-4 h-16 flex items-center justify-between sticky top-0 z-40">
               <div className="flex items-center gap-2">
@@ -301,8 +301,8 @@ export default async function DashboardPage() {
                 </TabsContent>
               </div>
             </main>
-          </Tabs>
-        </div>
+          </div>
+        </Tabs>
       </div>
     </AuthGuard>
   )

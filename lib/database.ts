@@ -44,6 +44,7 @@ export async function buscarEmpresas(filters?: {
               nome_tecnico: "Euterpe oleracea",
               linha: "Polpas de Frutas",
               descricao: "Polpa de açaí 100% orgânica, sem conservantes.",
+              imagem_url: "https://images.unsplash.com/photo-1540333563398-9942bf586321?w=800&q=80",
               status: "ativo",
               created_at: "2023-01-15T10:00:00Z",
               updated_at: "2023-01-15T10:00:00Z",
@@ -649,22 +650,68 @@ export async function buscarProdutosMaisVisualizados(limite: number = 6): Promis
 }
 
 // Funções para Arquivos
-export async function criarArquivo(arquivo: Omit<Arquivo, "id" | "created_at">): Promise<Arquivo | null> {
+export async function criarArquivo(arquivo: Omit<Arquivo, "id" | "created_at">): Promise<{ data: Arquivo | null, error: any }> {
+  console.log("Iniciando criarArquivo:", arquivo)
+  
   if (!isSupabaseConfigured()) {
-    return null
+    console.log("Modo mock: criando arquivo")
+    const newId = `mock-arquivo-${Date.now()}`
+    const novoArquivo = {
+      ...arquivo,
+      id: newId,
+      created_at: new Date().toISOString(),
+    } as Arquivo
+    
+    if (!mockEmpresasStore) {
+      console.log("Inicializando mockEmpresasStore...")
+      await buscarEmpresas()
+    }
+    
+    const empresa = mockEmpresasStore!.find(e => e.id === arquivo.empresa_id)
+    if (empresa) {
+      if (!empresa.arquivos) empresa.arquivos = []
+      empresa.arquivos.push(novoArquivo)
+      console.log("Arquivo adicionado ao mock da empresa:", empresa.id)
+    } else {
+      console.warn("Empresa não encontrada no mock store para ID:", arquivo.empresa_id)
+      // No modo mock, mesmo que a empresa não seja encontrada no store local, 
+      // retornamos o arquivo para não quebrar o fluxo da UI
+    }
+    return { data: novoArquivo, error: null }
   }
-  const { data, error } = await supabase!.from("arquivos").insert([arquivo]).select().single()
-  if (error) {
-    return null
+  
+  try {
+    const { data, error } = await supabase!
+      .from("arquivos")
+      .insert([arquivo])
+      .select()
+      .single()
+      
+    if (error) {
+      console.error("Erro do Supabase ao criar arquivo:", error)
+      return { data: null, error }
+    }
+    
+    console.log("Arquivo criado com sucesso no Supabase:", data?.id)
+    return { data: data as Arquivo, error: null }
+  } catch (err) {
+    console.error("Exceção ao criar arquivo:", err)
+    return { data: null, error: err }
   }
-  return data as Arquivo
 }
 
 export async function buscarArquivosPorEmpresa(empresaId: string) {
+  if (!isSupabaseConfigured()) {
+    if (!mockEmpresasStore) await buscarEmpresas()
+    const empresa = mockEmpresasStore!.find(e => e.id === empresaId)
+    return empresa?.arquivos || []
+  }
+  
   if (!supabase) {
     console.error("Supabase não está configurado.")
     return []
   }
+  
   const { data, error } = await supabase
     .from('arquivos')
     .select('*')
@@ -676,6 +723,23 @@ export async function buscarArquivosPorEmpresa(empresaId: string) {
     return []
   }
   return data || []
+}
+
+export async function deletarArquivo(id: string): Promise<void> {
+  if (!isSupabaseConfigured()) {
+    if (!mockEmpresasStore) await buscarEmpresas()
+    for (const empresa of mockEmpresasStore!) {
+      if (empresa.arquivos) {
+        empresa.arquivos = empresa.arquivos.filter(a => a.id !== id)
+      }
+    }
+    return
+  }
+  
+  const { error } = await supabase!.from("arquivos").delete().eq("id", id)
+  if (error) {
+    console.error("Erro ao deletar arquivo no Supabase:", error)
+  }
 }
 
 // Novas funções para gerenciar perfis de empresa (vinculados a auth.users)

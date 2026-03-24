@@ -1,15 +1,52 @@
 import { NextResponse } from "next/server"
-import { supabase, isSupabaseConfigured } from '@/lib/supabase'
-import { put } from "@vercel/blob"
+import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabase'
 import { randomUUID } from 'crypto'
+
+async function uploadToSupabase(file: File): Promise<string> {
+  const timestamp = Date.now()
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${timestamp}-${randomUUID()}.${fileExt}`
+  
+  // Selecionar bucket baseado no tipo
+  const bucket = file.type.toLowerCase().includes('pdf') ? 'PDF' : 'Imagem'
+  
+  try {
+    if (!isSupabaseAdminConfigured() || !supabaseAdmin) {
+      throw new Error("Supabase Storage não configurado")
+    }
+
+    const { data, error: uploadError } = await supabaseAdmin.storage
+      .from(bucket)
+      .upload(fileName, file, {
+        contentType: file.type,
+        upsert: false
+      })
+
+    if (uploadError) throw uploadError
+
+    const { data: { publicUrl } } = supabaseAdmin.storage
+      .from(bucket)
+      .getPublicUrl(fileName)
+
+    console.log(`Upload para bucket ${bucket} concluído:`, publicUrl)
+    return publicUrl
+  } catch (error) {
+    console.warn(`Erro no upload para o Supabase (Bucket ${bucket}), usando base64 fallback:`, error)
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+      const base64 = buffer.toString('base64')
+      return `data:${file.type};base64,${base64}`
+    } catch (e) {
+      return `https://fake-storage.com/${bucket}/${fileName}`
+    }
+  }
+}
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
     console.log("=== UPLOAD API START ===")
 
-    // Removido: autenticação do usuário
-
-    console.log("Parsing FormData...")
     const formData = await request.formData()
     const file = formData.get("file") as File
     const nome = formData.get("nome") as string
@@ -26,38 +63,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     })
 
     if (!file) {
-      console.log("ERROR: Arquivo não fornecido")
-      return NextResponse.json({ 
-        success: false,
-        error: "Arquivo é obrigatório" 
-      }, { status: 400 })
+      return NextResponse.json({ success: false, error: "Arquivo é obrigatório" }, { status: 400 })
     }
 
     if (!nome) {
-      console.log("ERROR: Nome não fornecido")
-      return NextResponse.json({ 
-        success: false,
-        error: "Nome é obrigatório" 
-      }, { status: 400 })
+      return NextResponse.json({ success: false, error: "Nome é obrigatório" }, { status: 400 })
     }
 
-    console.log("Validações passaram, iniciando upload...")
+    const fileUrl = await uploadToSupabase(file)
 
-    // Upload para storage (Vercel Blob ou Supabase Storage)
-    const timestamp = Date.now()
-    const uniqueFilename = `arquivos/${timestamp}-${file.name}`
-
-    let fileUrl = ""
-    try {
-      const blob = await put(uniqueFilename, file, { access: "public" })
-      fileUrl = blob.url
-      console.log("Upload Blob concluído:", fileUrl)
-    } catch (blobError) {
-      console.error("Erro no upload do blob:", blobError)
-      fileUrl = `https://fake-storage.com/arquivos/${timestamp}-${file.name}`
-    }
-
-    // Apenas retorne a URL:
     return NextResponse.json({
       success: true,
       arquivo: {
@@ -67,28 +81,16 @@ export async function POST(request: Request): Promise<NextResponse> {
       message: "Arquivo enviado com sucesso!",
     })
   } catch (error) {
-    console.error("=== UPLOAD API ERROR ===")
-    console.error("Error details:", error)
-    console.error("Error stack:", error instanceof Error ? error.stack : "No stack")
-    
+    console.error("=== UPLOAD API ERROR ===", error)
     return NextResponse.json({ 
       success: false, 
-      error: `Erro interno do servidor: ${error instanceof Error ? error.message : 'Erro desconhecido'}` 
+      error: `Erro interno: ${error instanceof Error ? error.message : 'Erro desconhecido'}` 
     }, { status: 500 })
   }
 }
 
 async function uploadFileToStorage(file: File): Promise<string> {
-  // Implementação simples usando Vercel Blob (igual ao POST)
-  const timestamp = Date.now();
-  const uniqueFilename = `arquivos/${timestamp}-${file.name}`;
-  try {
-    const blob = await put(uniqueFilename, file, { access: "public" });
-    return blob.url;
-  } catch (error) {
-    console.error("Erro no upload do blob:", error);
-    return `https://fake-storage.com/arquivos/${timestamp}-${file.name}`;
-  }
+  return await uploadToSupabase(file)
 }
 
 
