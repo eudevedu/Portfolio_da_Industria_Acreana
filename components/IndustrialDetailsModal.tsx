@@ -24,6 +24,7 @@ import {
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import type { Empresa } from "@/lib/supabase.types"
+import ImageGallery from "./ImageGallery"
 
 interface IndustrialDetailsModalProps {
   isOpen: boolean
@@ -157,23 +158,21 @@ export function IndustrialDetailsModal({ isOpen, onClose, company }: IndustrialD
             </TabsContent>
 
             <TabsContent value="fotos" className="mt-0 outline-none">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {company.arquivos && company.arquivos.filter(a => a.tipo.includes('image') || a.tipo.includes('png') || a.tipo.includes('jpg')).length > 0 ? (
-                  company.arquivos.filter(a => a.tipo.includes('image') || a.tipo.includes('png') || a.tipo.includes('jpg')).map((arquivo) => (
-                    <div key={arquivo.id} className="aspect-square rounded-2xl overflow-hidden border border-slate-100 group relative cursor-pointer">
-                      <img src={arquivo.url} alt={arquivo.nome} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Eye className="text-white h-6 w-6" />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-full py-16 text-center space-y-3 bg-white rounded-3xl border border-dashed border-slate-200">
-                    <ImageIcon className="h-10 w-10 text-slate-200 mx-auto" />
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Nenhuma foto institucional encontrada</p>
-                  </div>
-                )}
-              </div>
+              <ImageGallery images={company.arquivos?.filter(a => {
+                const tipo = (a.tipo || '').toLowerCase()
+                const cat = (a.categoria || '').toLowerCase()
+                const url = (a.url || '').toLowerCase()
+
+                const isImage =
+                  tipo.includes('image') ||
+                  tipo.includes('imagem') ||
+                  cat.includes('imagem') ||
+                  cat.includes('foto') ||
+                  url.includes('/imagem/') ||
+                  /\.(jpg|jpeg|png|webp|gif|avif|jfif|svg)$/i.test(url)
+
+                return isImage && a.url !== company.logo_url
+              }) || []} />
             </TabsContent>
 
             <TabsContent value="documentação" className="mt-0 outline-none">
