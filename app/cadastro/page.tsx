@@ -23,6 +23,7 @@ export default function CadastroPage() {
     Array<
       Partial<Produto> & {
         id: string
+        imagem_url?: string
         ficha_tecnica_url?: string
         folder_produto_url?: string
         imagens_produto_urls?: string[]
@@ -309,15 +310,16 @@ export default function CadastroPage() {
       // Save products and their files
       produtos.forEach((produto) => {
         if (produto.nome) {
-          filePromises.push(
-            criarProduto({
-              empresa_id: empresaId,
-              nome: produto.nome!,
-              nome_tecnico: produto.nome_tecnico,
-              linha: produto.linha,
-              descricao: produto.descricao,
-              status: produto.status || "ativo",
-            }).then(async (novoProduto) => {
+              filePromises.push(
+                criarProduto({
+                  empresa_id: empresaId,
+                  nome: produto.nome!,
+                  nome_tecnico: produto.nome_tecnico,
+                  linha: produto.linha,
+                  descricao: produto.descricao,
+                  imagem_url: produto.imagem_url,
+                  status: produto.status || "ativo",
+                }).then(async (novoProduto) => {
               if (novoProduto) {
                 // Create sub-promises for product files
                 const productFilePromises = []
@@ -964,41 +966,78 @@ export default function CadastroPage() {
                             </div>
                           </CardHeader>
                           <CardContent className="space-y-4">
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor={`nome-${index}`}>Nome do Produto *</Label>
-                                <Input
-                                  id={`nome-${index}`}
-                                  placeholder="Nome comercial do produto"
-                                  value={produto.nome || ""}
-                                  onChange={(e) => {
-                                    handleProductChange(index, "nome", e.target.value)
-                                    setValidationErrors((prev) => ({ ...prev, [`produto_nome_${index}`]: "" }))
-                                  }}
-                                  required
-                                />
-                                {validationErrors[`produto_nome_${index}`] && (
-                                  <p className="text-red-500 text-xs mt-1">{validationErrors[`produto_nome_${index}`]}</p>
+                            <div className="grid md:grid-cols-12 gap-6">
+                              {/* Foto Principal do Produto */}
+                              <div className="md:col-span-4 space-y-4">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Foto Principal (Destaque)</Label>
+                                {produto.imagem_url ? (
+                                  <div className="relative aspect-square w-full rounded-2xl overflow-hidden border border-green-100 group">
+                                    <img 
+                                      src={produto.imagem_url} 
+                                      alt="Preview" 
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" 
+                                    />
+                                    <Button 
+                                      type="button" 
+                                      variant="destructive" 
+                                      size="sm" 
+                                      className="absolute bottom-2 right-2 h-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                      onClick={() => handleProductChange(index, "imagem_url", "")}
+                                    >
+                                      Trocar
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <div className="w-full aspect-square bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-4 text-center">
+                                    <UploadComponent 
+                                      onUploadSuccess={(url) => handleProductChange(index, "imagem_url", url)} 
+                                      buttonText="Upload Foto"
+                                    />
+                                  </div>
                                 )}
                               </div>
-                              <div>
-                                <Label htmlFor={`nome_tecnico-${index}`}>Nome Técnico</Label>
-                                <Input
-                                  id={`nome_tecnico-${index}`}
-                                  placeholder="Nome técnico/científico"
-                                  value={produto.nome_tecnico || ""}
-                                  onChange={(e) => handleProductChange(index, "nome_tecnico", e.target.value)}
-                                />
+
+                              <div className="md:col-span-8 space-y-4">
+                                <div className="grid md:grid-cols-2 gap-4">
+                                  <div>
+                                    <Label htmlFor={`nome-${index}`}>Nome do Produto *</Label>
+                                    <Input
+                                      id={`nome-${index}`}
+                                      className="rounded-xl"
+                                      placeholder="Ex: Telha Ecológica Premium"
+                                      value={produto.nome || ""}
+                                      onChange={(e) => {
+                                        handleProductChange(index, "nome", e.target.value)
+                                        setValidationErrors((prev) => ({ ...prev, [`produto_nome_${index}`]: "" }))
+                                      }}
+                                      required
+                                    />
+                                    {validationErrors[`produto_nome_${index}`] && (
+                                      <p className="text-red-500 text-xs mt-1">{validationErrors[`produto_nome_${index}`]}</p>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <Label htmlFor={`nome_tecnico-${index}`}>Código / Nome Técnico</Label>
+                                    <Input
+                                      id={`nome_tecnico-${index}`}
+                                      className="rounded-xl"
+                                      placeholder="Ex: COD-123 ou Pinus Taeda"
+                                      value={produto.nome_tecnico || ""}
+                                      onChange={(e) => handleProductChange(index, "nome_tecnico", e.target.value)}
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label htmlFor={`linha-${index}`}>Linha / Categoria do Produto</Label>
+                                  <Input
+                                    id={`linha-${index}`}
+                                    className="rounded-xl"
+                                    placeholder="Ex: Linha Premium, Sustentável, Industrial"
+                                    value={produto.linha || ""}
+                                    onChange={(e) => handleProductChange(index, "linha", e.target.value)}
+                                  />
+                                </div>
                               </div>
-                            </div>
-                            <div>
-                              <Label htmlFor={`linha-${index}`}>Linha do Produto</Label>
-                              <Input
-                                id={`linha-${index}`}
-                                placeholder="Ex: Linha Premium, Linha Econômica"
-                                value={produto.linha || ""}
-                                onChange={(e) => handleProductChange(index, "linha", e.target.value)}
-                              />
                             </div>
                             <div>
                               <Label htmlFor={`descricao-${index}`}>Descrição e Especificações *</Label>

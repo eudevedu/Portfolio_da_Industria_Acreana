@@ -21,6 +21,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogTrigger 
+} from "@/components/ui/dialog"
+import { useState } from "react"
 import { buscarEmpresaPorId } from "@/lib/database"
 import { isSupabaseConfigured } from "@/lib/supabase"
 import { notFound } from "next/navigation"
@@ -69,6 +78,14 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
   if (!empresa) {
     notFound()
   }
+
+  return <EmpresaContent initialEmpresa={empresa} initialRelacionadas={empresasRelacionadas} />
+}
+
+function EmpresaContent({ initialEmpresa, initialRelacionadas }: { initialEmpresa: any, initialRelacionadas: any[] }) {
+  const [selectedProduto, setSelectedProduto] = useState<any>(null)
+  const empresa = initialEmpresa
+  const empresasRelacionadas = initialRelacionadas
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -230,8 +247,12 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-                {empresa.produtos.filter(p => p !== null).map((produto) => (
-                  <Card key={produto.id} className="group overflow-hidden border-none bg-white shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 rounded-[2.5rem] flex flex-col">
+                {empresa.produtos.filter(p => p !== null).map((produto: any) => (
+                  <Card 
+                    key={produto.id} 
+                    className="group overflow-hidden border-none bg-white shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 rounded-[2.5rem] flex flex-col cursor-pointer active:scale-95"
+                    onClick={() => setSelectedProduto(produto)}
+                  >
                     <AnalyticsTracker empresaId={empresa.id} tipoEvento="visualizacao_produto" referenciaId={produto.id} />
                     
                     {/* Product Image Holder */}

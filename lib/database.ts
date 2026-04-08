@@ -307,7 +307,8 @@ export async function criarProduto(
     linha: produto.linha || "Geral",
     imagem_url: produto.imagem_url || null,
     nome_tecnico: produto.nome_tecnico || null,
-    status: produto.status || "ativo"
+    status: produto.status || "ativo",
+    preco: produto.preco || null
   }
 
   const { data, error } = await supabase!.from("produtos").insert([dataToInsert]).select().single()
