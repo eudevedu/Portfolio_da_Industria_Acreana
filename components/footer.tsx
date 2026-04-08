@@ -17,7 +17,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative z-[60] bg-[#022c22] text-white pt-24 pb-12 overflow-hidden">
+    <footer className="relative z-10 bg-[#022c22] text-white pt-24 pb-12 overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500/0 via-green-500/50 to-green-500/0" />
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-green-500/10 rounded-full blur-[100px]" />

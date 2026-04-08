@@ -36,7 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={`${inter.variable} ${outfit.variable} font-sans antialiased`}>
         <div className="flex flex-col min-h-screen">
           <Header loggedIn={loggedIn} user={user} dashboardLink={dashboardLink} />
-          <main className="flex-grow">
+          <main className="flex-grow relative z-0">
             {children}
           </main>
           <Footer />
