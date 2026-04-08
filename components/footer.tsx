@@ -33,7 +33,7 @@ export default function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-display font-black tracking-tight leading-none">PORTFÓLIO</span>
-                <span className="text-[0.65rem] font-bold tracking-[0.2em] text-green-400 uppercase">Indústria Acreana</span>
+                <span className="text-[0.65rem] font-bold tracking-[0.2em] text-white uppercase">Indústria Acreana</span>
               </div>
             </div>
 
