@@ -6,12 +6,12 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { isLoggedIn, getCurrentUser } from "@/lib/auth"
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
 })
 
-const outfit = Outfit({ 
+const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
 })
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
   description: "Plataforma oficial para o desenvolvimento industrial do Estado do Acre. Conectando empresas, produtos e serviços.",
   generator: "Next.js",
   icons: {
-    icon: '/icon.svg',
-    apple: '/icon.svg',
+    icon: '/favicon.ico',
+    apple: '/favicon.ico',
   },
 }
 
