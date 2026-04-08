@@ -251,7 +251,7 @@ export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): P
     return null
   }
 
-  // console.log("Empresa atualizada no Supabase:", data)
+  console.log("Empresa atualizada no Supabase:", data)
   return data as Empresa
 }
 
