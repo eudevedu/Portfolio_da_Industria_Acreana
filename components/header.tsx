@@ -19,7 +19,7 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
-  
+
   const isDashboard = pathname?.startsWith("/admin") || pathname?.startsWith("/dashboard")
 
   useEffect(() => {
@@ -36,16 +36,17 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 sm:px-6 lg:px-8",
-          isScrolled 
-            ? "bg-white/80 backdrop-blur-md shadow-sm h-16 py-2" 
-            : "bg-gradient-to-r from-primary via-primary/80 to-primary/90 h-20 py-4"
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          isScrolled
+            ? "bg-[#228b22]/95 backdrop-blur-md shadow-sm"
+            : "bg-[#228b22] shadow-lg"
         )}
       >
-        <div className="max-w-7xl mx-auto h-full">
-          {/* ... existing header content ... */}
-          {/* ... keeping the full content of the header intact ... */}
-          <div className="flex justify-between items-center h-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className={cn(
+            "flex justify-between items-center transition-all duration-300",
+            isScrolled ? "h-16" : "h-20"
+          )}>
             {/* Logo and Title */}
             {!isDashboard && (
               <div className="flex items-center space-x-3">
@@ -55,9 +56,9 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
                   </div>
                   <h1 className={cn(
                     "text-xl sm:text-2xl font-display font-black tracking-tight transition-colors",
-                    isScrolled ? "text-primary" : "text-white"
+                    "text-white"
                   )}>
-                    Portfólio <span className={isScrolled ? "text-foreground/70" : "text-white/80"}>Industrial</span>
+                    Portfólio <span className="text-white/80">Industrial</span>
                   </h1>
                 </Link>
               </div>
@@ -66,37 +67,29 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6">
-              <Link 
-                href="/buscar" 
-                className={cn(
-                  "text-sm font-medium hover:opacity-80 transition-opacity",
-                  isScrolled ? "text-gray-700" : "text-white/90"
-                )}
+              <Link
+                href="/buscar"
+                className="text-sm font-medium text-white/90 hover:text-white transition-colors"
               >
                 Buscar Empresas
               </Link>
-              
+
               {loggedIn ? (
                 <div className="flex items-center space-x-4">
-                  <span className={cn(
-                    "text-sm hidden lg:inline",
-                    isScrolled ? "text-gray-600" : "text-white/80"
-                  )}>
+                  <span className="text-sm hidden lg:inline text-white/80">
                     Olá, <strong>{user?.email?.split('@')[0]}</strong>
                   </span>
                   <Link href={dashboardLink}>
-                    <Button variant={isScrolled ? "default" : "secondary"} size="sm">
+                    <Button variant="secondary" size="sm">
                       Meu Painel
                     </Button>
                   </Link>
                   <form action={logout}>
-                    <Button 
-                      type="submit" 
-                      variant="ghost" 
+                    <Button
+                      type="submit"
+                      variant="ghost"
                       size="sm"
-                      className={cn(
-                        isScrolled ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-white/10"
-                      )}
+                      className="text-white hover:bg-white/10"
                     >
                       Sair
                     </Button>
@@ -105,17 +98,15 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
               ) : (
                 <div className="flex items-center space-x-3">
                   <Link href="/login">
-                    <Button 
-                      variant="ghost" 
-                      className={cn(
-                        isScrolled ? "text-gray-700" : "text-white hover:bg-white/10"
-                      )}
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:bg-white/10"
                     >
                       Login
                     </Button>
                   </Link>
                   <Link href="/cadastro">
-                    <Button className={isScrolled ? "" : "bg-white text-primary hover:bg-secondary border-none"}>
+                    <Button className="bg-white text-[#034d2b] hover:bg-gray-100 border-none">
                       Cadastrar Empresa
                     </Button>
                   </Link>
@@ -129,54 +120,60 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={isScrolled ? "text-gray-900" : "text-white"}
+                className="text-white"
               >
                 {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
             </div>
           </div>
-
-          {/* Mobile Navigation */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b shadow-xl p-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
-              <Link 
-                href="/buscar" 
-                className="block px-4 py-2 text-gray-700 font-medium hover:bg-gray-50 rounded-lg"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Buscar Empresas
-              </Link>
-              {loggedIn ? (
-                <>
-                  <div className="px-4 py-2 text-sm text-gray-500 border-t pt-4">
-                    Logado como {user?.email}
-                  </div>
-                  <Link 
-                    href={dashboardLink}
-                    className="block px-4 py-2 text-primary font-bold"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Meu Painel
-                  </Link>
-                  <form action={logout}>
-                    <Button type="submit" variant="outline" className="w-full justify-start text-red-600 border-red-100 hover:bg-red-50">
-                      Sair da Conta
-                    </Button>
-                  </form>
-                </>
-              ) : (
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t">
-                  <Link href="/login" className="w-full">
-                    <Button variant="outline" className="w-full">Login</Button>
-                  </Link>
-                  <Link href="/cadastro" className="w-full">
-                    <Button className="w-full">Cadastrar</Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          )}
         </div>
+
+        {/* Linha fina de gradiente na parte inferior */}
+        <div
+          className="h-[3px] w-full"
+          style={{ backgroundImage: 'linear-gradient(90deg, #fccc02, #47ad37, #fccc02)' }}
+        />
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b shadow-xl p-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
+            <Link
+              href="/buscar"
+              className="block px-4 py-2 text-gray-700 font-medium hover:bg-gray-50 rounded-lg"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Buscar Empresas
+            </Link>
+            {loggedIn ? (
+              <>
+                <div className="px-4 py-2 text-sm text-gray-500 border-t pt-4">
+                  Logado como {user?.email}
+                </div>
+                <Link
+                  href={dashboardLink}
+                  className="block px-4 py-2 text-primary font-bold"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Meu Painel
+                </Link>
+                <form action={logout}>
+                  <Button type="submit" variant="outline" className="w-full justify-start text-red-600 border-red-100 hover:bg-red-50">
+                    Sair da Conta
+                  </Button>
+                </form>
+              </>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t">
+                <Link href="/login" className="w-full">
+                  <Button variant="outline" className="w-full">Login</Button>
+                </Link>
+                <Link href="/cadastro" className="w-full">
+                  <Button className="w-full">Cadastrar</Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
       </header>
       {!isDashboard && <div className="h-20" />} {/* Spacer for public pages */}
     </>
