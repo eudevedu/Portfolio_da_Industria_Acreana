@@ -23,7 +23,7 @@ import { buscarEmpresaPorId, buscarProdutosPorEmpresa, obterAnalytics, buscarArq
 import { isSupabaseConfigured } from "../../lib/supabase"
 import type { Empresa, Produto } from "../../lib/supabase.types"
 import { AuthGuard } from "@/components/auth-guard"
-import { logout, isLoggedIn, getCurrentUser } from "../../lib/auth"
+import { logout, isLoggedIn, getCurrentUser, isEmpresaAtiva } from "../../lib/auth"
 import { redirect } from "next/navigation"
 import { CompanyInfoCard } from "@/components/company-info-card"
 import ProdutosManager from "@/components/ProdutosManager"
@@ -37,9 +37,15 @@ export const dynamic = 'force-dynamic'
 export default async function DashboardPage() {
   const loggedIn = await isLoggedIn()
   const user = await getCurrentUser()
+  const active = await isEmpresaAtiva()
 
   if (!loggedIn || (user?.tipo !== "empresa" && user?.tipo !== "admin")) {
     redirect("/login")
+  }
+
+  // Bloqueio imediato se a empresa não estiver ativa (exceto para admins)
+  if (!active && user?.tipo === "empresa") {
+    redirect("/login?error=Sua conta industrial não está ativa. Entre em contato com o suporte da SEICT.")
   }
 
   const isConfigured = isSupabaseConfigured()

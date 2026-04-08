@@ -14,8 +14,8 @@ export interface LoginResult {
   message: string
 }
 
-// Função para login de empresas
-export async function login(email: string, password: string): Promise<{ success: boolean; message: string }> {
+// Função para login consolidada
+export async function login(email: string, password: string): Promise<{ success: boolean; message: string; tipo?: string }> {
   if (!isSupabaseConfigured()) {
     // Lógica de login mock
     let user: User | null = null
@@ -48,7 +48,7 @@ export async function login(email: string, password: string): Promise<{ success:
         path: "/",
         sameSite: "lax", // Permite cookies em navegação normal
       })
-      return { success: true, message: "Login bem-sucedido!" }
+      return { success: true, message: "Login bem-sucedido!", tipo: user.tipo }
     } else {
       return { success: false, message: "Credenciais inválidas." }
     }
@@ -77,19 +77,40 @@ export async function login(email: string, password: string): Promise<{ success:
       let empresaId: string | null = null
       const { data: perfilEmpresa, error: perfilError } = await supabase!
         .from("perfis_empresas")
-        .select("empresa_id")
+        .select(`
+          empresa_id,
+          empresas (
+            status
+          )
+        `)
         .eq("id", data.user.id)
         .single()
+
       if (perfilEmpresa) {
+        // Verificar se a empresa está ativa
+        const empresaStatus = (perfilEmpresa.empresas as any)?.status
+        if (empresaStatus && empresaStatus !== 'ativo') {
+          await supabase!.auth.signOut()
+          return { 
+            success: false, 
+            message: `Acesso negado. Sua conta industrial está com status: ${empresaStatus}.` 
+          }
+        }
+        
         userType = "empresa"
         empresaId = perfilEmpresa.empresa_id
       } else {
         const { data: adminPerfil, error: adminError } = await supabase!
           .from("admins")
-          .select("id")
+          .select("id, ativo")
           .eq("id", data.user.id)
           .single()
+
         if (adminPerfil) {
+          if (!adminPerfil.ativo) {
+            await supabase!.auth.signOut()
+            return { success: false, message: "Sua conta de administrador está desativada. Entre em contato com o suporte." }
+          }
           userType = "admin"
         }
       }
@@ -110,7 +131,7 @@ export async function login(email: string, password: string): Promise<{ success:
         path: "/",
         sameSite: "lax", // Permite cookies em navegação normal
       })
-      return { success: true, message: "Login bem-sucedido!" }
+      return { success: true, message: "Login bem-sucedido!", tipo: userType }
     }
     return { success: false, message: "Erro desconhecido durante o login." }
   } catch (error: any) {
@@ -119,8 +140,8 @@ export async function login(email: string, password: string): Promise<{ success:
   }
 }
 
-// Função para login de administradores
-export async function loginAdmin(email: string, password: string): Promise<{ success: boolean; message: string }> {
+// Função para login de administradores (Mantida para compatibilidade, mas agora redirecionando opcionalmente)
+export async function loginAdmin(email: string, password: string): Promise<{ success: boolean; message: string; tipo?: string }> {
   console.log("Admin login attempt:", { email, supabaseConfigured: isSupabaseConfigured() });
   
   if (!isSupabaseConfigured()) {
@@ -234,6 +255,7 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
     return {
       success: true,
       message: `Login bem-sucedido! Bem-vindo, ${admin.nome}`,
+      tipo: "admin"
     }
 
   } catch (error: any) {
@@ -320,14 +342,51 @@ export async function getCurrentUser(): Promise<User | null> {
 export async function isAdmin(): Promise<boolean> {
   try {
     const user = await getCurrentUser()
-    return user?.tipo === "admin"
+    if (!user || user.tipo !== "admin") return false
+
+    // No modo mock, pulamos a verificação do banco
+    if (!isSupabaseConfigured()) return true
+
+    // Verificação robusta no banco de dados
+    const { data: admin, error } = await supabase!
+      .from("admins")
+      .select("ativo")
+      .eq("id", user.id)
+      .single()
+
+    if (error || !admin) return false
+    return !!admin.ativo
   } catch (error) {
     console.error("Erro ao verificar se é admin:", error)
-    // Se for erro de renderização dinâmica, retorna false
-    if (error instanceof Error && error.message.includes('Dynamic server usage')) {
-      console.log("Retornando false para isAdmin devido a renderização dinâmica")
-      return false
-    }
+    return false
+  }
+}
+
+// Função para verificar se a empresa do usuário está ativa
+export async function isEmpresaAtiva(): Promise<boolean> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) return false
+    
+    // Admins sempre têm acesso se estiverem logados e o check de isAdmin passar
+    if (user.tipo === "admin") return true
+
+    if (!user.empresa_id) return false
+
+    // No modo mock, pulamos a verificação do banco
+    if (!isSupabaseConfigured()) return true
+
+    // Verificação robusta no banco de dados
+    const { data: empresa, error } = await supabase!
+      .from("empresas")
+      .select("status")
+      .eq("id", user.empresa_id)
+      .single()
+
+    if (error || !empresa) return false
+    return empresa.status === "ativo"
+  } catch (error) {
+    console.error("Erro ao verificar status da empresa:", error)
     return false
   }
 }

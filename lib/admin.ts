@@ -1,3 +1,4 @@
+"use server"
 import { supabase, supabaseAdmin, isSupabaseConfigured, isSupabaseAdminConfigured } from "./supabase"
 import type { Empresa, Admin } from "./supabase.types"
 
@@ -160,7 +161,18 @@ export async function criarAdmin(dadosAdmin: {
   try {
     console.log("Iniciando criação de admin:", { nome: dadosAdmin.nome, email: dadosAdmin.email })
 
-    // 1. Criar usuário no sistema de autenticação do Supabase
+    // 1. Verificar se já existe na tabela admins para dar erro claro
+    const { data: existingAdminCheck } = await supabase!
+      .from("admins")
+      .select("id")
+      .eq("email", dadosAdmin.email)
+      .single()
+
+    if (existingAdminCheck) {
+      throw new Error("Este e-mail já está cadastrado como administrador.")
+    }
+
+    // 2. Criar usuário no sistema de autenticação do Supabase
     const { data: authUser, error: authError } = await supabaseAdmin!.auth.admin.createUser({
       email: dadosAdmin.email,
       password: dadosAdmin.password,
@@ -173,39 +185,61 @@ export async function criarAdmin(dadosAdmin: {
 
     if (authError) {
       console.error("Erro ao criar usuário de autenticação:", authError)
+      if (authError.message.includes("already been registered")) {
+        console.log("Usuário já existe no Auth. Tentando promover a admin...")
+        
+        // 1. Buscar o usuário existente para obter o seu ID
+        const { data: listData, error: listError } = await supabaseAdmin!.auth.admin.listUsers()
+        if (listError) throw new Error(`Erro ao localizar usuário: ${listError.message}`)
+        
+        const existingUser = listData.users.find(u => u.email === dadosAdmin.email)
+        if (!existingUser) throw new Error("Usuário não encontrado na base de dados de autenticação.")
+
+        // 2. Atualizar metadados do usuário para marcar como admin (opcional mas recomendado)
+        const { error: updateError } = await supabaseAdmin!.auth.admin.updateUserById(existingUser.id, {
+          user_metadata: { 
+            ...existingUser.user_metadata, 
+            tipo: 'admin',
+            nome: dadosAdmin.nome 
+          }
+        })
+        if (updateError) console.warn("Aviso: Falha ao atualizar metadados do usuário no Auth:", updateError)
+
+        // 3. Prosseguir para criar o registro na tabela admins
+        return criarRegistroAdminTable(existingUser.id, dadosAdmin)
+      }
       throw new Error(`Erro na autenticação: ${authError.message}`)
     }
 
     console.log("Usuário de auth criado com sucesso:", authUser.user.id)
-
-    // 2. Criar registro na tabela admins (sem password_hash)
-    const { data, error } = await supabase!
-      .from("admins")
-      .insert({
-        id: authUser.user.id, // Usar o mesmo ID do auth
-        nome: dadosAdmin.nome,
-        email: dadosAdmin.email,
-        cargo: dadosAdmin.cargo,
-        ativo: true
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error("Erro ao criar registro de administrador:", error)
-      
-      // Se falhar ao criar o registro do admin, remover o usuário de auth
-      await supabaseAdmin!.auth.admin.deleteUser(authUser.user.id)
-      throw new Error(`Erro ao salvar admin: ${error.message}`)
-    }
-
-    console.log("Administrador criado com sucesso:", data)
-    return data as Admin
+    return criarRegistroAdminTable(authUser.user.id, dadosAdmin)
 
   } catch (error) {
     console.error("Erro geral ao criar administrador:", error)
     throw error
   }
+}
+
+// Função auxiliar para criar o registro na tabela admins
+async function criarRegistroAdminTable(userId: string, dadosAdmin: any): Promise<Admin | null> {
+  const { data, error } = await supabase!
+    .from("admins")
+    .insert({
+      id: userId,
+      nome: dadosAdmin.nome,
+      email: dadosAdmin.email,
+      cargo: dadosAdmin.cargo,
+      ativo: true
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error("Erro ao criar registro de administrador na tabela:", error)
+    throw new Error(`Erro ao salvar admin: ${error.message}`)
+  }
+
+  return data as Admin
 }
 
 export async function obterTodosAdmins(): Promise<Admin[]> {

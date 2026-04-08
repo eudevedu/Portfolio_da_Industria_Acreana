@@ -65,7 +65,8 @@ import {
   obterTodosAdmins,
   atualizarStatusAdmin,
   atualizarEmpresa,
-  excluirEmpresa
+  excluirEmpresa,
+  criarAdmin
 } from "@/lib/admin"
 import { criarEmpresa } from "@/lib/database"
 import { logout } from "@/lib/auth"
@@ -265,6 +266,57 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
     }
   }
 
+  const handleCreateAdmin = async () => {
+    if (!novoAdmin.nome || !novoAdmin.email || !novoAdmin.password) {
+      alert("Preencha todos os campos obrigatórios")
+      return
+    }
+
+    if (novoAdmin.password !== novoAdmin.confirmPassword) {
+      alert("As senhas não coincidem")
+      return
+    }
+
+    setCreatingAdmin(true)
+    try {
+      const result = await criarAdmin({
+        nome: novoAdmin.nome,
+        email: novoAdmin.email,
+        password: novoAdmin.password,
+        cargo: novoAdmin.cargo
+      })
+
+      if (result) {
+        setAdmins(prev => [result, ...prev])
+        setShowCreateAdminDialog(false)
+        setNovoAdmin({
+          nome: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          cargo: ""
+        })
+        alert("Administrador cadastrado com sucesso!")
+      }
+    } catch (error: any) {
+      console.error("Erro ao criar administrador:", error)
+      alert(error.message || "Erro ao criar administrador")
+    } finally {
+      setCreatingAdmin(false)
+    }
+  }
+
+  const handleToggleAdminStatus = async (adminId: string, currentStatus: boolean) => {
+    try {
+      const updated = await atualizarStatusAdmin(adminId, !currentStatus)
+      if (updated) {
+        setAdmins(prev => prev.map(a => a.id === adminId ? updated : a))
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar status do admin:", error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f8fafc] flex">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col h-full">
@@ -273,7 +325,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
           <div className="p-8 border-b border-slate-100">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
-                <LogoSeict className="h-8 w-8 text-white" />
+                <LogoSeict className=" text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-display font-black leading-none text-slate-900 uppercase">ADMIN</span>
@@ -477,8 +529,8 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                           <TableCell className="text-sm font-medium text-slate-600">{empresa.setor_economico}</TableCell>
                           <TableCell>
                             <Badge className={`rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${empresa.status === 'ativo' ? 'bg-green-50 text-green-700 border-green-100' :
-                                empresa.status === 'pendente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                                  'bg-slate-50 text-slate-700 border-slate-100'
+                              empresa.status === 'pendente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                'bg-slate-50 text-slate-700 border-slate-100'
                               }`}>
                               {empresa.status}
                             </Badge>
@@ -524,18 +576,59 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                     <TableHeader className="bg-slate-50/50"><TableRow><TableHead className="pl-8">Nome</TableHead><TableHead>Acesso</TableHead><TableHead>Status</TableHead><TableHead className="text-right pr-8">Ações</TableHead></TableRow></TableHeader>
                     <TableBody>
                       {admins.map(admin => (
-                        <TableRow key={admin.id}>
-                          <TableCell className="pl-8 py-4">
-                            <div className="flex flex-col">
-                              <span className="font-bold text-slate-800">{admin.nome}</span>
-                              <span className="text-xs text-slate-400">{admin.email}</span>
+                        <TableRow key={admin.id} className="hover:bg-slate-50/50 transition-colors">
+                          <TableCell className="pl-8 py-5">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold border-2 border-white shadow-sm">
+                                {admin.nome.substring(0, 2).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-bold text-slate-900">{admin.nome}</span>
+                                <span className="text-xs text-slate-400">{admin.email}</span>
+                              </div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-xs font-medium uppercase tracking-widest text-slate-500">{admin.cargo || 'Gestor'}</TableCell>
-                          <TableCell><Badge className="rounded-full">{admin.ativo ? 'Conectado' : 'Bloqueado'}</Badge></TableCell>
-                          <TableCell className="text-right pr-8 space-x-2">
-                            <Button variant="ghost" size="icon" className="rounded-lg" onClick={() => { setAdminToEdit(admin); setShowEditAdminDialog(true); }}><Edit className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="rounded-lg text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
+                          <TableCell className="text-xs font-bold uppercase tracking-widest text-slate-500">{admin.cargo || 'Gestor Admin'}</TableCell>
+                          <TableCell>
+                            <Badge className={`rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${admin.ativo ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'}`}>
+                              {admin.ativo ? 'Ativo' : 'Bloqueado'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right pr-8">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="rounded-xl"><ChevronDown className="h-4 w-4 text-slate-400" /></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="min-w-[180px] rounded-xl p-2">
+                                <DropdownMenuItem
+                                  className="gap-2 rounded-lg cursor-pointer"
+                                  onClick={() => { setAdminToEdit(admin); setShowEditAdminDialog(true); }}
+                                >
+                                  <Edit className="h-4 w-4" /> Editar Perfil
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel className="text-[0.6rem] uppercase tracking-[0.2em] opacity-50 px-2 py-2">Segurança</DropdownMenuLabel>
+
+                                <DropdownMenuItem
+                                  className={`gap-2 rounded-lg cursor-pointer ${admin.ativo ? 'text-amber-600' : 'text-green-600'}`}
+                                  onClick={() => handleToggleAdminStatus(admin.id, !!admin.ativo)}
+                                >
+                                  {admin.ativo ? (
+                                    <><UserX className="h-4 w-4" /> Bloquear Acesso</>
+                                  ) : (
+                                    <><UserCheck className="h-4 w-4" /> Reativar Acesso</>
+                                  )}
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem
+                                  className="gap-2 rounded-lg cursor-pointer text-slate-400 cursor-not-allowed opacity-50"
+                                  disabled
+                                >
+                                  <Key className="h-4 w-4" /> Resetar Senha
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -676,6 +769,86 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                 </>
               ) : (
                 "Salvar Alterações"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cadastro de Admin Dialog */}
+      <Dialog open={showCreateAdminDialog} onOpenChange={setShowCreateAdminDialog}>
+        <DialogContent className="max-w-md rounded-3xl p-8 border-none shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black flex items-center gap-3">
+              <UserPlus className="h-6 w-6 text-primary" />
+              Novo Administrador
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-6">
+            <div className="space-y-2">
+              <Label className="text-xs font-black uppercase text-slate-400">Nome Completo *</Label>
+              <Input
+                className="rounded-xl"
+                placeholder="Ex: João Silva"
+                value={novoAdmin.nome}
+                onChange={e => setNovoAdmin({ ...novoAdmin, nome: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-black uppercase text-slate-400">E-mail *</Label>
+              <Input
+                type="email"
+                className="rounded-xl"
+                placeholder="email@exemplo.com"
+                value={novoAdmin.email}
+                onChange={e => setNovoAdmin({ ...novoAdmin, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-black uppercase text-slate-400">Cargo / Função</Label>
+              <Input
+                className="rounded-xl"
+                placeholder="Ex: Moderador, Gestor SEICT"
+                value={novoAdmin.cargo}
+                onChange={e => setNovoAdmin({ ...novoAdmin, cargo: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-black uppercase text-slate-400">Senha *</Label>
+                <Input
+                  type="password"
+                  className="rounded-xl"
+                  value={novoAdmin.password}
+                  onChange={e => setNovoAdmin({ ...novoAdmin, password: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-black uppercase text-slate-400">Confirmar *</Label>
+                <Input
+                  type="password"
+                  className="rounded-xl"
+                  value={novoAdmin.confirmPassword}
+                  onChange={e => setNovoAdmin({ ...novoAdmin, confirmPassword: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              onClick={handleCreateAdmin}
+              disabled={creatingAdmin}
+              className="w-full rounded-xl bg-slate-900 h-12 font-bold shadow-lg shadow-slate-900/20"
+            >
+              {creatingAdmin ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Cadastrando...
+                </>
+              ) : (
+                "Cadastrar Administrador"
               )}
             </Button>
           </DialogFooter>
