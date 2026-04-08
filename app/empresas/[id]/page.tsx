@@ -211,59 +211,80 @@ export default async function EmpresaDetailPage({ params }: { params: Promise<{ 
             </section>
           )}
 
-          {/* Products Grid */}
+          {/* Products Grid - E-commerce Style */}
           {empresa.produtos && empresa.produtos.length > 0 && (
             <section>
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">
-                    <Package className="h-5 w-5 text-green-600" />
+                  <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center shadow-lg shadow-green-600/20">
+                    <Package className="h-6 w-6 text-white" />
                   </div>
-                  <h2 className="text-2xl font-display font-black tracking-tight">Destaques do Portfólio</h2>
+                  <div>
+                    <h2 className="text-2xl font-display font-black tracking-tight">Destaques do Portfólio</h2>
+                    <p className="text-sm text-muted-foreground font-medium">Conheça as principais soluções desta indústria</p>
+                  </div>
                 </div>
-                <Badge variant="outline" className="font-bold border-muted-foreground/20">
-                  {empresa.produtos.length} {empresa.produtos.length === 1 ? 'Produto' : 'Produtos'}
+                <Badge variant="secondary" className="font-black bg-slate-100 text-slate-600 border-none px-4 py-1.5 rounded-full">
+                  {empresa.produtos.length} {empresa.produtos.length === 1 ? 'Item' : 'Itens'}
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {empresa.produtos.map((produto) => (
-                  <Card key={produto.id} className="group overflow-hidden border-border/40 bg-white/40 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 rounded-3xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                {empresa.produtos.filter(p => p !== null).map((produto) => (
+                  <Card key={produto.id} className="group overflow-hidden border-none bg-white shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 rounded-[2.5rem] flex flex-col">
                     <AnalyticsTracker empresaId={empresa.id} tipoEvento="visualizacao_produto" referenciaId={produto.id} />
-                    <CardHeader className="p-6 pb-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[9px] uppercase tracking-widest">
-                          {produto.linha || "Linha Geral"}
-                        </Badge>
-                        <div className="flex items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                          {produto.status === 'ativo' ? (
-                            <span className="flex items-center text-green-600">
-                              <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5" />
-                              Catálogo
-                            </span>
-                          ) : 'Indisponível'}
-                        </div>
-                      </div>
-                      <CardTitle className="text-xl font-display font-black group-hover:text-primary transition-colors">
-                        {produto.nome}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 pt-2">
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-6 line-clamp-3">
-                        {produto.descricao}
-                      </p>
-                      
-                      {produto.nome_tecnico && (
-                        <div className="text-[10px] font-bold text-muted-foreground/60 uppercase mb-6 flex items-center">
-                          <FileText className="h-3 w-3 mr-1" />
-                          Cod: {produto.nome_tecnico}
+                    
+                    {/* Product Image Holder */}
+                    <div className="relative aspect-square overflow-hidden bg-slate-100 p-4">
+                      {produto.imagem_url ? (
+                        <img 
+                          src={produto.imagem_url} 
+                          alt={produto.nome} 
+                          className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700" 
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                          <ImageIcon className="h-12 w-12 mb-2 stroke-[1.5]" />
+                          <span className="text-[10px] uppercase font-bold tracking-widest">Sem imagem</span>
                         </div>
                       )}
+                      
+                      {/* Floating Badge */}
+                      <div className="absolute top-4 left-4">
+                        <Badge className="bg-white/90 backdrop-blur-md text-slate-900 border-none font-bold text-[9px] uppercase tracking-widest shadow-sm px-3 py-1">
+                          {produto.linha || "Geral"}
+                        </Badge>
+                      </div>
+                    </div>
 
-                      <Button variant="ghost" className="w-full h-11 rounded-xl bg-muted/30 group-hover:bg-primary group-hover:text-white transition-all duration-300 border-none justify-between pl-4 pr-3 font-bold">
-                        Ver detalhes técnicos
-                        <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />
-                      </Button>
+                    <CardContent className="p-6 flex-1 flex flex-col">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-display font-black group-hover:text-primary transition-colors leading-tight mb-2">
+                          {produto.nome}
+                        </h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 italic">
+                          {produto.descricao || "Nenhuma descrição detalhada fornecida pela indústria."}
+                        </p>
+                      </div>
+                      
+                      <div className="mt-auto space-y-4">
+                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+                          <div className="flex items-center text-green-600">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse mr-2" />
+                            Em Catálogo
+                          </div>
+                          {produto.nome_tecnico && (
+                            <div className="text-slate-400">
+                              REF: {produto.nome_tecnico}
+                            </div>
+                          )}
+                        </div>
+
+                        <Button className="w-full h-12 rounded-2xl bg-slate-50 hover:bg-primary text-slate-900 hover:text-white transition-all duration-300 border-none font-bold text-xs uppercase tracking-widest group/btn">
+                          Ver Especificações
+                          <Plus className="h-4 w-4 ml-2 transition-transform group-hover/btn:rotate-90" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

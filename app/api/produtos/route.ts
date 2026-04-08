@@ -40,13 +40,24 @@ export async function POST(request: Request) {
 
     const data = await request.json()
     
+    console.log("DEBUG: Tentativa de criar produto por usuario:", user.id, "Empresa ID:", user.empresa_id)
+    
     // Adiciona o empresa_id automaticamente
     const produtoData = {
       ...data,
       empresa_id: user.empresa_id
     }
     
+    console.log("DEBUG: produtoData preparado:", JSON.stringify(produtoData, null, 2))
+    
     const novoProduto = await criarProduto(produtoData)
+    
+    if (!novoProduto) {
+      return NextResponse.json({
+        success: false,
+        error: "Falha ao persistir produto no banco de dados. Verifique os logs do servidor."
+      }, { status: 400 })
+    }
     
     return NextResponse.json({
       success: true,

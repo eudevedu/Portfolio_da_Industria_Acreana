@@ -9,15 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Trash2, Plus, Edit, Eye } from 'lucide-react'
+import { Trash2, Plus, Edit, Eye, ImageIcon } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { UploadComponent } from '@/components/upload-component' // Importando o componente de upload
 
 interface Produto {
   id: string
   nome: string
   descricao?: string
   preco?: number
-  categoria?: string
+  linha?: string // Alinhado com o banco de dados
+  imagem_url?: string // Nova propriedade para a foto do produto
+  status: string
   created_at: string
 }
 
@@ -31,7 +34,9 @@ export default function ProdutosManager() {
     nome: '',
     descricao: '',
     preco: '',
-    categoria: ''
+    linha: 'Geral',
+    imagem_url: '',
+    status: 'ativo'
   })
 
   useEffect(() => {
@@ -54,39 +59,38 @@ export default function ProdutosManager() {
     }
   }
 
+  const handleUploadSuccess = (url: string) => {
+    setProdutoForm(prev => ({ ...prev, imagem_url: url }))
+    setMessage({ type: 'success', text: 'Foto do produto enviada com sucesso!' })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Defer processing to prevent UI blocking
-    const processSubmit = async () => {
-      try {
-        const response = await fetch('/api/produtos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...produtoForm,
-            preco: produtoForm.preco ? parseFloat(produtoForm.preco) : null
-          })
+    try {
+      const response = await fetch('/api/produtos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...produtoForm,
+          preco: produtoForm.preco ? parseFloat(produtoForm.preco) : null
         })
+      })
 
-        const result = await response.json()
-        
-        if (result.success) {
-          setProdutos([result.produto, ...produtos])
-          setProdutoForm({ nome: '', descricao: '', preco: '', categoria: '' })
-          setShowForm(false)
-          setMessage({ type: 'success', text: 'Produto adicionado com sucesso!' })
-        } else {
-          setMessage({ type: 'error', text: result.error || 'Erro ao adicionar produto' })
-        }
-      } catch (error) {
-        console.error('Erro ao adicionar produto:', error)
-        setMessage({ type: 'error', text: 'Erro ao adicionar produto' })
+      const result = await response.json()
+      
+      if (result.success) {
+        setProdutos([result.produto, ...produtos])
+        setProdutoForm({ nome: '', descricao: '', preco: '', linha: 'Geral', imagem_url: '', status: 'ativo' })
+        setShowForm(false)
+        setMessage({ type: 'success', text: 'Produto adicionado com sucesso!' })
+      } else {
+        setMessage({ type: 'error', text: result.error || 'Erro ao adicionar produto' })
       }
+    } catch (error) {
+      console.error('Erro ao adicionar produto:', error)
+      setMessage({ type: 'error', text: 'Erro ao adicionar produto' })
     }
-
-    // Use setTimeout to defer processing
-    setTimeout(processSubmit, 0)
   }
 
   const deleteProduto = async (id: string) => {
@@ -120,81 +124,127 @@ export default function ProdutosManager() {
   return (
     <div className="space-y-6">
       {message && (
-        <Alert className={`${message.type === 'error' ? 'border-red-500' : 'border-green-500'}`}>
-          <AlertDescription className={message.type === 'error' ? 'text-red-700' : 'text-green-700'}>
+        <Alert className={`${message.type === 'error' ? 'border-red-500' : 'border-green-500'} animate-in fade-in slide-in-from-top-4 duration-500`}>
+          <AlertDescription className={message.type === 'error' ? 'text-red-700 font-bold' : 'text-green-700 font-bold'}>
             {message.text}
           </AlertDescription>
         </Alert>
       )}
 
-      <Card>
-        <CardHeader>
+      <Card className="border-none shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden">
+        <CardHeader className="bg-slate-50/50 border-b border-slate-100">
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Produtos Cadastrados ({produtos.length})</CardTitle>
-              <p className="text-sm text-gray-600 mt-1">Gerencie os produtos da sua empresa</p>
+              <CardTitle className="text-2xl font-display font-black tracking-tight">Portfólio de Produtos ({produtos.length})</CardTitle>
+              <p className="text-sm text-slate-500 font-medium mt-1">Gerencie o que sua vitrine industrial exibe para o portal</p>
             </div>
-            <Button onClick={() => setShowForm(!showForm)}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button onClick={() => setShowForm(!showForm)} className={`rounded-xl h-11 transition-all ${showForm ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-green-600 hover:bg-green-700'}`}>
+              <Plus className={`h-4 w-4 mr-2 transition-transform ${showForm ? 'rotate-45' : ''}`} />
               {showForm ? 'Cancelar' : 'Novo Produto'}
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-8">
           {showForm && (
-            <div className="mb-6 p-4 border rounded-lg bg-gray-50">
-              <h3 className="font-semibold mb-4">Adicionar Novo Produto</h3>
-              <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="nome">Nome do Produto *</Label>
-                  <Input
-                    id="nome"
-                    value={produtoForm.nome}
-                    onChange={(e) => setProdutoForm({ ...produtoForm, nome: e.target.value })}
-                    required
-                  />
+            <div className="mb-10 p-8 border border-slate-100 rounded-[2rem] bg-slate-50/30 animate-in zoom-in-95 duration-300">
+              <h3 className="text-lg font-black mb-6 uppercase tracking-widest text-slate-400">Dados do Novo Produto</h3>
+              <form onSubmit={handleSubmit} className="grid md:grid-cols-12 gap-8">
+                {/* Imagem do Produto */}
+                <div className="md:col-span-5 space-y-4">
+                  <Label className="text-xs font-bold uppercase tracking-widest text-slate-500">Foto do Produto</Label>
+                  {produtoForm.imagem_url ? (
+                    <div className="relative aspect-square w-full rounded-3xl overflow-hidden border-2 border-green-100 group">
+                      <img 
+                        src={produtoForm.imagem_url} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      />
+                      <Button 
+                        type="button" 
+                        variant="destructive" 
+                        size="sm" 
+                        className="absolute bottom-4 right-4 h-9 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setProdutoForm(prev => ({ ...prev, imagem_url: '' }))}
+                      >
+                        Trocar Foto
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-square bg-slate-100 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-6 text-center">
+                      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+                        <ImageIcon className="h-8 w-8 text-slate-300" />
+                      </div>
+                      <p className="text-xs font-bold text-slate-400 mb-6 px-4">Utilize fotos de alta qualidade com fundo neutro para melhor destaque</p>
+                      <UploadComponent 
+                        onUploadSuccess={handleUploadSuccess} 
+                        buttonText="Selecionar Foto"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <Label htmlFor="categoria">Categoria</Label>
-                  <Select 
-                    value={produtoForm.categoria} 
-                    onValueChange={(value) => setProdutoForm({ ...produtoForm, categoria: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="alimentos">Alimentos</SelectItem>
-                      <SelectItem value="madeira">Madeira</SelectItem>
-                      <SelectItem value="textil">Têxtil</SelectItem>
-                      <SelectItem value="plastico">Plástico</SelectItem>
-                      <SelectItem value="metal">Metal</SelectItem>
-                      <SelectItem value="outros">Outros</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="descricao">Descrição</Label>
-                  <Textarea
-                    id="descricao"
-                    value={produtoForm.descricao}
-                    onChange={(e) => setProdutoForm({ ...produtoForm, descricao: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="preco">Preço (R$)</Label>
-                  <Input
-                    id="preco"
-                    type="number"
-                    step="0.01"
-                    value={produtoForm.preco}
-                    onChange={(e) => setProdutoForm({ ...produtoForm, preco: e.target.value })}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button type="submit" className="w-full">Adicionar Produto</Button>
+
+                {/* Detalhes do Produto */}
+                <div className="md:col-span-7 space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <Label htmlFor="nome" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Nome Comercial *</Label>
+                      <Input
+                        id="nome"
+                        className="rounded-xl h-12 mt-1"
+                        placeholder="Ex: Telha Ecológica Premium"
+                        value={produtoForm.nome}
+                        onChange={(e) => setProdutoForm({ ...produtoForm, nome: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="linha" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Linha / Categoria</Label>
+                      <Select 
+                        value={produtoForm.linha} 
+                        onValueChange={(value) => setProdutoForm({ ...produtoForm, linha: value })}
+                      >
+                        <SelectTrigger className="rounded-xl h-12 mt-1">
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="Geral">Linha Geral</SelectItem>
+                          <SelectItem value="Premium">Série Premium</SelectItem>
+                          <SelectItem value="Economica">Linha Econômica</SelectItem>
+                          <SelectItem value="Sustentavel">Ecológico / Sustentável</SelectItem>
+                          <SelectItem value="Industrial">Uso Industrial</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="preco" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Valor Estimado (R$)</Label>
+                      <Input
+                        id="preco"
+                        type="number"
+                        step="0.01"
+                        className="rounded-xl h-12 mt-1"
+                        value={produtoForm.preco}
+                        onChange={(e) => setProdutoForm({ ...produtoForm, preco: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="descricao" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Breve Descrição do Produto</Label>
+                    <Textarea
+                      id="descricao"
+                      className="rounded-2xl mt-1 min-h-[120px]"
+                      placeholder="Descreva as principais características e benefícios deste item..."
+                      value={produtoForm.descricao}
+                      onChange={(e) => setProdutoForm({ ...produtoForm, descricao: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="flex pt-4">
+                    <Button type="submit" className="w-full h-14 rounded-2xl bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20 font-black text-sm uppercase tracking-widest" disabled={!produtoForm.nome}>
+                      Salvar Cadastro do Produto
+                    </Button>
+                  </div>
                 </div>
               </form>
             </div>
@@ -211,51 +261,62 @@ export default function ProdutosManager() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Nome do Produto</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Preço</TableHead>
-                  <TableHead>Ações</TableHead>
+                <TableRow className="hover:bg-transparent border-slate-100">
+                  <TableHead className="w-20 text-xs font-bold uppercase tracking-widest text-slate-400">Foto</TableHead>
+                  <TableHead className="text-xs font-bold uppercase tracking-widest text-slate-400">Produto / Descrição</TableHead>
+                  <TableHead className="text-xs font-bold uppercase tracking-widest text-slate-400">Linha</TableHead>
+                  <TableHead className="text-xs font-bold uppercase tracking-widest text-slate-400">Valoração</TableHead>
+                  <TableHead className="text-right text-xs font-bold uppercase tracking-widest text-slate-400">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {produtos.map((produto) => (
-                  <TableRow key={produto.id}>
+                {produtos.filter(p => p !== null).map((produto) => (
+                  <TableRow key={produto.id} className="hover:bg-slate-50/50 border-slate-50 transition-colors">
+                    <TableCell>
+                      <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden border border-slate-200">
+                        {produto.imagem_url ? (
+                          <img src={produto.imagem_url} alt={produto.nome} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageIcon className="h-5 w-5 text-slate-300" />
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{produto.nome}</div>
+                        <div className="font-bold text-slate-900">{produto.nome}</div>
                         {produto.descricao && (
-                          <div className="text-sm text-gray-500 truncate max-w-xs">
+                          <div className="text-xs text-slate-500 truncate max-w-xs mt-0.5">
                             {produto.descricao}
                           </div>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {produto.categoria && (
-                        <Badge variant="outline">{produto.categoria}</Badge>
-                      )}
+                      <Badge variant="outline" className="rounded-lg border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                        {produto.linha || "Geral"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      {produto.preco && (
-                        <Badge variant="secondary">
+                      {produto.preco ? (
+                        <div className="font-black text-slate-900 text-sm">
                           R$ {produto.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </Badge>
+                        </div>
+                      ) : (
+                        <span className="text-xs font-bold text-slate-400 italic">Sob consulta</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-slate-100 text-slate-600">
                           <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
-                          size="sm"
+                          size="icon"
                           onClick={() => deleteProduto(produto.id)}
-                          className="text-red-600 hover:text-red-800"
+                          className="h-9 w-9 rounded-xl hover:bg-red-50 text-red-500"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

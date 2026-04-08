@@ -298,8 +298,21 @@ export async function criarProduto(
     empresa.produtos.push(novoProduto)
     return novoProduto
   }
-  const { data, error } = await supabase!.from("produtos").insert([produto]).select().single()
+
+  // Limpeza de dados para garantir que apenas campos validos cheguem ao DB
+  const dataToInsert = {
+    nome: produto.nome || "Produto sem nome",
+    empresa_id: produto.empresa_id,
+    descricao: produto.descricao || null,
+    linha: produto.linha || "Geral",
+    imagem_url: produto.imagem_url || null,
+    nome_tecnico: produto.nome_tecnico || null,
+    status: produto.status || "ativo"
+  }
+
+  const { data, error } = await supabase!.from("produtos").insert([dataToInsert]).select().single()
   if (error) {
+    console.error("❌ Erro ao criar produto no Supabase:", error.message, error.details)
     return null
   }
   return data as Produto
