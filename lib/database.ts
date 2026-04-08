@@ -209,7 +209,7 @@ export async function criarEmpresa(
     mockEmpresasStore!.push(novaEmpresa)
     return novaEmpresa
   }
-  
+
   console.log("Criando empresa no Supabase:", empresa)
   const { data, error } = await supabase!.from("empresas").insert([empresa]).select().single()
   if (error) {
@@ -222,7 +222,7 @@ export async function criarEmpresa(
 
 export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): Promise<Empresa | null> {
   console.log("atualizarEmpresa chamada:", { id, updates })
-  
+
   if (!isSupabaseConfigured()) {
     console.log("Supabase não configurado, usando mock store")
     if (!mockEmpresasStore) await buscarEmpresas()
@@ -237,7 +237,7 @@ export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): P
     console.log("Empresa atualizada no mock:", atualizada)
     return atualizada
   }
-  
+
   console.log("Atualizando empresa no Supabase...")
   const { data, error } = await supabase!
     .from("empresas")
@@ -245,13 +245,13 @@ export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): P
     .eq("id", id)
     .select()
     .single()
-    
+
   if (error) {
     console.error("Erro ao atualizar empresa no Supabase:", error.message, error)
     return null
   }
-  
-  console.log("Empresa atualizada no Supabase:", data)
+
+  // console.log("Empresa atualizada no Supabase:", data)
   return data as Empresa
 }
 
@@ -360,7 +360,7 @@ export async function obterAnalytics(empresaId: string): Promise<{
     const mockEmpresas = await buscarEmpresas()
     const empresa = mockEmpresas.find(e => e.id === empresaId)
     const produtosMock = empresa?.produtos || []
-    
+
     const produtosMaisVistos = produtosMock.slice(0, 3).map((produto, index) => ({
       nome: produto.nome,
       views: 500 - (index * 100) // Simula views decrescentes
@@ -652,7 +652,7 @@ export async function buscarProdutosMaisVisualizados(limite: number = 6): Promis
 // Funções para Arquivos
 export async function criarArquivo(arquivo: Omit<Arquivo, "id" | "created_at">): Promise<{ data: Arquivo | null, error: any }> {
   console.log("Iniciando criarArquivo:", arquivo)
-  
+
   if (!isSupabaseConfigured()) {
     console.log("Modo mock: criando arquivo")
     const newId = `mock-arquivo-${Date.now()}`
@@ -661,12 +661,12 @@ export async function criarArquivo(arquivo: Omit<Arquivo, "id" | "created_at">):
       id: newId,
       created_at: new Date().toISOString(),
     } as Arquivo
-    
+
     if (!mockEmpresasStore) {
       console.log("Inicializando mockEmpresasStore...")
       await buscarEmpresas()
     }
-    
+
     const empresa = mockEmpresasStore!.find(e => e.id === arquivo.empresa_id)
     if (empresa) {
       if (!empresa.arquivos) empresa.arquivos = []
@@ -679,19 +679,19 @@ export async function criarArquivo(arquivo: Omit<Arquivo, "id" | "created_at">):
     }
     return { data: novoArquivo, error: null }
   }
-  
+
   try {
     const { data, error } = await supabase!
       .from("arquivos")
       .insert([arquivo])
       .select()
       .single()
-      
+
     if (error) {
       console.error("Erro do Supabase ao criar arquivo:", error)
       return { data: null, error }
     }
-    
+
     console.log("Arquivo criado com sucesso no Supabase:", data?.id)
     return { data: data as Arquivo, error: null }
   } catch (err) {
@@ -706,12 +706,12 @@ export async function buscarArquivosPorEmpresa(empresaId: string) {
     const empresa = mockEmpresasStore!.find(e => e.id === empresaId)
     return empresa?.arquivos || []
   }
-  
+
   if (!supabase) {
     console.error("Supabase não está configurado.")
     return []
   }
-  
+
   const { data, error } = await supabase
     .from('arquivos')
     .select('*')
@@ -735,7 +735,7 @@ export async function deletarArquivo(id: string): Promise<void> {
     }
     return
   }
-  
+
   const { error } = await supabase!.from("arquivos").delete().eq("id", id)
   if (error) {
     console.error("Erro ao deletar arquivo no Supabase:", error)
@@ -751,9 +751,9 @@ export async function criarPerfilEmpresa(
   if (!isSupabaseConfigured()) {
     return { data: null, error: new Error("Supabase not configured") }
   }
-  
+
   console.log("Criando/atualizando perfil da empresa:", { userId, empresaId, profileData })
-  
+
   // Garantir que campos obrigatórios estejam preenchidos
   const perfilCompleto = {
     id: userId,
@@ -764,19 +764,19 @@ export async function criarPerfilEmpresa(
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }
-  
+
   // Usar UPSERT para evitar erro de chave duplicada
   const { data, error } = await supabase!
     .from("perfis_empresas")
     .upsert([perfilCompleto])
     .select()
     .single()
-    
+
   if (error) {
     console.error("Erro ao criar/atualizar perfil da empresa:", error)
     return { data: null, error }
   }
-  
+
   console.log("Perfil da empresa criado/atualizado com sucesso:", data)
   return { data: data as PerfilEmpresa, error: null }
 }
