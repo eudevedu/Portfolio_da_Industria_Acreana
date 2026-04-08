@@ -17,7 +17,7 @@ export function AcreBanner(props: React.SVGProps<SVGSVGElement>) {
   return (
     <Image
       src="/acre.jpg" // Caminho relativo à pasta public
-      alt="Logo Acre"
+      alt="banner Acre"
       width={1920} // ou o tamanho desejado
       height={900}
     />
