@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <LogoSeict className="h-12 w-12 text-green-600" />
+            <LogoSeict className="text-green-600" />
           </div>
           <CardTitle className="text-2xl font-bold">Login de Administrador</CardTitle>
           <CardDescription>Acesse o painel administrativo.</CardDescription>

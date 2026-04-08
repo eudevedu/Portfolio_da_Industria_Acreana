@@ -247,7 +247,7 @@ export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): P
     .single()
     
   if (error) {
-    console.error("Erro ao atualizar empresa no Supabase:", error)
+    console.error("Erro ao atualizar empresa no Supabase:", error.message, error)
     return null
   }
   
@@ -940,9 +940,9 @@ export async function uploadLogo(empresaId: string, file: File): Promise<string>
     throw new Error("Formato de imagem não suportado. Use PNG, JPG, JPEG, SVG ou WEBP.")
   }
 
-  // Upload para o bucket 'empresas-logos'
+  // Upload para o bucket 'Imagem'
   const { data, error } = await supabase.storage
-    .from("empresas-logos")
+    .from("Imagem")
     .upload(`${empresaId}/${file.name}`, file, {
       cacheControl: "3600",
       upsert: true,
@@ -953,7 +953,7 @@ export async function uploadLogo(empresaId: string, file: File): Promise<string>
 
   // Retorna a URL pública da logo
   return supabase.storage
-    .from("empresas-logos")
+    .from("Imagem")
     .getPublicUrl(`${empresaId}/${file.name}`).data.publicUrl
 }
 

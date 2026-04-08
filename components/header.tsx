@@ -39,7 +39,7 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 sm:px-6 lg:px-8",
           isScrolled 
             ? "bg-white/80 backdrop-blur-md shadow-sm h-16 py-2" 
-            : "bg-gradient-to-r from-green-900/90 to-green-600/90 h-20 py-4"
+            : "bg-gradient-to-r from-primary via-primary/80 to-primary/90 h-20 py-4"
         )}
       >
         <div className="max-w-7xl mx-auto h-full">
@@ -50,14 +50,14 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
             {!isDashboard && (
               <div className="flex items-center space-x-3">
                 <Link href="/" className="flex items-center space-x-2 group">
-                  <div className="bg-white p-1 rounded-lg shadow-sm group-hover:scale-105 transition-transform">
-                    <LogoSeict className="h-10 w-10 sm:h-12 sm:w-12" />
+                  <div className="bg-white px-4 py-2 rounded-xl shadow-md group-hover:scale-105 transition-all duration-300">
+                    <LogoSeict className="h-10 sm:h-12 w-auto object-contain" />
                   </div>
                   <h1 className={cn(
-                    "text-lg sm:text-xl font-bold tracking-tight transition-colors",
-                    isScrolled ? "text-green-900" : "text-white"
+                    "text-xl sm:text-2xl font-display font-black tracking-tight transition-colors",
+                    isScrolled ? "text-primary" : "text-white"
                   )}>
-                    Portfólio Industrial
+                    Portfólio <span className={isScrolled ? "text-foreground/70" : "text-white/80"}>Industrial</span>
                   </h1>
                 </Link>
               </div>
@@ -115,7 +115,7 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
                     </Button>
                   </Link>
                   <Link href="/cadastro">
-                    <Button className={isScrolled ? "" : "bg-white text-green-700 hover:bg-green-50 border-none"}>
+                    <Button className={isScrolled ? "" : "bg-white text-primary hover:bg-secondary border-none"}>
                       Cadastrar Empresa
                     </Button>
                   </Link>
@@ -153,7 +153,7 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
                   </div>
                   <Link 
                     href={dashboardLink}
-                    className="block px-4 py-2 text-green-700 font-bold"
+                    className="block px-4 py-2 text-primary font-bold"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Meu Painel

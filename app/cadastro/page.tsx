@@ -50,6 +50,7 @@ export default function CadastroPage() {
     linkedin: "",
     twitter: "",
     video_apresentacao: "",
+    telefone: "",
     status: "ativo",
   })
   const [userEmail, setUserEmail] = useState("")
@@ -242,6 +243,7 @@ export default function CadastroPage() {
   linkedin: formData.linkedin,
   twitter: formData.twitter,
   video_apresentacao: formData.video_apresentacao,
+  telefone: formData.telefone,
   status: "ativo",
       };
 
@@ -421,6 +423,7 @@ export default function CadastroPage() {
       linkedin: "",
       twitter: "",
       video_apresentacao: "",
+      telefone: "",
       status: "ativo",
     })
     setUserEmail("")
@@ -883,6 +886,16 @@ export default function CadastroPage() {
                       value={formData.video_apresentacao || ""}
                       onChange={e => setFormData(prev => ({ ...prev, video_apresentacao: e.target.value }))}
                       autoComplete="url"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="telefone_empresa">Telefone da Empresa</Label>
+                    <Input
+                      id="telefone_empresa"
+                      placeholder="(XX) XXXX-XXXX"
+                      value={formData.telefone || ""}
+                      onChange={e => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
+                      autoComplete="tel"
                     />
                   </div>
                   <div className="space-y-4">

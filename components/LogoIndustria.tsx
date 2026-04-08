@@ -4,10 +4,10 @@ import Image from "next/image"
 export function LogoSeict({ className, ...props }: { className?: string; width?: number; height?: number }) {
   return (
     <Image
-      src="/SEICT-Logo.svg" // Caminho relativo à pasta public
+      src="/Logomarca2.jpg" // Caminho relativo à pasta public
       alt="Logo Indústria"
-      width={props.width || 125} // ou o tamanho desejado
-      height={props.height || 125}
+      width={props.width || 390} // Aumentado de 300 para 390 (30%)
+      height={props.height || 78} // Aumentado de 60 para 78 (30%)
       className={className}
     />
   )

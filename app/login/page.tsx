@@ -47,7 +47,7 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Link href="/">
-              <LogoSeict className="h-15  w-15 text-green-600" />
+              <LogoSeict className=" text-green-600" />
             </Link>
           </div>
           <CardTitle className="text-2xl font-bold">Entrar como Empresa</CardTitle>

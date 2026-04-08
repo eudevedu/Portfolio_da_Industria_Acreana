@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, MapPin, Loader2 } from "lucide-react"
+import { Search, MapPin, Loader2, Phone } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -86,15 +86,15 @@ export default function BuscarPage() {
   }, [selectedStatus, selectedSector, selectedCity, searchTerm])
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-background py-12">
       {/* Search and Filters Section */}
       <section className="py-12 px-4 glass mx-4 rounded-3xl mb-12">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-display font-black text-gray-900 mb-6 flex items-center justify-center">
+          <h2 className="text-3xl font-display font-black text-foreground mb-6 flex items-center justify-center">
             <Search className="mr-3 h-8 w-8 text-primary" />
             Encontre Indústrias e Produtos
           </h2>
-          <p className="text-lg text-gray-600 mb-10 max-w-xl mx-auto">Filtre por setor ou município para encontrar exatamente o que você procura.</p>
+          <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">Filtre por setor ou município para encontrar exatamente o que você procura.</p>
 
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-10">
@@ -157,7 +157,7 @@ export default function BuscarPage() {
       <section className="px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10">
-            <h3 className="text-2xl font-display font-bold text-gray-900">
+            <h3 className="text-2xl font-display font-bold text-foreground">
               {loading ? "Buscando..." : `${empresas.length} Resultados Encontrados`}
             </h3>
           </div>
@@ -212,8 +212,15 @@ export default function BuscarPage() {
                       <MapPin className="h-4 w-4 mr-2 text-primary" />
                       {empresa.municipio}, AC
                     </div>
+
+                    {empresa.telefone && (
+                      <div className="flex items-center text-sm font-medium text-muted-foreground mb-4">
+                        <Phone className="h-4 w-4 mr-2 text-primary" />
+                        {empresa.telefone}
+                      </div>
+                    )}
                     
-                    <p className="text-sm text-gray-600 mb-6 line-clamp-3 leading-relaxed grow">
+                    <p className="text-sm text-muted-foreground mb-6 line-clamp-3 leading-relaxed grow">
                       {empresa.apresentacao || "Esta indústria contribui para a economia local oferecendo serviços de alta qualidade."}
                     </p>
                     

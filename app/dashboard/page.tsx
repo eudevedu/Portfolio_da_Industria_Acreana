@@ -86,76 +86,76 @@ export default async function DashboardPage() {
     >
       <div className="min-h-screen bg-[#f8fafc] flex">
         <Tabs defaultValue="empresa" className="flex-1 flex flex-col h-full">
-        {/* Sidebar Navigation */}
-        <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col z-50">
-          <div className="p-8 border-b border-slate-100">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
-                <LogoSeict className="h-8 w-8 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-display font-black tracking-tight leading-none text-slate-900 uppercase">PORTFÓLIO</span>
-                <span className="text-[0.6rem] font-bold tracking-[0.2em] text-green-600 uppercase">Indústria Acreana</span>
-              </div>
-            </Link>
-          </div>
-
-          <nav className="flex-1 p-6 space-y-2">
-            <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Menu Principal</p>
-            <TabsList className="flex flex-col w-full bg-transparent p-0 gap-2 h-auto">
-              {[
-                { id: 'empresa', label: 'Dados da Empresa', icon: Building2 },
-                { id: 'produtos', label: 'Gestão de Produtos', icon: Package },
-                { id: 'arquivos', label: 'Arquivos e Mídias', icon: ImageIcon },
-                { id: 'analytics', label: 'Desempenho', icon: BarChart3 },
-              ].map((item) => (
-                <TabsTrigger 
-                  key={item.id} 
-                  value={item.id}
-                  className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-slate-600 data-[state=active]:bg-green-50 data-[state=active]:text-green-700 data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent"
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <div className="pt-8 space-y-2">
-              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Atalhos</p>
-              <ViewProfileButton company={empresa} />
-              <ConfiguracoesButton 
-                userEmail={user?.email || ""} 
-                empresaId={empresaId} 
-                userType="empresa" 
-                userName={empresa?.nome_fantasia} 
-              />
+          {/* Sidebar Navigation */}
+          <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col z-50">
+            <div className="p-8 border-b border-slate-100">
+              <Link href="/" className="flex items-center gap-3 group">
+                <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
+                  <LogoSeict className="text-white" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-lg font-display font-black tracking-tight leading-none text-slate-900 uppercase">PORTFÓLIO</span>
+                  <span className="text-[0.6rem] font-bold tracking-[0.2em] text-green-600 uppercase">Indústria Acreana</span>
+                </div>
+              </Link>
             </div>
-          </nav>
 
-          <div className="p-6 border-t border-slate-100">
-            <form action={logout}>
-              <Button type="submit" variant="ghost" className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700 transition-all font-bold">
-                <LogOut className="h-5 w-5" />
-                Sair da Conta
-              </Button>
-            </form>
-          </div>
-        </aside>
+            <nav className="flex-1 p-6 space-y-2">
+              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Menu Principal</p>
+              <TabsList className="flex flex-col w-full bg-transparent p-0 gap-2 h-auto">
+                {[
+                  { id: 'empresa', label: 'Dados da Empresa', icon: Building2 },
+                  { id: 'produtos', label: 'Gestão de Produtos', icon: Package },
+                  { id: 'arquivos', label: 'Arquivos e Mídias', icon: ImageIcon },
+                  { id: 'analytics', label: 'Desempenho', icon: BarChart3 },
+                ].map((item) => (
+                  <TabsTrigger
+                    key={item.id}
+                    value={item.id}
+                    className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-slate-600 data-[state=active]:bg-green-50 data-[state=active]:text-green-700 data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent"
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-        {/* Main Content Area */}
-        <div className="flex-1 lg:ml-72 flex flex-col min-h-screen">
+              <div className="pt-8 space-y-2">
+                <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Atalhos</p>
+                <ViewProfileButton company={empresa} />
+                <ConfiguracoesButton
+                  userEmail={user?.email || ""}
+                  empresaId={empresaId}
+                  userType="empresa"
+                  userName={empresa?.nome_fantasia}
+                />
+              </div>
+            </nav>
+
+            <div className="p-6 border-t border-slate-100">
+              <form action={logout}>
+                <Button type="submit" variant="ghost" className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700 transition-all font-bold">
+                  <LogOut className="h-5 w-5" />
+                  Sair da Conta
+                </Button>
+              </form>
+            </div>
+          </aside>
+
+          {/* Main Content Area */}
+          <div className="flex-1 lg:ml-72 flex flex-col min-h-screen">
             {/* Mobile Header */}
             <header className="lg:hidden bg-gradient-to-r from-green-900 to-green-700 px-4 h-16 flex items-center justify-between sticky top-0 z-40 shadow-md">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-display font-black tracking-tight text-white uppercase">Dashboard</h1>
               </div>
               <div className="flex items-center gap-2 text-white">
-                <ConfiguracoesButton 
+                <ConfiguracoesButton
                   variant="mobile"
-                  userEmail={user?.email || ""} 
-                  empresaId={empresaId} 
-                  userType="empresa" 
-                  userName={empresa?.nome_fantasia} 
+                  userEmail={user?.email || ""}
+                  empresaId={empresaId}
+                  userType="empresa"
+                  userName={empresa?.nome_fantasia}
                 />
                 <form action={logout}>
                   <Button type="submit" variant="ghost" size="icon" className="text-white hover:bg-white/10">
@@ -173,7 +173,7 @@ export default async function DashboardPage() {
                 </h1>
                 <p className="text-sm text-green-50/80 font-medium">Bem-vindo(a) de volta, <span className="text-white font-bold">{empresa?.nome_fantasia || "Admin"}</span></p>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 <div className="flex flex-col items-end mr-2 text-white">
                   <span className="text-sm font-bold leading-tight">{empresa?.nome_fantasia || user?.email?.split('@')[0]}</span>
@@ -242,9 +242,9 @@ export default async function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2 mb-2">
-                       <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-                         {empresa?.status || 'Ativo'}
-                       </Badge>
+                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                        {empresa?.status || 'Ativo'}
+                      </Badge>
                     </div>
                     <p className="text-[0.7rem] font-medium text-slate-400">Última atualização: {new Date().toLocaleDateString('pt-BR')}</p>
                   </CardContent>
@@ -256,19 +256,19 @@ export default async function DashboardPage() {
                 <TabsContent value="empresa" className="mt-0 outline-none animate-in fade-in-50 duration-500">
                   <CompanyInfoCard initialData={empresa} empresaId={empresaId} />
                 </TabsContent>
-                
+
                 <TabsContent value="produtos" className="mt-0 outline-none animate-in fade-in-50 duration-500">
                   <div className="glass p-8 rounded-[2.5rem] border-white/40 shadow-2xl shadow-slate-200/60">
                     <ProdutosManager />
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="arquivos" className="mt-0 outline-none animate-in fade-in-50 duration-500">
                   <div className="glass p-8 rounded-[2.5rem] border-white/40 shadow-2xl shadow-slate-200/60">
                     <ArquivosManager arquivos={arquivos} empresaId={empresaId} />
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="analytics" className="mt-0 outline-none animate-in fade-in-50 duration-500">
                   <div className="grid md:grid-cols-2 gap-8">
                     <Card className="glass rounded-[2rem] border-white/40 shadow-xl overflow-hidden">
@@ -280,7 +280,7 @@ export default async function DashboardPage() {
                         <p className="text-sm text-slate-500 font-medium">Total de interações acumuladas nos últimos 30 dias</p>
                       </CardContent>
                     </Card>
-                    
+
                     <Card className="glass rounded-[2rem] border-white/40 shadow-xl overflow-hidden">
                       <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
                         <CardTitle className="font-display font-black text-slate-900">Destaques</CardTitle>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react"
-import { MapPin } from "lucide-react"
+import { MapPin, Phone } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -50,6 +50,13 @@ export default function HomeCompanyGrid({ empresas }: HomeCompanyGridProps) {
                 <MapPin className="h-4 w-4 mr-2 text-primary" />
                 {empresa.municipio}, AC
               </div>
+
+              {empresa.telefone && (
+                <div className="flex items-center text-sm font-medium text-muted-foreground mb-4">
+                  <Phone className="h-4 w-4 mr-2 text-primary" />
+                  {empresa.telefone}
+                </div>
+              )}
               
               <p className="text-sm text-gray-600 mb-6 line-clamp-3 leading-relaxed grow font-medium">
                 {empresa.apresentacao || "Esta indústria contribui para a economia local oferecendo serviços de alta qualidade."}
