@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UploadComponent } from "@/components/upload-component"
 import { CadastroFormData } from "@/lib/schemas/cadastro-schema"
-import { X } from "lucide-react"
+import { X, AlertCircle } from "lucide-react"
+import { formatCnpj } from "@/lib/cnpj-mask"
 
 const SETORES_ECONOMICOS = [
   { value: "industria", label: "Indústria" },
@@ -42,16 +43,28 @@ export function EmpresaFormAdmin() {
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="nome_fantasia">Nome Fantasia *</Label>
-          <Input id="nome_fantasia" {...register("empresa.nome_fantasia")} className="rounded-xl" />
+          <Input 
+            id="nome_fantasia" 
+            {...register("empresa.nome_fantasia")} 
+            className={`rounded-xl ${errors.empresa?.nome_fantasia ? "border-red-500 bg-red-50" : ""}`} 
+          />
           {errors.empresa?.nome_fantasia && (
-            <p className="text-red-500 text-xs">{errors.empresa.nome_fantasia.message}</p>
+            <p className="text-red-500 text-[10px] font-bold flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" /> {errors.empresa.nome_fantasia.message}
+            </p>
           )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="razao_social">Razão Social *</Label>
-          <Input id="razao_social" {...register("empresa.razao_social")} className="rounded-xl" />
+          <Input 
+            id="razao_social" 
+            {...register("empresa.razao_social")} 
+            className={`rounded-xl ${errors.empresa?.razao_social ? "border-red-500 bg-red-50" : ""}`} 
+          />
           {errors.empresa?.razao_social && (
-            <p className="text-red-500 text-xs">{errors.empresa.razao_social.message}</p>
+            <p className="text-red-500 text-[10px] font-bold flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" /> {errors.empresa.razao_social.message}
+            </p>
           )}
         </div>
       </div>
@@ -59,32 +72,31 @@ export function EmpresaFormAdmin() {
       <div className="grid md:grid-cols-2 gap-4 items-end">
         <div className="space-y-2">
           <Label htmlFor="cnpj">CNPJ *</Label>
-          <Input id="cnpj" {...register("empresa.cnpj")} placeholder="00.000.000/0000-00" className="rounded-xl" />
+          <Input 
+            id="cnpj" 
+            {...register("empresa.cnpj")} 
+            placeholder="00.000.000/0000-00" 
+            className={`rounded-xl ${errors.empresa?.cnpj ? "border-red-500 bg-red-50" : ""}`}
+            onChange={(e) => {
+              const masked = formatCnpj(e.target.value)
+              setValue("empresa.cnpj", masked, { shouldValidate: true })
+            }}
+          />
           {errors.empresa?.cnpj && (
-            <p className="text-red-500 text-xs">{errors.empresa.cnpj.message}</p>
+            <p className="text-red-500 text-[10px] font-bold flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" /> {errors.empresa.cnpj.message}
+            </p>
           )}
         </div>
         <div className="space-y-2">
           <Label>Logo da Empresa</Label>
-          <div className="flex items-center gap-3">
-            <UploadComponent
-              onUploadSuccess={(url) => setValue("empresa.logo_url", url)}
-              acceptedFileTypes="image/*"
-              buttonText={logoUrl ? "Alterar Logo" : "Upload Logo"}
-            />
-            {logoUrl && (
-              <div className="relative group">
-                <img src={logoUrl} alt="Logo" className="w-12 h-12 rounded-xl object-contain border bg-slate-50" />
-                <button 
-                  type="button"
-                  onClick={() => setValue("empresa.logo_url", "")}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            )}
-          </div>
+          <UploadComponent
+            onUploadSuccess={(url) => setValue("empresa.logo_url", url)}
+            currentUrl={logoUrl}
+            acceptedFileTypes="image/*"
+            buttonText={logoUrl ? "Alterar Logo" : "Clique para subir a Logo"}
+            className="w-full"
+          />
         </div>
       </div>
 
@@ -96,7 +108,7 @@ export function EmpresaFormAdmin() {
             control={control}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="rounded-xl">
+                <SelectTrigger className={`rounded-xl ${errors.empresa?.setor_economico ? "border-red-500 bg-red-50" : ""}`}>
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -107,6 +119,11 @@ export function EmpresaFormAdmin() {
               </Select>
             )}
           />
+          {errors.empresa?.setor_economico && (
+            <p className="text-red-500 text-[10px] font-bold flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" /> {errors.empresa.setor_economico.message}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -116,7 +133,7 @@ export function EmpresaFormAdmin() {
             control={control}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="rounded-xl">
+                <SelectTrigger className={`rounded-xl ${errors.empresa?.setor_empresa ? "border-red-500 bg-red-50" : ""}`}>
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -127,6 +144,11 @@ export function EmpresaFormAdmin() {
               </Select>
             )}
           />
+          {errors.empresa?.setor_empresa && (
+            <p className="text-red-500 text-[10px] font-bold flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" /> {errors.empresa.setor_empresa.message}
+            </p>
+          )}
         </div>
       </div>
 
@@ -147,8 +169,13 @@ export function EmpresaFormAdmin() {
           id="descricao_produtos" 
           {...register("empresa.descricao_produtos")} 
           placeholder="Descreva sucintamente os produtos..."
-          className="rounded-xl resize-none"
+          className={`rounded-xl resize-none ${errors.empresa?.descricao_produtos ? "border-red-500 bg-red-50" : ""}`}
         />
+        {errors.empresa?.descricao_produtos && (
+          <p className="text-red-500 text-[10px] font-bold flex items-center gap-1 mt-1">
+            <AlertCircle className="h-3 w-3" /> {errors.empresa.descricao_produtos.message}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -157,8 +184,13 @@ export function EmpresaFormAdmin() {
           id="apresentacao" 
           {...register("empresa.apresentacao")} 
           placeholder="Breve texto de apresentação..."
-          className="rounded-xl min-h-[100px] resize-none"
+          className={`rounded-xl min-h-[100px] resize-none ${errors.empresa?.apresentacao ? "border-red-500 bg-red-50" : ""}`}
         />
+        {errors.empresa?.apresentacao && (
+          <p className="text-red-500 text-[10px] font-bold flex items-center gap-1 mt-1">
+            <AlertCircle className="h-3 w-3" /> {errors.empresa.apresentacao.message}
+          </p>
+        )}
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -168,8 +200,13 @@ export function EmpresaFormAdmin() {
              id="endereco" 
              {...register("empresa.endereco")} 
              placeholder="Rua, número, bairro..."
-             className="rounded-xl min-h-[80px] resize-none"
+             className={`rounded-xl min-h-[80px] resize-none ${errors.empresa?.endereco ? "border-red-500 bg-red-50" : ""}`}
           />
+          {errors.empresa?.endereco && (
+            <p className="text-red-500 text-[10px] font-bold flex items-center gap-1 mt-1">
+              <AlertCircle className="h-3 w-3" /> {errors.empresa.endereco.message}
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label>Município *</Label>
@@ -178,7 +215,7 @@ export function EmpresaFormAdmin() {
             control={control}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="rounded-xl">
+                <SelectTrigger className={`rounded-xl ${errors.empresa?.municipio ? "border-red-500 bg-red-50" : ""}`}>
                   <SelectValue placeholder="Selecione o município" />
                 </SelectTrigger>
                 <SelectContent>
@@ -189,6 +226,11 @@ export function EmpresaFormAdmin() {
               </Select>
             )}
           />
+          {errors.empresa?.municipio && (
+            <p className="text-red-500 text-[10px] font-bold flex items-center gap-1 mt-1">
+              <AlertCircle className="h-3 w-3" /> {errors.empresa.municipio.message}
+            </p>
+          )}
         </div>
       </div>
 

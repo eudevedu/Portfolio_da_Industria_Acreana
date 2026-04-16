@@ -29,7 +29,8 @@ import {
   X,
   Printer,
   Share2,
-  ListFilter
+  ListFilter,
+  AlertCircle
 } from "lucide-react"
 import { IndustrialDetailsModal } from "@/components/IndustrialDetailsModal"
 import { ConfiguracoesModal } from "@/components/ConfiguracoesModal"
@@ -157,10 +158,42 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
     resolver: zodResolver(cadastroCompletoSchema),
     defaultValues: {
       acesso: { email: `temp-${Date.now()}@example.com`, password: "dummy-password-123", confirmPassword: "dummy-password-123", contactName: "Admin Created" },
-      empresa: { status: "ativo" },
+      empresa: { 
+        status: "ativo",
+        setor_economico: "",
+        setor_empresa: "",
+        municipio: "" 
+      },
       produtos: []
     }
   })
+
+  const { formState: { errors } } = methods
+
+  const validateStep = async (step: "empresa" | "contato") => {
+    const fieldsToValidate = step === "empresa" 
+      ? ["empresa.nome_fantasia", "empresa.razao_social", "empresa.cnpj", "empresa.setor_economico", "empresa.setor_empresa", "empresa.descricao_produtos", "empresa.apresentacao", "empresa.endereco", "empresa.municipio"]
+      : ["empresa.email", "empresa.telefone"]
+    
+    const result = await methods.trigger(fieldsToValidate as any)
+    return result
+  }
+
+  const handleTabChange = async (newTab: string) => {
+    // Se estiver tentando avançar da empresa para contato/produtos
+    if (createStepTab === "empresa" && (newTab === "contato" || newTab === "produtos")) {
+      const isValid = await validateStep("empresa")
+      if (!isValid) return
+    }
+    
+    // Se estiver tentando avançar do contato para produtos
+    if (createStepTab === "contato" && newTab === "produtos") {
+      const isValid = await validateStep("contato")
+      if (!isValid) return
+    }
+    
+    setCreateStepTab(newTab)
+  }
 
   const [showDetailsDialog, setShowDetailsDialog] = useState(false)
   const [companyToView, setCompanyToView] = useState<Empresa | null>(null)
@@ -338,9 +371,12 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
         setCreateStepTab("empresa")
         alert("Empresa cadastrada com sucesso!")
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao criar empresa:", error)
-      alert("Erro ao criar perfil industrial")
+      const errorMsg = error.message?.includes("duplicate key") 
+        ? "Erro: CNPJ já cadastrado no sistema." 
+        : `Erro ao criar perfil industrial: ${error.message || ""}`
+      alert(errorMsg)
     } finally {
       setCreatingEmpresa(false)
     }
@@ -449,9 +485,9 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
         setShowFormDialog(false)
         alert("Perfil industrial atualizado com sucesso!")
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao atualizar:", error)
-      alert("Erro ao atualizar perfil industrial")
+      alert(`Erro ao atualizar perfil industrial: ${error.message || ""}`)
     } finally {
       setUpdatingCompany(false)
     }
@@ -964,18 +1000,33 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
           </DialogHeader>
           
           <FormProvider {...methods}>
-            <Tabs value={createStepTab} onValueChange={setCreateStepTab} className="w-full">
+            <Tabs value={createStepTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-6 h-12 p-1 bg-slate-100/50 rounded-2xl">
-                <TabsTrigger value="empresa" className="rounded-xl font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">Dados da Empresa</TabsTrigger>
-                <TabsTrigger value="contato" className="rounded-xl font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">Contato e Redes</TabsTrigger>
-                <TabsTrigger value="produtos" className="rounded-xl font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">Produtos</TabsTrigger>
+                <TabsTrigger value="empresa" className="rounded-xl font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-2">
+                  Dados da Empresa
+                  {Object.keys(errors.empresa || {}).some(k => ["nome_fantasia", "razao_social", "cnpj", "setor_economico", "setor_empresa", "descricao_produtos", "apresentacao", "endereco", "municipio"].includes(k)) && (
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="contato" className="rounded-xl font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-2">
+                  Contato e Redes
+                  {Object.keys(errors.empresa || {}).some(k => ["email", "telefone"].includes(k)) && (
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="produtos" className="rounded-xl font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-2">
+                  Produtos
+                  {errors.produtos && (
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  )}
+                </TabsTrigger>
               </TabsList>
 
               <div className="max-h-[60vh] overflow-y-auto px-1">
                 <TabsContent value="empresa" className="mt-0 focus-visible:outline-none">
                   <EmpresaFormAdmin />
                   <div className="mt-8 flex justify-end">
-                    <Button type="button" onClick={() => setCreateStepTab("contato")} className="rounded-xl h-12 px-8 font-bold">
+                    <Button type="button" onClick={() => handleTabChange("contato")} className="rounded-xl h-12 px-8 font-bold">
                       Próximo Passo
                     </Button>
                   </div>
@@ -984,10 +1035,10 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
                 <TabsContent value="contato" className="mt-0 focus-visible:outline-none">
                   <RedesSociaisForm />
                   <div className="mt-8 flex justify-between gap-4">
-                    <Button type="button" variant="outline" onClick={() => setCreateStepTab("empresa")} className="rounded-xl h-12 px-8 font-bold">
+                    <Button type="button" variant="outline" onClick={() => handleTabChange("empresa")} className="rounded-xl h-12 px-8 font-bold">
                       Voltar
                     </Button>
-                    <Button type="button" onClick={() => setCreateStepTab("produtos")} className="rounded-xl h-12 px-8 font-bold">
+                    <Button type="button" onClick={() => handleTabChange("produtos")} className="rounded-xl h-12 px-8 font-bold">
                       Próximo Passo
                     </Button>
                   </div>
@@ -996,7 +1047,7 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
                 <TabsContent value="produtos" className="mt-0 focus-visible:outline-none">
                   <ProdutosForm />
                   <div className="mt-8 flex justify-between gap-4">
-                    <Button type="button" variant="outline" onClick={() => setCreateStepTab("contato")} className="rounded-xl h-12 px-8 font-bold">
+                    <Button type="button" variant="outline" onClick={() => handleTabChange("contato")} className="rounded-xl h-12 px-8 font-bold">
                       Voltar
                     </Button>
                     <Button 

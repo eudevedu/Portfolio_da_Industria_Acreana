@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Plus, Trash2, ImageIcon } from "lucide-react"
+import { Plus, Trash2, ImageIcon, AlertCircle } from "lucide-react"
 import { UploadComponent } from "@/components/upload-component"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CadastroFormData } from "@/lib/schemas/cadastro-schema"
@@ -25,7 +25,7 @@ export function ProdutosForm() {
           type="button" 
           variant="outline" 
           size="sm" 
-          onClick={() => append({ nome: "", descricao: "", status: "ativo" })}
+          onClick={() => append({ nome: "", descricao: "", imagens_produto_urls: [] })}
         >
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Produto
@@ -80,9 +80,15 @@ export function ProdutosForm() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Nome do Produto *</Label>
-                    <Input {...register(`produtos.${index}.nome`)} placeholder="Ex: Mel Orgânico 500g" />
+                    <Input 
+                      {...register(`produtos.${index}.nome`)} 
+                      placeholder="Ex: Mel Orgânico 500g" 
+                      className={`${errors.produtos?.[index]?.nome ? "border-red-500 bg-red-50" : ""}`}
+                    />
                     {errors.produtos?.[index]?.nome && (
-                      <p className="text-red-500 text-xs">{errors.produtos[index].nome?.message}</p>
+                      <p className="text-red-500 text-[10px] font-bold flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" /> {errors.produtos[index].nome?.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -97,9 +103,12 @@ export function ProdutosForm() {
                     {...register(`produtos.${index}.descricao`)} 
                     placeholder="Principais características e usos do produto..."
                     rows={3}
+                    className={`${errors.produtos?.[index]?.descricao ? "border-red-500 bg-red-50" : ""}`}
                   />
                   {errors.produtos?.[index]?.descricao && (
-                    <p className="text-red-500 text-xs">{errors.produtos[index].descricao?.message}</p>
+                    <p className="text-red-500 text-[10px] font-bold flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-3 w-3" /> {errors.produtos[index].descricao?.message}
+                    </p>
                   )}
                 </div>
 
@@ -108,23 +117,19 @@ export function ProdutosForm() {
                     <Label>Ficha Técnica (PDF)</Label>
                     <UploadComponent
                       onUploadSuccess={(url) => setValue(`produtos.${index}.ficha_tecnica_url`, url)}
+                      currentUrl={control._formValues.produtos?.[index]?.ficha_tecnica_url}
                       acceptedFileTypes="application/pdf"
-                      buttonText={control._formValues.produtos?.[index]?.ficha_tecnica_url ? "Alterar PDF" : "Upload PDF"}
+                      buttonText={control._formValues.produtos?.[index]?.ficha_tecnica_url ? "Alterar PDF" : "Upload Ficha Técnica (PDF)"}
                     />
-                    {control._formValues.produtos?.[index]?.ficha_tecnica_url && (
-                      <p className="text-xs text-green-600 font-bold">PDF Carregado ✓</p>
-                    )}
                   </div>
                   <div className="space-y-4">
                     <Label>Folder do Produto (PDF)</Label>
                     <UploadComponent
                       onUploadSuccess={(url) => setValue(`produtos.${index}.folder_produto_url`, url)}
+                      currentUrl={control._formValues.produtos?.[index]?.folder_produto_url}
                       acceptedFileTypes="application/pdf"
-                      buttonText={control._formValues.produtos?.[index]?.folder_produto_url ? "Alterar PDF" : "Upload PDF"}
+                      buttonText={control._formValues.produtos?.[index]?.folder_produto_url ? "Alterar PDF" : "Upload Folder (PDF)"}
                     />
-                    {control._formValues.produtos?.[index]?.folder_produto_url && (
-                      <p className="text-xs text-green-600 font-bold">PDF Carregado ✓</p>
-                    )}
                   </div>
                 </div>
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Plus, X, Loader2 } from "lucide-react"
+import { ArrowLeft, Plus, X, Loader2, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,6 +15,8 @@ import { criarEmpresa, criarProduto, criarArquivo, vincularEmpresaAoPerfil } fro
 import { register } from "@/lib/auth"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/lib/supabase"
+import { formatCnpj } from "@/lib/cnpj-mask"
+import { formatPhone } from "@/lib/phone-mask"
 import type { Produto, Empresa } from "@/lib/supabase.types"
 
 export default function CadastroPage() {
@@ -277,10 +279,14 @@ export default function CadastroPage() {
 
     } catch (err: any) {
       console.error("Erro ao cadastrar empresa:", err)
+      const errorMsg = err.message?.includes("duplicate key") 
+        ? "Este CNPJ já está cadastrado no sistema." 
+        : (err.message || err.error_description || "Erro ao cadastrar empresa. Tente novamente.")
+      
       toast({
         variant: "destructive",
         title: "Erro no Cadastro",
-        description: err.message || err.error_description || "Erro ao cadastrar empresa. Tente novamente.",
+        description: errorMsg,
         duration: 8000,
       })
     } finally {
@@ -523,10 +529,30 @@ export default function CadastroPage() {
             <form onSubmit={(e) => { e.preventDefault(); handleSalvarEmpresa(); }}>
               <Tabs value={currentTab} onValueChange={setCurrentTab}>
                 <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="acesso">Dados de Acesso</TabsTrigger>
-                  <TabsTrigger value="empresa">Dados da Empresa</TabsTrigger>
-                  <TabsTrigger value="contato">Contato e Redes</TabsTrigger>
-                  <TabsTrigger value="produtos">Produtos</TabsTrigger>
+                  <TabsTrigger value="acesso" className="flex items-center gap-2">
+                    Dados de Acesso
+                    {(validationErrors.userEmail || validationErrors.userPassword || validationErrors.confirmPassword || validationErrors.contactName) && (
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="empresa" className="flex items-center gap-2">
+                    Dados da Empresa
+                    {Object.keys(validationErrors).some(k => requiredCompanyFields.includes(k)) && (
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="contato" className="flex items-center gap-2">
+                    Contato e Redes
+                    {validationErrors.telefone && (
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="produtos" className="flex items-center gap-2">
+                    Produtos
+                    {Object.keys(validationErrors).some(k => k.startsWith("produto_")) && (
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                    )}
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="acesso" className="space-y-6 mt-6">
                   <div className="grid md:grid-cols-2 gap-4">
@@ -540,9 +566,12 @@ export default function CadastroPage() {
                         onChange={e => setUserEmail(e.target.value)}
                         required
                         autoComplete="email"
+                        className={`${validationErrors.userEmail ? "border-red-500 bg-red-50" : ""}`}
                       />
                       {validationErrors.userEmail && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.userEmail}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.userEmail}
+                        </p>
                       )}
                     </div>
                     <div>
@@ -555,9 +584,12 @@ export default function CadastroPage() {
                         onChange={e => setUserPassword(e.target.value)}
                         required
                         autoComplete="new-password"
+                        className={`${validationErrors.userPassword ? "border-red-500 bg-red-50" : ""}`}
                       />
                       {validationErrors.userPassword && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.userPassword}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.userPassword}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -573,9 +605,12 @@ export default function CadastroPage() {
                         onChange={e => setConfirmPassword(e.target.value)}
                         required
                         autoComplete="new-password"
+                        className={`${validationErrors.confirmPassword ? "border-red-500 bg-red-50" : ""}`}
                       />
                       {validationErrors.confirmPassword && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.confirmPassword}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.confirmPassword}
+                        </p>
                       )}
                     </div>
                     <div>
@@ -587,9 +622,12 @@ export default function CadastroPage() {
                         onChange={e => setContactName(e.target.value)}
                         required
                         autoComplete="name"
+                        className={`${validationErrors.contactName ? "border-red-500 bg-red-50" : ""}`}
                       />
                       {validationErrors.contactName && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.contactName}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.contactName}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -600,7 +638,7 @@ export default function CadastroPage() {
                         id="contactPhone"
                         placeholder="(XX) XXXXX-XXXX"
                         value={contactPhone}
-                        onChange={(e) => setContactPhone(e.target.value)}
+                        onChange={(e) => setContactPhone(formatPhone(e.target.value))}
                         autoComplete="tel"
                       />
                     </div>
@@ -626,9 +664,12 @@ export default function CadastroPage() {
                         onChange={e => setFormData(prev => ({ ...prev, nome_fantasia: e.target.value }))}
                         required
                         autoComplete="organization"
+                        className={`${validationErrors.nome_fantasia ? "border-red-500 bg-red-50" : ""}`}
                       />
                       {validationErrors.nome_fantasia && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.nome_fantasia}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.nome_fantasia}
+                        </p>
                       )}
                     </div>
                     <div>
@@ -639,9 +680,12 @@ export default function CadastroPage() {
                         onChange={e => setFormData(prev => ({ ...prev, razao_social: e.target.value }))}
                         required
                         autoComplete="organization"
+                        className={`${validationErrors.razao_social ? "border-red-500 bg-red-50" : ""}`}
                       />
                       {validationErrors.razao_social && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.razao_social}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.razao_social}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -686,11 +730,16 @@ export default function CadastroPage() {
                         id="cnpj"
                         placeholder="00.000.000/0000-00"
                         value={formData.cnpj || ""}
-                        onChange={e => setFormData(prev => ({ ...prev, cnpj: e.target.value }))}
+                        onChange={e => setFormData(prev => ({ ...prev, cnpj: formatCnpj(e.target.value) }))}
                         required
                         autoComplete="off"
+                        className={`${validationErrors.cnpj ? "border-red-500 bg-red-50" : ""}`}
                       />
-                      {validationErrors.cnpj && <p className="text-red-500 text-xs mt-1">{validationErrors.cnpj}</p>}
+                      {validationErrors.cnpj && (
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.cnpj}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="setor_economico">Setor Econômico *</Label>
@@ -699,7 +748,7 @@ export default function CadastroPage() {
                         onValueChange={value => setFormData(prev => ({ ...prev, setor_economico: value }))}
                         required
                       >
-                        <SelectTrigger id="setor_economico">
+                        <SelectTrigger id="setor_economico" className={`${validationErrors.setor_economico ? "border-red-500 bg-red-50" : ""}`}>
                           <SelectValue placeholder="Selecione o setor" />
                         </SelectTrigger>
                         <SelectContent>
@@ -711,7 +760,9 @@ export default function CadastroPage() {
                         </SelectContent>
                       </Select>
                       {validationErrors.setor_economico && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.setor_economico}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.setor_economico}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -723,7 +774,7 @@ export default function CadastroPage() {
                         onValueChange={value => setFormData(prev => ({ ...prev, setor_empresa: value }))}
                         required
                       >
-                        <SelectTrigger id="setor_empresa">
+                        <SelectTrigger id="setor_empresa" className={`${validationErrors.setor_empresa ? "border-red-500 bg-red-50" : ""}`}>
                           <SelectValue placeholder="Selecione o setor" />
                         </SelectTrigger>
                         <SelectContent>
@@ -735,7 +786,9 @@ export default function CadastroPage() {
                         </SelectContent>
                       </Select>
                       {validationErrors.setor_empresa && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.setor_empresa}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.setor_empresa}
+                        </p>
                       )}
                     </div>
                     <div>
@@ -767,9 +820,12 @@ export default function CadastroPage() {
                       value={formData.descricao_produtos || ""}
                       onChange={e => setFormData(prev => ({ ...prev, descricao_produtos: e.target.value }))}
                       required
+                      className={`${validationErrors.descricao_produtos ? "border-red-500 bg-red-50" : ""}`}
                     />
                     {validationErrors.descricao_produtos && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.descricao_produtos}</p>
+                      <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" /> {validationErrors.descricao_produtos}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -781,9 +837,12 @@ export default function CadastroPage() {
                       value={formData.apresentacao || ""}
                       onChange={e => setFormData(prev => ({ ...prev, apresentacao: e.target.value }))}
                       required
+                      className={`${validationErrors.apresentacao ? "border-red-500 bg-red-50" : ""}`}
                     />
                     {validationErrors.apresentacao && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.apresentacao}</p>
+                      <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" /> {validationErrors.apresentacao}
+                      </p>
                     )}
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
@@ -796,9 +855,12 @@ export default function CadastroPage() {
                         value={formData.endereco || ""}
                         onChange={e => setFormData(prev => ({ ...prev, endereco: e.target.value }))}
                         required
+                        className={`${validationErrors.endereco ? "border-red-500 bg-red-50" : ""}`}
                       />
                       {validationErrors.endereco && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.endereco}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.endereco}
+                        </p>
                       )}
                     </div>
                     <div>
@@ -808,7 +870,7 @@ export default function CadastroPage() {
                         onValueChange={value => setFormData(prev => ({ ...prev, municipio: value }))}
                         required
                       >
-                        <SelectTrigger id="municipio">
+                        <SelectTrigger id="municipio" className={`${validationErrors.municipio ? "border-red-500 bg-red-50" : ""}`}>
                           <SelectValue placeholder="Selecione o município" />
                         </SelectTrigger>
                         <SelectContent>
@@ -820,7 +882,9 @@ export default function CadastroPage() {
                         </SelectContent>
                       </Select>
                       {validationErrors.municipio && (
-                        <p className="text-red-500 text-xs mt-1">{validationErrors.municipio}</p>
+                        <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> {validationErrors.municipio}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -896,7 +960,7 @@ export default function CadastroPage() {
                       id="telefone_empresa"
                       placeholder="(XX) XXXX-XXXX"
                       value={formData.telefone || ""}
-                      onChange={e => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
+                      onChange={e => setFormData(prev => ({ ...prev, telefone: formatPhone(e.target.value) }))}
                       autoComplete="tel"
                     />
                   </div>
@@ -904,24 +968,18 @@ export default function CadastroPage() {
                     <Label>Folder de Apresentação (PDF)</Label>
                     <UploadComponent
                       onUploadSuccess={(url) => setFolderApresentacaoUrl(url)}
+                      currentUrl={folderApresentacaoUrl}
                       acceptedFileTypes="application/pdf"
-                      buttonText={folderApresentacaoUrl ? "Alterar PDF" : "Upload PDF"}
+                      buttonText={folderApresentacaoUrl ? "Alterar PDF" : "Upload Folder (PDF)"}
                     />
-                    {folderApresentacaoUrl && (
-                      <p className="text-sm text-gray-600">
-                        PDF atual:{" "}
-                        <a href={folderApresentacaoUrl} target="_blank" rel="noopener noreferrer" className="underline">
-                          Ver arquivo
-                        </a>
-                      </p>
-                    )}
                   </div>
                   <div className="space-y-4">
                     <Label>Outros Arquivos (PDFs, Imagens)</Label>
                     <UploadComponent
                       onUploadSuccess={(url) => setOutrosArquivosUrls((prev) => [...prev, url])}
                       acceptedFileTypes="image/*,application/pdf"
-                      buttonText="Adicionar Arquivo"
+                      buttonText="Adicionar outro arquivo"
+                      autoReset={true}
                     />
                     {outrosArquivosUrls.length > 0 && (
                       <div className="mt-2 space-y-1">
@@ -1013,7 +1071,9 @@ export default function CadastroPage() {
                                       required
                                     />
                                     {validationErrors[`produto_nome_${index}`] && (
-                                      <p className="text-red-500 text-xs mt-1">{validationErrors[`produto_nome_${index}`]}</p>
+                                      <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                                        <AlertCircle className="h-3 w-3" /> {validationErrors[`produto_nome_${index}`]}
+                                      </p>
                                     )}
                                   </div>
                                   <div>
@@ -1051,10 +1111,11 @@ export default function CadastroPage() {
                                   setValidationErrors((prev) => ({ ...prev, [`produto_descricao_${index}`]: "" }))
                                 }}
                                 required
+                                className={`${validationErrors[`produto_descricao_${index}`] ? "border-red-500 bg-red-50" : ""}`}
                               />
                               {validationErrors[`produto_descricao_${index}`] && (
-                                <p className="text-red-500 text-xs mt-1">
-                                  {validationErrors[`produto_descricao_${index}`]}
+                                <p className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1">
+                                  <AlertCircle className="h-3 w-3" /> {validationErrors[`produto_descricao_${index}`]}
                                 </p>
                               )}
                             </div>
@@ -1063,43 +1124,19 @@ export default function CadastroPage() {
                                 <Label>Ficha Técnica (PDF)</Label>
                                 <UploadComponent
                                   onUploadSuccess={(url) => handleProductFileUpload(index, "ficha_tecnica_url", url)}
+                                  currentUrl={produto.ficha_tecnica_url}
                                   acceptedFileTypes="application/pdf"
-                                  buttonText={produto.ficha_tecnica_url ? "Alterar PDF" : "Upload PDF"}
+                                  buttonText={produto.ficha_tecnica_url ? "Alterar PDF" : "Upload Ficha Técnica (PDF)"}
                                 />
-                                {produto.ficha_tecnica_url && (
-                                  <p className="text-sm text-gray-600">
-                                    PDF atual:{" "}
-                                    <a
-                                      href={produto.ficha_tecnica_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="underline"
-                                    >
-                                      Ver arquivo
-                                    </a>
-                                  </p>
-                                )}
                               </div>
                               <div className="space-y-2">
                                 <Label>Folder do Produto (PDF)</Label>
                                 <UploadComponent
                                   onUploadSuccess={(url) => handleProductFileUpload(index, "folder_produto_url", url)}
+                                  currentUrl={produto.folder_produto_url}
                                   acceptedFileTypes="application/pdf"
-                                  buttonText={produto.folder_produto_url ? "Alterar PDF" : "Upload PDF"}
+                                  buttonText={produto.folder_produto_url ? "Alterar PDF" : "Upload Folder (PDF)"}
                                 />
-                                {produto.folder_produto_url && (
-                                  <p className="text-sm text-gray-600">
-                                    PDF atual:{" "}
-                                    <a
-                                      href={produto.folder_produto_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="underline"
-                                    >
-                                      Ver arquivo
-                                    </a>
-                                  </p>
-                                )}
                               </div>
                             </div>
                             <div className="space-y-2">
