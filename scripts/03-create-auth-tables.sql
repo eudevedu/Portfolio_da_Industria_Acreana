@@ -10,12 +10,13 @@ CREATE TABLE IF NOT EXISTS perfis_empresas (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Tabela para armazenar usuários administradores
 CREATE TABLE IF NOT EXISTS admins (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     cargo VARCHAR(100),
-    ativo BOOLEAN DEFAULT TRUE,
+    Senha varchar, (16),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

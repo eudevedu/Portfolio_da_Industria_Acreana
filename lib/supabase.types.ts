@@ -58,7 +58,6 @@ export type User = {
   email: string
   password_hash: string
   tipo: "empresa" | "admin"
-  isSuperAdmin?: boolean
   empresa_id?: string | null
   created_at: string
   updated_at: string

@@ -1,85 +1,108 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+const USER_COOKIE_NAME = "user_session"
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+// Define as rotas que precisam de autenticação
+const protectedRoutes = [
+  '/dashboard',
+  '/admin',
+  '/api/produtos',
+  '/api/arquivos',
+  '/api/auth/update-email',
+  '/api/auth/update-password',
+  '/api/auth/delete-account'
+]
 
-  if (!supabaseUrl || !supabaseKey) {
-    return response
-  }
+// Define as rotas de admin
+const adminRoutes = [
+  '/admin'
+]
 
-  const supabase = createServerClient(
-    supabaseUrl,
-    supabaseKey,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
+// Define rotas que devem ser excluídas da verificação
+const excludedRoutes = [
+  '/admin/login',
+  '/login',
+  '/cadastro',
+  '/recuperar-senha',
+  '/redefinir-senha'
+]
 
-  // This will refresh session if expired - essential for SSR
-  const { data: { user } } = await supabase.auth.getUser()
-
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  // Protected routes logic
-  const isProtectedRoute = 
-    pathname.startsWith('/dashboard') || 
-    pathname.startsWith('/admin') || 
-    pathname.startsWith('/api/produtos') ||
-    pathname.startsWith('/api/arquivos')
-
-  if (!user && isProtectedRoute) {
-    // Determine where to redirect based on the prefix
-    const redirectUrl = pathname.startsWith('/admin') ? '/admin/login' : '/login'
-    const url = request.nextUrl.clone()
-    url.pathname = redirectUrl
-    return NextResponse.redirect(url)
+  
+  // Exclui rotas que não devem passar pelo middleware
+  const isExcludedRoute = excludedRoutes.some(route => 
+    pathname.startsWith(route)
+  )
+  
+  if (isExcludedRoute) {
+    return NextResponse.next()
   }
-
-  // Admin access control
-  if (user && pathname.startsWith('/admin') && pathname !== '/admin/login') {
-    const userRole = user.user_metadata?.tipo
-    if (userRole !== 'admin') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
+  
+  // Verifica se é uma rota protegida
+  const isProtectedRoute = protectedRoutes.some(route => 
+    pathname.startsWith(route)
+  )
+  
+  const isAdminRoute = adminRoutes.some(route => 
+    pathname.startsWith(route)
+  )
+  
+  if (isProtectedRoute) {
+    const userCookie = request.cookies.get(USER_COOKIE_NAME)
+    
+    // Se não tem cookie de usuário, redireciona para login
+    if (!userCookie || !userCookie.value) {
+      if (isAdminRoute) {
+        return NextResponse.redirect(new URL('/admin/login', request.url))
+      }
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    
+    try {
+      const user = JSON.parse(userCookie.value)
+      
+      // Verifica se é uma rota de admin e se o usuário é admin
+      if (isAdminRoute && user.tipo !== 'admin') {
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+      
+      // Verifica se é uma rota de empresa e se o usuário tem empresa_id
+      if (pathname.startsWith('/dashboard') && user.tipo === 'empresa' && !user.empresa_id) {
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+      
+    } catch (error) {
+      // Cookie inválido, remove e redireciona
+      const response = isAdminRoute 
+        ? NextResponse.redirect(new URL('/admin/login', request.url))
+        : NextResponse.redirect(new URL('/login', request.url))
+      
+      response.cookies.delete(USER_COOKIE_NAME)
+      return response
     }
   }
+  
+  // Libera a rota de upload para qualquer usuário
+  if (request.nextUrl.pathname.startsWith("/api/upload")) {
+    return NextResponse.next()
+  }
 
-  return response
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - api/auth (auth endpoints)
      * - _next/static (static files)
-     * - _next/image (image optimization files)
+     * - _next/image (image optimization files)  
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - public folder
+     * - login pages (to prevent redirect loops)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|public|login|admin/login|cadastro|recuperar-senha|redefinir-senha|.*\\.).*)',
   ],
 }
