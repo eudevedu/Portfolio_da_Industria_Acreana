@@ -157,7 +157,12 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
   const methods = useForm<CadastroFormData>({
     resolver: zodResolver(cadastroCompletoSchema),
     defaultValues: {
-      acesso: { email: `temp-${Date.now()}@example.com`, password: "dummy-password-123", confirmPassword: "dummy-password-123", contactName: "Admin Created" },
+      acesso: { 
+        email: `temp-${Date.now()}@example.com`, 
+        password: "password123", 
+        confirmPassword: "password123", 
+        contactName: "Admin Created" 
+      },
       empresa: { 
         status: "ativo",
         setor_economico: "",
@@ -436,7 +441,7 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
         outros_arquivos_urls: outros
       },
       produtos: produtosFixed,
-      acesso: { email: "edit@example.com", password: "dummy", confirmPassword: "dummy", contactName: "Edit Mode" }
+      acesso: { email: "edit@example.com", password: "edit-bypass-123", confirmPassword: "edit-bypass-123", contactName: "Edit Mode" }
     })
     setCreateStepTab("empresa")
     setShowFormDialog(true)
@@ -966,7 +971,13 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
                     </Button>
                     <Button 
                       type="button" 
-                      onClick={methods.handleSubmit((data) => isEditing ? handleUpdateEmpresa(data) : handleCreateEmpresa(data))} 
+                      onClick={methods.handleSubmit(
+                        (data) => isEditing ? handleUpdateEmpresa(data) : handleCreateEmpresa(data),
+                        (err) => {
+                          console.error("Erro de validação no formulário admin:", err);
+                          alert("Atenção: Alguns campos obrigatórios estão incompletos ou em formato inválido. Verifique todas as abas.");
+                        }
+                      )} 
                       disabled={creatingEmpresa || updatingCompany} 
                       className="rounded-xl h-12 px-8 font-bold bg-slate-900"
                     >
