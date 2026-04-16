@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { isLoggedIn, getCurrentUser } from "@/lib/auth"
 import { getLastCompanies } from "@/lib/empresa"
 import { obterEstatisticasHome } from "@/lib/database"
-import HomeCompanyGrid from "@/components/HomeCompanyGrid"
+import HomeCompanyCarousel from "@/components/HomeCompanyCarousel"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -22,7 +22,7 @@ export default async function HomePage() {
   let errorMsg = null
 
   try {
-    empresas = await getLastCompanies(6)
+    empresas = await getLastCompanies(24)
   } catch (error) {
     errorMsg = error instanceof Error ? error.message : 'Erro desconhecido'
     empresas = []
@@ -135,7 +135,7 @@ export default async function HomePage() {
             </div>
           )}
 
-          <HomeCompanyGrid empresas={empresas} />
+          <HomeCompanyCarousel empresas={empresas} />
         </div>
       </section>
     </div>
