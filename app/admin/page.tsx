@@ -1,14 +1,9 @@
-import Link from "next/link"
-import { Building2, Settings, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import AdminDashboard from "@/components/AdminDashboard"
 import { obterEstatisticasAdmin, buscarEmpresasAdmin } from "@/lib/admin"
 import { isSupabaseConfigured } from "@/lib/supabase"
-import { logout, isLoggedIn, isAdmin as checkIsAdmin, getCurrentUser } from "@/lib/auth"
+import { isLoggedIn, isAdmin as checkIsAdmin, getCurrentUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import type { Empresa } from "@/lib/supabase.types"
-import { AdminContent } from "@/components/admin-content"
-import { LogoSeict } from "@/components/LogoIndustria"
-import { Badge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"
 
@@ -55,7 +50,7 @@ export default async function AdminDashboardPage() {
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-solid border-green-500 border-t-transparent shadow-lg shadow-green-100" />
         </div>
       ) : (
-        <AdminContent 
+        <AdminDashboard 
           initialStats={stats} 
           initialEmpresas={initialEmpresas} 
           isConfiguredProp={isConfigured} 

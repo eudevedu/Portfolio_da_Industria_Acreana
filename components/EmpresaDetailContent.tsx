@@ -17,12 +17,10 @@ import {
   ExternalLink,
   Plus,
   Phone,
-  Globe,
-  Mail,
   X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { 
@@ -30,18 +28,19 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogDescription,
 } from "@/components/ui/dialog"
 import ImageGallery from "@/components/ImageGallery"
 import AnalyticsTracker from "@/components/AnalyticsTracker"
 
 interface EmpresaContentProps {
-  empresa: any
-  empresasRelacionadas: any[]
+  initialEmpresa: any
+  initialRelacionadas: any[]
 }
 
-export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: EmpresaContentProps) {
+export default function EmpresaDetailContent({ initialEmpresa, initialRelacionadas }: EmpresaContentProps) {
   const [selectedProduto, setSelectedProduto] = useState<any>(null)
+  const empresa = initialEmpresa
+  const empresasRelacionadas = initialRelacionadas
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -75,7 +74,8 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
           </Link>
 
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
-            <div className="w-40 h-40 md:w-56 md:h-56 relative flex-shrink-0 bg-white rounded-[2.5rem] border-4 border-white shadow-2xl overflow-hidden flex items-center justify-center transition-transform duration-700">
+            {/* Extended Brand Identity */}
+            <div className="w-40 h-40 md:w-56 md:h-56 relative flex-shrink-0 bg-white rounded-[2.5rem] border-4 border-white shadow-2xl overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform duration-700">
               {empresa.logo_url ? (
                 <img
                   src={empresa.logo_url}
@@ -125,6 +125,7 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
 
       {/* Main Content Grid */}
       <section className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* Left Column: Details & Products */}
         <div className="lg:col-span-8 space-y-16">
           {/* About Section */}
           <section>
@@ -202,64 +203,65 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
 
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
                 {empresa.produtos.filter((p: any) => p !== null).map((produto: any) => (
-                  <div key={produto.id} className="relative group">
+                  <Card 
+                    key={produto.id} 
+                    className="group overflow-hidden border-none bg-white shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 rounded-[2.5rem] flex flex-col cursor-pointer active:scale-95"
+                    onClick={() => setSelectedProduto(produto)}
+                  >
                     <AnalyticsTracker empresaId={empresa.id} tipoEvento="visualizacao_produto" referenciaId={produto.id} />
-                    <Card 
-                      className="group overflow-hidden border-none bg-white shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 rounded-[2.5rem] flex flex-col cursor-pointer active:scale-95 h-full"
-                      onClick={() => setSelectedProduto(produto)}
-                    >
-                      <div className="relative aspect-square overflow-hidden bg-slate-100 p-4">
-                        {produto.imagem_url ? (
-                          <img 
-                            src={produto.imagem_url} 
-                            alt={produto.nome} 
-                            className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700" 
-                          />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                            <ImageIcon className="h-12 w-12 mb-2 stroke-[1.5]" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest">Sem imagem</span>
-                          </div>
-                        )}
-                        
-                        <div className="absolute top-4 left-4">
-                          <Badge className="bg-white/90 backdrop-blur-md text-slate-900 border-none font-bold text-[9px] uppercase tracking-widest shadow-sm px-3 py-1">
-                            {produto.linha || "Geral"}
-                          </Badge>
+                    
+                    {/* Product Image Holder */}
+                    <div className="relative aspect-square overflow-hidden bg-slate-100 p-4">
+                      {produto.imagem_url ? (
+                        <img 
+                          src={produto.imagem_url} 
+                          alt={produto.nome} 
+                          className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700" 
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                          <ImageIcon className="h-12 w-12 mb-2 stroke-[1.5]" />
+                          <span className="text-[10px] uppercase font-bold tracking-widest">Sem imagem</span>
                         </div>
+                      )}
+                      
+                      <div className="absolute top-4 left-4">
+                        <Badge className="bg-white/90 backdrop-blur-md text-slate-900 border-none font-bold text-[9px] uppercase tracking-widest shadow-sm px-3 py-1">
+                          {produto.linha || "Geral"}
+                        </Badge>
                       </div>
+                    </div>
 
-                      <CardContent className="p-6 flex-1 flex flex-col">
-                        <div className="mb-4">
-                          <h3 className="text-lg font-display font-black group-hover:text-primary transition-colors leading-tight mb-2">
-                            {produto.nome}
-                          </h3>
-                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 italic">
-                            {produto.descricao || "Nenhuma descrição detalhada fornecida pela indústria."}
-                          </p>
-                        </div>
-                        
-                        <div className="mt-auto space-y-4">
-                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
-                            <div className="flex items-center text-green-600">
-                              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse mr-2" />
-                              Em Catálogo
-                            </div>
-                            {produto.nome_tecnico && (
-                              <div className="text-slate-400">
-                                REF: {produto.nome_tecnico}
-                              </div>
-                            )}
+                    <CardContent className="p-6 flex-1 flex flex-col">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-display font-black group-hover:text-primary transition-colors leading-tight mb-2">
+                          {produto.nome}
+                        </h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 italic">
+                          {produto.descricao || "Nenhuma descrição detalhada fornecida pela indústria."}
+                        </p>
+                      </div>
+                      
+                      <div className="mt-auto space-y-4">
+                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+                          <div className="flex items-center text-green-600">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse mr-2" />
+                            Em Catálogo
                           </div>
-
-                          <Button className="w-full h-12 rounded-2xl bg-slate-50 hover:bg-primary text-slate-900 hover:text-white transition-all duration-300 border-none font-bold text-xs uppercase tracking-widest group/btn">
-                            Ver Especificações
-                            <Plus className="h-4 w-4 ml-2 transition-transform group-hover/btn:rotate-90" />
-                          </Button>
+                          {produto.nome_tecnico && (
+                            <div className="text-slate-400">
+                              REF: {produto.nome_tecnico}
+                            </div>
+                          )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+
+                        <Button className="w-full h-12 rounded-2xl bg-slate-50 hover:bg-primary text-slate-900 hover:text-white transition-all duration-300 border-none font-bold text-xs uppercase tracking-widest group/btn">
+                          Ver Especificações
+                          <Plus className="h-4 w-4 ml-2 transition-transform group-hover/btn:rotate-90" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </section>
@@ -291,7 +293,7 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
           )}
         </div>
 
-        {/* Sidebar */}
+        {/* Right Column: Sidebar */}
         <aside className="lg:col-span-4 space-y-8">
           <Card className="rounded-[2.5rem] border-none shadow-2xl shadow-primary/5 bg-primary text-white overflow-hidden p-8">
             <h3 className="text-xl font-display font-black mb-6 flex items-center gap-2">
@@ -405,7 +407,7 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
       </section>
 
       {/* Related Companies */}
-      {empresasRelacionadas.length > 0 && (
+      {initialRelacionadas.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 md:px-8 mt-32">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <div className="space-y-2">
@@ -420,7 +422,7 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
           </div>
 
           <div className="flex gap-6 overflow-x-auto pb-10 scrollbar-hide -mx-4 px-4">
-            {empresasRelacionadas.map((relacionada) => (
+            {initialRelacionadas.map((relacionada) => (
               <Link key={relacionada.id} href={`/empresas/${relacionada.id}`} className="flex-shrink-0 w-72 group">
                 <Card className="h-full border-border/40 hover:border-primary/20 hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white/50 backdrop-blur-sm overflow-hidden flex flex-col p-6">
                   <div className="w-16 h-16 bg-white rounded-2xl border border-border/50 shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
@@ -446,19 +448,17 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
         </section>
       )}
 
-      {/* Product Detail Modal (Premium Implementation) */}
+      {/* Product Detail Modal */}
       <Dialog open={!!selectedProduto} onOpenChange={() => setSelectedProduto(null)}>
         <DialogContent className="max-w-5xl rounded-[3rem] p-0 overflow-hidden border-none shadow-2xl">
           {selectedProduto && (
             <div className="flex flex-col md:flex-row h-full max-h-[90vh] overflow-y-auto md:overflow-hidden">
-              {/* Product Image Side */}
               <div className="md:w-1/2 bg-slate-50 flex items-center justify-center p-12 relative">
                 {selectedProduto.imagem_url ? (
                   <img src={selectedProduto.imagem_url} alt={selectedProduto.nome} className="max-w-full max-h-[400px] object-contain drop-shadow-2xl" />
                 ) : (
                   <Package className="h-32 w-32 text-slate-200" />
                 )}
-                
                 <div className="absolute top-8 left-8">
                    <Badge className="bg-white/80 backdrop-blur text-slate-900 border-none font-black text-[10px] py-1.5 px-4 rounded-full uppercase tracking-widest">
                      {selectedProduto.linha || "Portfólio Industrial"}
@@ -466,9 +466,8 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
                 </div>
               </div>
 
-              {/* Product Text Side */}
               <div className="md:w-1/2 p-10 md:p-14 flex flex-col bg-white">
-                <DialogHeader className="mb-8">
+                <DialogHeader className="mb-8 p-0">
                   <div className="flex items-center justify-between mb-2">
                      <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Ficha Técnica</span>
                      <button onClick={() => setSelectedProduto(null)} className="text-slate-400 hover:text-black transition-colors">
@@ -484,7 +483,7 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
                   <div className="space-y-3">
                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-400">Descrição do Produto</h4>
                      <p className="text-slate-600 leading-relaxed text-lg">
-                       {selectedProduto.descricao || "Esta solução industrial foi desenvolvida com os mais altos padrões de qualidade acreana, focada em eficiência e durabilidade para diversos setores."}
+                       {selectedProduto.descricao || "Esta solução industrial foi desenvolvida com os mais altos padrões de qualidade acreana, focada em eficiência e durabilidade."}
                      </p>
                   </div>
 
@@ -500,24 +499,11 @@ export default function EmpresaDetailContent({ empresa, empresasRelacionadas }: 
                         <p className="font-bold text-primary">{empresa.nome_fantasia}</p>
                      </div>
                   </div>
-
-                  {/* Placeholder Specifications for Premium feel */}
-                  <div className="space-y-4 pt-4 border-t border-slate-100">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-400">Atributos</h4>
-                    <div className="flex flex-wrap gap-2">
-                       <Badge variant="secondary" className="bg-slate-50 text-slate-600 border-none px-3 py-1 text-[10px] font-bold">Produção Local</Badge>
-                       <Badge variant="secondary" className="bg-slate-50 text-slate-600 border-none px-3 py-1 text-[10px] font-bold">Alta Durabilidade</Badge>
-                       <Badge variant="secondary" className="bg-slate-50 text-slate-600 border-none px-3 py-1 text-[10px] font-bold">Sustentável</Badge>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="mt-10 pt-8 border-t border-slate-100 flex gap-4">
                   <Button className="flex-1 h-14 rounded-2xl bg-primary text-white font-black uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all">
                     Solicitar Cotação
-                  </Button>
-                  <Button variant="outline" className="w-14 h-14 rounded-2xl border-2 border-slate-100 flex items-center justify-center hover:bg-slate-50 transition-colors">
-                    <Phone className="h-5 w-5" />
                   </Button>
                 </div>
               </div>
