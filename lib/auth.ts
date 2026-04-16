@@ -1,627 +1,125 @@
-"use server" // Todas as funções exportadas deste arquivo são Server Actions
-import { cookies } from "next/headers"
+"use server"
+
 import { redirect } from "next/navigation"
-import { supabase, isSupabaseConfigured, supabaseAdmin, isSupabaseAdminConfigured } from "./supabase"
-import type { User } from "./supabase.types" // Importa o tipo User do novo arquivo de tipos
-import { criarPerfilEmpresa } from "./database" // Importa a nova função (corrigido para 'data' se for o arquivo correto)
+import { createServerSideClient } from "./supabase"
+import { getAuthenticatedUser } from "./auth-guards"
+import type { User } from "./supabase.types"
 
-
-const USER_COOKIE_NAME = "user_session"
-
-// Tipos para autenticação
-export interface LoginResult {
-  success: boolean
-  message: string
-}
-
-// Função para login consolidada
+/**
+ * Login consolidado usando Supabase Auth
+ */
 export async function login(email: string, password: string): Promise<{ success: boolean; message: string; tipo?: string }> {
-  if (!isSupabaseConfigured()) {
-    // Lógica de login mock
-    let user: User | null = null
-    if (email === "admin@example.com" && password === "admin123") {
-      user = {
-        id: "admin-id",
-        email: "admin@example.com",
-        tipo: "admin",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        password_hash: "mock_hash", // Adicionado para tipo User
-      }
-    } else if (email === "empresa@example.com" && password === "empresa123") {
-      user = {
-        id: "empresa-id",
-        email: "empresa@example.com",
-        tipo: "empresa",
-        empresa_id: "1",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        password_hash: "mock_hash", // Adicionado para tipo User
-      }
-    }
-    if (user) {
-      const cookieStore = await cookies() // Adicionado await
-      cookieStore.set(USER_COOKIE_NAME, JSON.stringify(user), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 7, // 1 semana
-        path: "/",
-        sameSite: "lax", // Permite cookies em navegação normal
-      })
-      return { success: true, message: "Login bem-sucedido!", tipo: user.tipo }
-    } else {
-      return { success: false, message: "Credenciais inválidas." }
-    }
-  }
   try {
-    const { data, error } = await supabase!.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const supabase = await createServerSideClient()
+    const { data, error } = await supabase!.auth.signInWithPassword({ email, password })
+
     if (error) {
-      console.error("Supabase login error:", error);
-      console.error("Error details:", { message: error.message, status: error.status, code: error.code });
-      
-      // Retorna uma mensagem mais específica baseada no código do erro
-      if (error.code === 'invalid_credentials') {
-        return { success: false, message: "Email ou senha incorretos. Verifique suas credenciais e tente novamente." }
-      } else if (error.code === 'email_not_confirmed') {
-        return { success: false, message: "Email não confirmado. Verifique sua caixa de entrada." }
-      } else {
-        return { success: false, message: `Erro de autenticação: ${error.message}` }
-      }
+      return { success: false, message: "Email ou senha incorretos." }
     }
-    if (data.user) {
-      // Fetch user type from public.perfis_empresas or public.admins
-      let userType: "empresa" | "admin" = "empresa" // Default
-      let empresaId: string | null = null
-      const { data: perfilEmpresa, error: perfilError } = await supabase!
-        .from("perfis_empresas")
-        .select(`
-          empresa_id,
-          empresas (
-            status
-          )
-        `)
-        .eq("id", data.user.id)
-        .single()
 
-      if (perfilEmpresa) {
-        // Verificar se a empresa está ativa
-        const empresaStatus = (perfilEmpresa.empresas as any)?.status
-        if (empresaStatus && empresaStatus !== 'ativo') {
-          await supabase!.auth.signOut()
-          return { 
-            success: false, 
-            message: `Acesso negado. Sua conta industrial está com status: ${empresaStatus}.` 
-          }
-        }
-        
-        userType = "empresa"
-        empresaId = perfilEmpresa.empresa_id
-      } else {
-        const { data: adminPerfil, error: adminError } = await supabase!
-          .from("admins")
-          .select("id, ativo")
-          .eq("id", data.user.id)
-          .single()
+    // O tipo já deve vir no metadata do usuário se o cadastro foi feito corretamente
+    const userTipo = data.user.user_metadata?.tipo
 
-        if (adminPerfil) {
-          if (!adminPerfil.ativo) {
-            await supabase!.auth.signOut()
-            return { success: false, message: "Sua conta de administrador está desativada. Entre em contato com o suporte." }
-          }
-          userType = "admin"
-        }
-      }
-      const userSession: User = {
-        id: data.user.id,
-        email: data.user.email!,
-        tipo: userType,
-        empresa_id: empresaId,
-        created_at: data.user.created_at ?? "",
-        updated_at: data.user.updated_at ?? "",
-        password_hash: "", // ou "hidden"
-      }
-      const cookieStore = await cookies() // Adicionado await
-      cookieStore.set(USER_COOKIE_NAME, JSON.stringify(userSession), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 7, // 1 semana
-        path: "/",
-        sameSite: "lax", // Permite cookies em navegação normal
-      })
-      return { success: true, message: "Login bem-sucedido!", tipo: userType }
+    if (userTipo === "admin") {
+      return { success: true, message: "Login bem-sucedido!", tipo: "admin" }
     }
-    return { success: false, message: "Erro desconhecido durante o login." }
-  } catch (error: any) {
-    console.error("Erro ao conectar com o servidor:", error)
-    return { success: false, message: error.message || "Ocorreu um erro inesperado durante o login." }
+
+    // Se for empresa ou visitante, busca perfil para confirmar empresa_id
+    const { data: perfil } = await supabase!.from("perfis_empresas").select("empresa_id").eq("id", data.user.id).single()
+    return { success: true, message: "Login bem-sucedido!", tipo: perfil ? "empresa" : "visitante" }
+
+  } catch (error) {
+    return { success: false, message: "Erro inesperado durante o login." }
   }
 }
 
-// Função para login de administradores (Mantida para compatibilidade, mas agora redirecionando opcionalmente)
-export async function loginAdmin(email: string, password: string): Promise<{ success: boolean; message: string; tipo?: string }> {
-  console.log("Admin login attempt:", { email, supabaseConfigured: isSupabaseConfigured() });
-  
-  if (!isSupabaseConfigured()) {
-    console.log("Supabase not configured, using mock credentials");
-    // Modo mock - apenas quando Supabase não está configurado
-    if (email === "admin@example.com" && password === "admin123") {
-      const admin = {
-        id: "admin-id",
-        email: "admin@example.com",
-        tipo: "admin",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        password_hash: "mock_hash",
-      }
-      
-      const cookieStore = await cookies()
-      cookieStore.set(USER_COOKIE_NAME, JSON.stringify(admin), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 7, // 1 semana
-        path: "/",
-        sameSite: "lax", // Adicionado para melhorar compatibilidade
-      })
-      
-      return { success: true, message: "Login realizado com sucesso!" }
-    }
-    return { success: false, message: "Supabase não configurado. Use admin@example.com / admin123 para desenvolvimento." }
-  }
-
-  try {
-    console.log("Tentando autenticação via Supabase Auth...");
-    
-    // Autenticar usando Supabase Auth
-    const { data: authData, error: authError } = await supabase!.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    console.log("Supabase Auth result:", { 
-      hasUser: !!authData.user, 
-      userEmail: authData.user?.email,
-      error: authError?.message 
-    });
-
-    if (authError || !authData.user) {
-      console.log('Falha na autenticação Supabase:', authError?.message);
-      return { success: false, message: 'Credenciais inválidas' };
-    }
-
-    // Verificar se o usuário é admin na tabela admins
-    // Usar supabaseAdmin se disponível (ignora RLS) para operações sensíveis
-    const adminClient = isSupabaseAdminConfigured() ? supabaseAdmin : supabase
-    
-    if (!adminClient) {
-      return { success: false, message: 'Erro de configuração do servidor' }
-    }
-    
-    const { data: admins, error: adminError } = await adminClient
-      .from('admins')
-      .select('*')
-      .eq('email', email)
-      .eq('ativo', true)
-
-    console.log("Admin table verification:", { 
-      count: admins?.length, 
-      error: adminError?.message,
-      usedAdminClient: isSupabaseAdminConfigured()
-    })
-
-    if (adminError) {
-      console.log('Erro ao buscar admin:', adminError.message)
-      return { success: false, message: 'Erro ao verificar credenciais de admin' }
-    }
-    
-    if (!admins || admins.length === 0) {
-      console.log('Usuário não é admin ou conta inativa')
-      // Fazer logout do Supabase se não for admin
-      await supabase!.auth.signOut()
-      return { success: false, message: 'Acesso negado. Usuário não é administrador' }
-    }
-    
-    const admin = admins[0]
-    
-    console.log('Admin autenticado com sucesso:', admin.nome);
-    
-    // Criar sessão do admin
-    const userSession: User = {
-      id: authData.user.id, // Usar ID do Supabase Auth
-      email: admin.email,
-      tipo: "admin",
-      empresa_id: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      password_hash: "",
-    }
-    
-    console.log("Criando sessão para:", userSession);
-    
-    const cookieStore = await cookies()
-    cookieStore.set(USER_COOKIE_NAME, JSON.stringify(userSession), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7, // 1 semana
-      path: "/",
-      sameSite: "lax", // Permite cookies em navegação normal
-    })
-    
-    console.log("Cookie definido com nome:", USER_COOKIE_NAME);
-    console.log("Cookie definido, login admin concluído");
-    
-    return {
-      success: true,
-      message: `Login bem-sucedido! Bem-vindo, ${admin.nome}`,
-      tipo: "admin"
-    }
-
-  } catch (error: any) {
-    console.error("Erro ao verificar credenciais de admin:", error)
-    return {
-      success: false,
-      message: "Erro de conexão. Tente novamente.",
-    }
-  }
-}
-
-// Função para logout
+/**
+ * Logout seguro removendo a sessão do Supabase
+ */
 export async function logout(): Promise<void> {
-  if (isSupabaseConfigured() && supabase) {
+  const supabase = await createServerSideClient()
+  if (supabase) {
     await supabase.auth.signOut()
   }
-  const cookieStore = await cookies() // Adicionado await
-  cookieStore.delete(USER_COOKIE_NAME)
-  redirect("/") // Redireciona após o logout
+  redirect("/")
 }
 
-// Função para verificar se está logado
-export async function isLoggedIn(): Promise<boolean> {
-  try {
-    const user = await getCurrentUser()
-    const result = !!user
-    console.log("Checking if logged in:", user ? `${user.email} (${user.tipo})` : "No user")
-    return result
-  } catch (error) {
-    console.error("Erro ao verificar login:", error)
-    // Se for erro de renderização dinâmica, retorna false
-    if (error instanceof Error && error.message.includes('Dynamic server usage')) {
-      console.log("Retornando false devido a renderização dinâmica")
-      return false
-    }
-    return false
-  }
-}
-
-// Função para obter usuário atual
+/**
+ * Obtém o usuário atual com tipagem e papel corretos
+ */
 export async function getCurrentUser(): Promise<User | null> {
-  try {
-    const cookieStore = await cookies() // Adicionado await
-    const userCookie = cookieStore.get(USER_COOKIE_NAME)
-    
-    console.log("Verificando cookie:", {
-      cookieName: USER_COOKIE_NAME,
-      hasCookie: !!userCookie,
-      hasValue: !!userCookie?.value,
-      valueLength: userCookie?.value?.length || 0
-    });
-    
-    if (!userCookie || !userCookie.value) {
-      console.log("No user cookie found")
-      return null
-    }
-    
-    try {
-      const user = JSON.parse(userCookie.value) as User
-      console.log("User found in session:", user.email, user.tipo)
-      return user
-    } catch (parseError) {
-      console.error("Falha ao analisar cookie de usuário:", parseError)
-      // Remove o cookie inválido
-      try {
-        cookieStore.delete(USER_COOKIE_NAME)
-      } catch (deleteError) {
-        console.error("Erro ao deletar cookie inválido:", deleteError)
-      }
-      return null
-    }
-  } catch (error) {
-    console.error("Erro ao obter usuário atual:", error)
-    // Se for erro de renderização dinâmica, retorna null silenciosamente
-    if (error instanceof Error && error.message.includes('Dynamic server usage')) {
-      console.log("Retornando null devido a renderização dinâmica")
-      return null
-    }
-    return null
+  const user = await getAuthenticatedUser()
+  if (!user) return null
+
+  const supabase = await createServerSideClient()
+  const tipo = user.user_metadata?.tipo || "visitante"
+  let empresaId = null
+
+  if (tipo === "empresa") {
+    const { data: perfil } = await supabase.from("perfis_empresas").select("empresa_id").eq("id", user.id).single()
+    empresaId = perfil?.empresa_id
   }
+
+  return {
+    id: user.id,
+    email: user.email!,
+    tipo: tipo as any,
+    empresa_id: empresaId,
+    created_at: user.created_at,
+    updated_at: user.updated_at || user.created_at,
+  } as User
 }
 
-// Função para verificar se é admin
-export async function isAdmin(): Promise<boolean> {
-  try {
-    const user = await getCurrentUser()
-    if (!user || user.tipo !== "admin") return false
-
-    // No modo mock, pulamos a verificação do banco
-    if (!isSupabaseConfigured()) return true
-
-    // Verificação robusta no banco de dados
-    const { data: admin, error } = await supabase!
-      .from("admins")
-      .select("ativo")
-      .eq("id", user.id)
-      .single()
-
-    if (error || !admin) return false
-    return !!admin.ativo
-  } catch (error) {
-    console.error("Erro ao verificar se é admin:", error)
-    return false
-  }
-}
-
-// Função para verificar se a empresa do usuário está ativa
-export async function isEmpresaAtiva(): Promise<boolean> {
-  try {
-    const user = await getCurrentUser()
-    if (!user) return false
-    
-    // Admins sempre têm acesso se estiverem logados e o check de isAdmin passar
-    if (user.tipo === "admin") return true
-
-    if (!user.empresa_id) return false
-
-    // No modo mock, pulamos a verificação do banco
-    if (!isSupabaseConfigured()) return true
-
-    // Verificação robusta no banco de dados
-    const { data: empresa, error } = await supabase!
-      .from("empresas")
-      .select("status")
-      .eq("id", user.empresa_id)
-      .single()
-
-    if (error || !empresa) return false
-    return empresa.status === "ativo"
-  } catch (error) {
-    console.error("Erro ao verificar status da empresa:", error)
-    return false
-  }
-}
-
-// Função para registro (agora com Supabase Auth e criação de perfil)
+/**
+ * Registro de novos usuários com definição de papel via Metadata
+ */
 export async function register(
   email: string,
   password: string,
   tipo: "empresa" | "admin",
-  nome_contato?: string,
-  telefone?: string,
-  cargo?: string,
-): Promise<{ success: boolean; message: string; userId?: string }> {
-  console.log("Registro iniciado:", { 
-    email, 
-    tipo, 
-    environment: process.env.NODE_ENV,
-    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-    hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY 
-  });
+  nome_contato: string,
+): Promise<{ success: boolean; message: string }> {
+  const supabase = await createServerSideClient()
+  
+  const { data, error } = await supabase!.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { tipo, nome_contato } 
+    }
+  })
 
-  if (!isSupabaseConfigured()) {
-    console.warn("Supabase não configurado. Registro mock.")
-    return { success: true, message: "Registro bem-sucedido! Faça login para continuar.", userId: "mock-user-id" }
-  }
-  
-  // Verificar se o Supabase está realmente funcionando
-  try {
-    const { data: testData, error: testError } = await supabase!.from('perfis_empresas').select('id').limit(1)
-    if (testError && testError.message.includes('relation "public.perfis_empresas" does not exist')) {
-      console.error("Tabela perfis_empresas não existe. Execute os scripts SQL no Supabase.")
-      return { 
-        success: false, 
-        message: "Erro de configuração: As tabelas do banco de dados não foram criadas. Entre em contato com o administrador." 
-      }
-    }
-  } catch (configError) {
-    console.error("Erro de configuração do Supabase:", configError)
-    return { 
-      success: false, 
-      message: "Erro de conexão com o banco de dados. Tente novamente em alguns minutos." 
-    }
-  }
-  
-  try {
-    console.log("Tentando criar usuário no Supabase:", { email, tipo })
-    
-    // Configurações específicas para Vercel
-    const signUpOptions = {
-      email,
-      password,
-      options: {
-        emailRedirectTo: typeof window !== 'undefined' 
-          ? `${window.location.origin}/login`
-          : process.env.NEXT_PUBLIC_BASE_URL 
-            ? `${process.env.NEXT_PUBLIC_BASE_URL}/login`
-            : 'http://localhost:3000/login',
-        data: {
-          tipo,
-          nome_contato,
-          telefone,
-          cargo
-        }
-      }
-    }
-    
-    console.log("Configurações de signUp:", { 
-      redirectTo: signUpOptions.options.emailRedirectTo,
-      hasUserData: !!signUpOptions.options.data
+  if (error) return { success: false, message: error.message }
+
+  if (data.user && tipo === "empresa") {
+    await supabase!.from("perfis_empresas").insert({
+      id: data.user.id,
+      nome_contato,
     })
-    
-    const { data, error } = await supabase!.auth.signUp(signUpOptions)
-    
-    console.log("Resultado do signUp:", { 
-      user: data.user?.id, 
-      session: !!data.session, 
-      error: error?.message,
-      errorCode: error?.code 
-    })
-    
-    if (error) {
-      console.error("Erro no Supabase signUp:", error)
-      console.error("Detalhes do erro:", { 
-        message: error.message, 
-        status: error.status, 
-        code: error.code 
-      })
-      
-      // Mensagens mais específicas baseadas no erro
-      if (error.message.includes('already registered') || error.code === 'user_already_exists') {
-        return { success: false, message: "Este email já está cadastrado. Tente fazer login ou use outro email." }
-      } else if (error.message.includes('Invalid email')) {
-        return { success: false, message: "Email inválido. Verifique o formato e tente novamente." }
-      } else if (error.message.includes('Password') || error.message.includes('password')) {
-        return { success: false, message: "Senha deve ter pelo menos 6 caracteres." }
-      } else if (error.message.includes('Database error') || error.message.includes('database')) {
-        return { success: false, message: "Erro no banco de dados. Verifique a configuração do Supabase ou tente novamente mais tarde." }
-      } else if (error.message.includes('fetch')) {
-        return { success: false, message: "Erro de conexão. Verifique sua internet e tente novamente." }
-      } else {
-        return { success: false, message: `Erro no cadastro: ${error.message}` }
-      }
-    }
-    
-    console.log("Usuário criado com sucesso:", data.user?.id)
-    
-    if (data.user) {
-      if (tipo === "empresa") {
-        console.log("Criando perfil da empresa para usuário:", data.user.id)
-        const { error: profileError } = await criarPerfilEmpresa(data.user.id, null, {
-          nome_contato: nome_contato,  // Nome do contato do cadastro
-          telefone: telefone,          // Telefone do contato do cadastro
-          cargo: cargo,                // Cargo do contato do cadastro
-          // Não incluir email aqui pois está no auth.users
-        })
-        if (profileError) {
-          // If profile creation fails, consider rolling back user creation or logging
-          console.error("Erro ao criar perfil da empresa:", profileError)
-          console.error("Detalhes do erro do perfil:", {
-            message: profileError.message,
-            code: profileError.code,
-            details: profileError.details
-          })
-          
-          // Fazer rollback completo: primeiro remover perfil, depois usuário
-          try {
-            console.log("Iniciando rollback...")
-            
-            // 1. Remover perfil se foi criado parcialmente
-            try {
-              await supabase!.from("perfis_empresas").delete().eq("id", data.user.id)
-              console.log("Perfil removido durante rollback")
-            } catch (perfilDeleteError) {
-              console.log("Perfil não precisou ser removido:", perfilDeleteError)
-            }
-            
-            // 2. Remover usuário (precisa de SERVICE_ROLE_KEY)
-            if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-              const { createClient } = await import('@supabase/supabase-js')
-              const supabaseAdmin = createClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.SUPABASE_SERVICE_ROLE_KEY!,
-                {
-                  auth: {
-                    autoRefreshToken: false,
-                    persistSession: false
-                  }
-                }
-              )
-              
-              await supabaseAdmin.auth.admin.deleteUser(data.user.id)
-              console.log("Usuário removido com SERVICE_ROLE_KEY")
-            } else {
-              await supabase!.auth.admin.deleteUser(data.user.id)
-              console.log("Usuário removido com auth regular")
-            }
-            
-          } catch (deleteError) {
-            console.error("Não foi possível fazer rollback completo:", deleteError)
-            console.log("⚠️ Usuário órfão criado. ID:", data.user.id)
-          }
-          
-          return { 
-            success: false, 
-            message: `Erro ao criar perfil: ${profileError.message || 'Erro desconhecido no banco de dados'}` 
-          }
-        }
-        console.log("Perfil da empresa criado com sucesso")
-      }
-      return {
-        success: true,
-        message: "Registro bem-sucedido! Verifique seu email para confirmar.",
-        userId: data.user.id,
-      }
-    }
-    return { success: false, message: "Erro desconhecido durante o registro." }
-  } catch (err: any) {
-    console.error("Erro ao registrar usuário:", err)
-    return { success: false, message: err.message || "Ocorreu um erro inesperado durante o registro." }
   }
+
+  return { success: true, message: "Registro bem-sucedido! Verifique seu email." }
 }
 
-// Função para recuperação de senha
-export async function recoverPassword(email: string): Promise<{ success: boolean; message: string }> {
-  if (!isSupabaseConfigured()) {
-    console.warn("Supabase não configurado. Recuperação de senha mock.")
-    return { success: true, message: "Se as credenciais estiverem corretas, um link de recuperação foi enviado." }
-  }
-  try {
-    // Determina o URL de redirecionamento baseado no ambiente
-    const redirectUrl = typeof window !== 'undefined' 
-      ? `${window.location.origin}/redefinir-senha`
-      : process.env.NEXT_PUBLIC_BASE_URL 
-        ? `${process.env.NEXT_PUBLIC_BASE_URL}/redefinir-senha`
-        : 'http://localhost:3000/redefinir-senha'
-    
-    console.log("Enviando email de recuperação para:", email)
-    console.log("URL de redirecionamento:", redirectUrl)
-    
-    const { error } = await supabase!.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectUrl,
-    })
-    
-    if (error) {
-      console.error("Erro ao enviar email de recuperação:", error)
-      return { success: false, message: error.message }
-    }
-    
-    console.log("Email de recuperação enviado com sucesso")
-    return { success: true, message: "Um link de redefinição de senha foi enviado para o seu email. Verifique sua caixa de entrada e spam." }
-  } catch (err: any) {
-    console.error("Erro na recuperação de senha:", err)
-    return { success: false, message: err.message || "Ocorreu um erro inesperado durante a recuperação de senha." }
-  }
+/**
+ * Helpers de Compatibilidade Legada
+ */
+export async function isLoggedIn() {
+  const user = await getAuthenticatedUser()
+  return !!user
 }
 
-// Nova função para redefinir a senha
-export async function resetPassword(newPassword: string): Promise<{ success: boolean; message: string }> {
-  if (!isSupabaseConfigured()) {
-    console.warn("Supabase não configurado. Redefinição de senha mock.")
-    return { success: true, message: "Senha redefinida com sucesso (modo mock)!" }
-  }
-  try {
-    const { data, error } = await supabase!.auth.updateUser({
-      password: newPassword,
-    })
-    if (error) {
-      return { success: false, message: error.message }
-    }
-    if (data.user) {
-      return { success: true, message: "Sua senha foi redefinida com sucesso! Você pode fazer login agora." }
-    }
-    return { success: false, message: "Erro desconhecido ao redefinir a senha." }
-  } catch (err: any) {
-    console.error("Erro ao redefinir senha:", err)
-    return { success: false, message: err.message || "Ocorreu um erro inesperado ao redefinir a senha." }
-  }
+export async function isAdmin() {
+  const user = await getAuthenticatedUser()
+  return user?.user_metadata?.tipo === "admin"
+}
+
+export async function isEmpresaAtiva() {
+  const user = await getCurrentUser()
+  if (!user || user.tipo !== "empresa") return false
+  if (!user.empresa_id) return false
+
+  const supabase = await createServerSideClient()
+  const { data: empresa } = await supabase.from("empresas").select("status").eq("id", user.empresa_id).single()
+  return empresa?.status === "ativo"
 }

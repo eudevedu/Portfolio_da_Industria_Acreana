@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, createBrowserClient } from '@supabase/ssr'
 import { createClient as createLegacyClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -8,70 +8,52 @@ export const isSupabaseConfigured = () => !!supabaseUrl && !!supabaseKey
 export const isSupabaseAdminConfigured = () => !!supabaseUrl && !!process.env.SUPABASE_SERVICE_ROLE_KEY
 
 /**
- * Cria um cliente Supabase para Client Components.
- * Em Next.js 15, o recomendado é usar o createBrowserClient do @supabase/ssr
+ * Cliente para Browser (Client Components)
  */
 export function createClient() {
   if (!isSupabaseConfigured()) {
-    console.warn('⚠️ Supabase não configurado. createClient retornando null.')
+    console.warn('⚠️ Supabase não configurado.')
     return null as any
   }
-  
-  // Re-importing dynamic to avoid issues in some environments
-  const { createBrowserClient } = require('@supabase/ssr')
   return createBrowserClient(supabaseUrl!, supabaseKey!)
 }
 
 /**
- * Cria um cliente Supabase para Server Components, Route Handlers e Actions.
- * Utiliza o novo padrão de cookies assíncronos do Next.js 15.
+ * Cliente para Server (Server Components, Actions, Route Handlers)
  */
 export async function createServerSideClient() {
   if (!isSupabaseConfigured()) {
-    console.warn('⚠️ Supabase não configurado. createServerSideClient retornando null.')
     return null as any
   }
 
-  try {
-    const { cookies } = await import('next/headers')
-    const cookieStore = await cookies()
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
 
-    return createServerClient(supabaseUrl!, supabaseKey!, {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // Ignorado propositalmente em Server Components (pre-rendering)
-          }
-        },
+  return createServerClient(supabaseUrl!, supabaseKey!, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll()
       },
-    })
-  } catch (error) {
-    // Fallback para ambientes sem cookies (ex: builds estáticos)
-    return createServerClient(supabaseUrl!, supabaseKey!, {
-      cookies: {
-          getAll() { return [] },
-          setAll() {}
-      }
-    })
-  }
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          )
+        } catch {
+          // Ignorado em Server Components (pre-rendering)
+        }
+      },
+    },
+  })
 }
 
 /**
- * Cliente admin com permissões totais via Service Role.
- * Usado exclusivamente em operações seguras no lado do servidor.
+ * Cliente Admin (Service Role) - APENAS SERVER-SIDE
  */
 export function createAdminClient() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   
   if (!supabaseUrl || !serviceKey) {
-    console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY ou URL não configurados.')
     return null as any
   }
 
@@ -84,13 +66,9 @@ export function createAdminClient() {
 }
 
 /**
- * Singleton de compatibilidade resiliente (uso em scripts legado).
+ * Singleton de compatibilidade (Legado).
+ * @deprecated Use createClient() ou createServerSideClient() em Next.js 15.
  */
 export const supabase = isSupabaseConfigured() 
   ? createLegacyClient(supabaseUrl!, supabaseKey!)
   : null
-
-/**
- * Singleton de compatibilidade para o Admin (Service Role).
- */
-export const supabaseAdmin = createAdminClient()

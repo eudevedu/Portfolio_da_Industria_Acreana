@@ -1,108 +1,83 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
-const USER_COOKIE_NAME = "user_session"
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
 
-// Define as rotas que precisam de autenticação
-const protectedRoutes = [
-  '/dashboard',
-  '/admin',
-  '/api/produtos',
-  '/api/arquivos',
-  '/api/auth/update-email',
-  '/api/auth/update-password',
-  '/api/auth/delete-account'
-]
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value)
+          )
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
 
-// Define as rotas de admin
-const adminRoutes = [
-  '/admin'
-]
-
-// Define rotas que devem ser excluídas da verificação
-const excludedRoutes = [
-  '/admin/login',
-  '/login',
-  '/cadastro',
-  '/recuperar-senha',
-  '/redefinir-senha'
-]
-
-export function middleware(request: NextRequest) {
+  const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
-  
-  // Exclui rotas que não devem passar pelo middleware
-  const isExcludedRoute = excludedRoutes.some(route => 
-    pathname.startsWith(route)
-  )
-  
-  if (isExcludedRoute) {
-    return NextResponse.next()
-  }
-  
-  // Verifica se é uma rota protegida
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
-  )
-  
-  const isAdminRoute = adminRoutes.some(route => 
-    pathname.startsWith(route)
-  )
-  
-  if (isProtectedRoute) {
-    const userCookie = request.cookies.get(USER_COOKIE_NAME)
+  const userTipo = user?.user_metadata?.tipo
+
+  // 1. Proteger rotas Administrativas
+  if (pathname.startsWith('/admin')) {
+    if (pathname === '/admin/login') {
+      if (userTipo === 'admin') return NextResponse.redirect(new URL('/admin', request.url))
+      return response
+    }
+
+    if (!user) return NextResponse.redirect(new URL('/admin/login', request.url))
     
-    // Se não tem cookie de usuário, redireciona para login
-    if (!userCookie || !userCookie.value) {
-      if (isAdminRoute) {
-        return NextResponse.redirect(new URL('/admin/login', request.url))
-      }
+    // Verificação baseada em metadados para velocidade
+    if (userTipo !== 'admin') {
       return NextResponse.redirect(new URL('/login', request.url))
     }
     
-    try {
-      const user = JSON.parse(userCookie.value)
-      
-      // Verifica se é uma rota de admin e se o usuário é admin
-      if (isAdminRoute && user.tipo !== 'admin') {
-        return NextResponse.redirect(new URL('/login', request.url))
-      }
-      
-      // Verifica se é uma rota de empresa e se o usuário tem empresa_id
-      if (pathname.startsWith('/dashboard') && user.tipo === 'empresa' && !user.empresa_id) {
-        return NextResponse.redirect(new URL('/login', request.url))
-      }
-      
-    } catch (error) {
-      // Cookie inválido, remove e redireciona
-      const response = isAdminRoute 
-        ? NextResponse.redirect(new URL('/admin/login', request.url))
-        : NextResponse.redirect(new URL('/login', request.url))
-      
-      response.cookies.delete(USER_COOKIE_NAME)
-      return response
+    // Verificação no Banco apenas para a Home do Admin ou ações críticas (opcional no middleware)
+    if (pathname === '/admin') {
+      const { data: admin } = await supabase.from('admins').select('ativo').eq('id', user.id).single()
+      if (!admin || !admin.ativo) return NextResponse.redirect(new URL('/login', request.url))
     }
   }
-  
-  // Libera a rota de upload para qualquer usuário
-  if (request.nextUrl.pathname.startsWith("/api/upload")) {
-    return NextResponse.next()
+
+  // 2. Proteger Dashboard de Empresas
+  if (pathname.startsWith('/dashboard')) {
+    if (!user) return NextResponse.redirect(new URL('/login', request.url))
+    
+    // Admins podem ver o dashboard, mas usuários sem tipo 'empresa' ou 'admin' não
+    if (userTipo !== 'empresa' && userTipo !== 'admin') {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
   }
 
-  return NextResponse.next()
+  // 3. Redirecionar usuários logados que tentam acessar login/cadastro
+  if ((pathname === '/login' || pathname === '/cadastro') && user) {
+    return NextResponse.redirect(new URL(userTipo === 'admin' ? '/admin' : '/dashboard', request.url))
+  }
+
+  return response
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/auth (auth endpoints)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)  
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - login pages (to prevent redirect loops)
-     */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|public|login|admin/login|cadastro|recuperar-senha|redefinir-senha|.*\\.).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public|api/auth|.*\\.).*)',
   ],
 }
