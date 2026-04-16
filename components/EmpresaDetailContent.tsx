@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/dialog"
 import ImageGallery from "@/components/ImageGallery"
 import AnalyticsTracker from "@/components/AnalyticsTracker"
+import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
+import { useEffect } from "react"
 
 interface EmpresaContentProps {
   initialEmpresa: any
@@ -39,8 +41,25 @@ interface EmpresaContentProps {
 
 export default function EmpresaDetailContent({ initialEmpresa, initialRelacionadas }: EmpresaContentProps) {
   const [selectedProduto, setSelectedProduto] = useState<any>(null)
+  const [allCategories, setAllCategories] = useState<Categoria[]>([])
   const empresa = initialEmpresa
   const empresasRelacionadas = initialRelacionadas
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await buscarCategorias()
+        setAllCategories(data || [])
+      } catch (err) {
+        console.error("Erro ao carregar categorias:", err)
+      }
+    }
+    loadCategories()
+  }, [])
+
+  const getCategoryName = (id: string) => {
+    return allCategories.find(c => c.id === id)?.nome || id
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -94,7 +113,7 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
                 {getStatusBadge(empresa.status)}
                 {empresa.setor_economico && (
                   <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary font-bold uppercase tracking-wider text-[10px]">
-                    {empresa.setor_economico}
+                    {getCategoryName(empresa.setor_economico)}
                   </Badge>
                 )}
               </div>
@@ -361,7 +380,7 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
                 </div>
                 <div className="flex justify-between items-center text-sm font-bold">
                   <span className="text-muted-foreground">Setor</span>
-                  <span className="text-primary truncate ml-4">{empresa.setor_empresa}</span>
+                  <span className="text-primary truncate ml-4">{getCategoryName(empresa.setor_empresa)}</span>
                 </div>
               </div>
             </div>

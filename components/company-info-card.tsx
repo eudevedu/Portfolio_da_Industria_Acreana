@@ -24,6 +24,7 @@ import { UploadComponent } from "./upload-component"
 import type { Empresa } from "../lib/supabase.types"
 import { atualizarEmpresa } from "../lib/database"
 import { formatCnpj, unformatCnpj } from "../lib/cnpj-mask"
+import { buscarCategorias, type Categoria } from "../lib/services/category-service"
 
 // Esquema de validação com Zod
 const formSchema = z.object({
@@ -47,21 +48,7 @@ const formSchema = z.object({
   status: z.string().optional(),
 })
 
-const setoresEconomicos = [
-  { value: "industria", label: "Indústria" },
-  { value: "agroindustria", label: "Agroindústria" },
-  { value: "servicos", label: "Serviços" },
-  { value: "comercio", label: "Comércio" },
-]
-
-const setoresEmpresaList = [
-  { value: "alimentos", label: "Alimentos e Bebidas" },
-  { value: "madeira", label: "Madeira e Móveis" },
-  { value: "construcao", label: "Construção Civil" },
-  { value: "tecnologia", label: "Tecnologia" },
-  { value: "textil", label: "Têxtil" },
-  { value: "outros", label: "Outros" },
-]
+// Hardcoded lists removed in favor of dynamic loading from database
 
 interface CompanyInfoCardProps {
   initialData: Empresa | null
@@ -72,6 +59,35 @@ export function CompanyInfoCard({ initialData, empresaId }: CompanyInfoCardProps
   const [isEditing, setIsEditing] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("empresa")
+  const [allCategories, setAllCategories] = React.useState<Categoria[]>([])
+  const [catsLoading, setCatsLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await buscarCategorias()
+        setAllCategories(data || [])
+      } catch (err) {
+        console.error("Erro ao carregar categorias:", err)
+      } finally {
+        setCatsLoading(false)
+      }
+    }
+    loadCategories()
+  }, [])
+
+  const selectedSectorId = form.watch("setor_economico")
+
+  const setoresEconomicos = allCategories
+    .filter(c => c.tipo === "setor_economico")
+    .map(c => ({ value: c.id, label: c.nome }))
+
+  const setoresEmpresaList = allCategories
+    .filter(c => 
+      c.tipo === "atividade_principal" && 
+      (!selectedSectorId || c.parent_id === selectedSectorId || !c.parent_id)
+    )
+    .map(c => ({ value: c.id, label: c.nome }))
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -331,8 +347,8 @@ export function CompanyInfoCard({ initialData, empresaId }: CompanyInfoCardProps
                           ) : (
                             <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                               <Globe className="h-4 w-4 text-green-600" />
-                              <span className="text-sm font-bold text-slate-700 capitalize">
-                                {setoresEconomicos.find(s => s.value === field.value)?.label || field.value}
+                              <span className="text-sm font-bold text-slate-700">
+                                {allCategories.find(c => c.id === field.value)?.nome || field.value}
                               </span>
                             </div>
                           )}
@@ -356,8 +372,8 @@ export function CompanyInfoCard({ initialData, empresaId }: CompanyInfoCardProps
                           ) : (
                             <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                               <Building className="h-4 w-4 text-green-600" />
-                              <span className="text-sm font-bold text-slate-700 capitalize">
-                                {setoresEmpresaList.find(s => s.value === field.value)?.label || field.value}
+                              <span className="text-sm font-bold text-slate-700">
+                                {allCategories.find(c => c.id === field.value)?.nome || field.value}
                               </span>
                             </div>
                           )}
