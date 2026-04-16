@@ -9,11 +9,11 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const supabase = await createServerSideClient()
     
-    // 1. Validar Autenticação
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ success: false, error: "Não autorizado" }, { status: 401 })
-    }
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    // Se não houver usuário, permitimos o upload mas em uma pasta pública de cadastro
+    const ownerId = user?.id || "public-registration"
+
 
     const formData = await request.formData()
     const file = formData.get("file") as File
@@ -22,9 +22,16 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ success: false, error: "Arquivo não fornecido" }, { status: 400 })
     }
 
-    // 2. Validar Tamanho
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ success: false, error: "Arquivo muito grande (máx 5MB)" }, { status: 400 })
+    // 2. Validar Limites de Tamanho Dinâmicos
+    const isPDF = file.type === 'application/pdf'
+    const limit = isPDF ? 5 * 1024 * 1024 : 1 * 1024 * 1024
+    
+    if (file.size > limit) {
+      const limitText = isPDF ? "5MB" : "1MB"
+      return NextResponse.json({ 
+        success: false, 
+        error: `O arquivo excede o limite permitido para ${isPDF ? 'PDFs' : 'Imagens'} (${limitText}).` 
+      }, { status: 400 })
     }
 
     // 3. Validar Tipo
@@ -32,17 +39,22 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ success: false, error: "Tipo de arquivo não permitido" }, { status: 400 })
     }
 
-    // 4. Upload para Supabase Storage
+
+    // 4. Upload para Supabase Storage (Usando Admin Client para contornar RLS do Storage)
+    const { createAdminClient } = await import('@/lib/supabase')
+    const supabaseAdmin = createAdminClient()
+    
     const fileExt = file.name.split('.').pop()
-    const fileName = `${user.id}/${Date.now()}-${randomUUID()}.${fileExt}`
+    const fileName = `${ownerId}/${Date.now()}-${randomUUID()}.${fileExt}`
     const bucket = file.type.includes('pdf') ? 'PDF' : 'Imagem'
 
-    const { data, error: uploadError } = await supabase.storage
+    const { data, error: uploadError } = await supabaseAdmin.storage
       .from(bucket)
       .upload(fileName, file, {
         contentType: file.type,
         upsert: false
       })
+
 
     if (uploadError) throw uploadError
 

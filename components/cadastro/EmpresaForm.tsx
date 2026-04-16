@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UploadComponent } from "@/components/upload-component"
 import { CadastroFormData } from "@/lib/schemas/cadastro-schema"
-import { X } from "lucide-react"
+import { X, FileText, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const SETORES_ECONOMICOS = [
@@ -37,59 +37,57 @@ const MUNICIPIOS = [
 export function EmpresaForm() {
   const { register, control, setValue, watch, formState: { errors } } = useFormContext<CadastroFormData>()
   const logoUrl = watch("empresa.logo_url")
+  const folderUrl = watch("empresa.folder_apresentacao_url")
+  const outrosArquivos = watch("empresa.outros_arquivos_urls") || []
 
   return (
-    <div className="space-y-6 mt-6">
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="nome_fantasia">Nome Fantasia *</Label>
-          <Input id="nome_fantasia" {...register("empresa.nome_fantasia")} />
-          {errors.empresa?.nome_fantasia && (
-            <p className="text-red-500 text-xs">{errors.empresa.nome_fantasia.message}</p>
-          )}
+    <div className="space-y-8 mt-6">
+      {/* Dados Básicos */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <Label>Identidade Visual</Label>
+          <UploadComponent
+            onUploadSuccess={(url) => setValue("empresa.logo_url", url, { shouldValidate: true })}
+            currentUrl={logoUrl}
+            acceptedFileTypes="image/*"
+            buttonText={logoUrl ? "Alterar Logo" : "Logo da Empresa (1MB)"}
+          />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="razao_social">Razão Social *</Label>
-          <Input id="razao_social" {...register("empresa.razao_social")} />
-          {errors.empresa?.razao_social && (
-            <p className="text-red-500 text-xs">{errors.empresa.razao_social.message}</p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="cnpj">CNPJ *</Label>
-          <Input id="cnpj" {...register("empresa.cnpj")} placeholder="00.000.000/0000-00" />
-          {errors.empresa?.cnpj && (
-            <p className="text-red-500 text-xs">{errors.empresa.cnpj.message}</p>
-          )}
-        </div>
-        <div className="space-y-2 flex flex-col justify-end">
-          <Label>Logo da Empresa</Label>
-          <div className="flex items-center gap-3">
-            <UploadComponent
-              onUploadSuccess={(url) => setValue("empresa.logo_url", url)}
-              acceptedFileTypes="image/*"
-              buttonText={logoUrl ? "Alterar Logo" : "Upload Logo"}
-            />
-            {logoUrl && (
-              <div className="relative group">
-                <img src={logoUrl} alt="Logo" className="w-12 h-12 rounded object-cover border" />
-                <button 
-                  type="button"
-                  onClick={() => setValue("empresa.logo_url", "")}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="nome_fantasia">Nome Fantasia *</Label>
+            <Input id="nome_fantasia" {...register("empresa.nome_fantasia")} placeholder="Nome como é conhecida" />
+            {errors.empresa?.nome_fantasia && (
+              <p className="text-red-500 text-[10px] font-bold">{errors.empresa.nome_fantasia.message}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="razao_social">Razão Social *</Label>
+            <Input id="razao_social" {...register("empresa.razao_social")} placeholder="Nome legal da empresa" />
+            {errors.empresa?.razao_social && (
+              <p className="text-red-500 text-[10px] font-bold">{errors.empresa.razao_social.message}</p>
             )}
           </div>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="cnpj">CNPJ *</Label>
+          <Input 
+            id="cnpj" 
+            {...register("empresa.cnpj")} 
+            placeholder="00.000.000/0000-00" 
+            onChange={(e) => {
+              const { formatCnpj } = require("@/lib/cnpj-mask")
+              setValue("empresa.cnpj", formatCnpj(e.target.value), { shouldValidate: true })
+            }}
+          />
+          {errors.empresa?.cnpj && (
+            <p className="text-red-500 text-[10px] font-bold">{errors.empresa.cnpj.message}</p>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label>Setor Econômico *</Label>
           <Controller
@@ -109,10 +107,12 @@ export function EmpresaForm() {
             )}
           />
           {errors.empresa?.setor_economico && (
-            <p className="text-red-500 text-xs">{errors.empresa.setor_economico.message}</p>
+            <p className="text-red-500 text-[10px] font-bold text-xs">{errors.empresa.setor_economico.message}</p>
           )}
         </div>
+      </div>
 
+      <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label>Atividade Principal *</Label>
           <Controller
@@ -131,71 +131,78 @@ export function EmpresaForm() {
               </Select>
             )}
           />
-          {errors.empresa?.setor_empresa && (
-            <p className="text-red-500 text-xs">{errors.empresa.setor_empresa.message}</p>
-          )}
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+           <div className="space-y-2">
+             <Label>Município *</Label>
+             <Controller
+               name="empresa.municipio"
+               control={control}
+               render={({ field }) => (
+                 <Select onValueChange={field.onChange} value={field.value}>
+                   <SelectTrigger>
+                     <SelectValue placeholder="Selecione..." />
+                   </SelectTrigger>
+                   <SelectContent>
+                     {MUNICIPIOS.map((m) => (
+                       <SelectItem key={m} value={m}>{m}</SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+               )}
+             />
+           </div>
+           <div className="space-y-2">
+             <Label htmlFor="endereco">Endereço *</Label>
+             <Input id="endereco" {...register("empresa.endereco")} placeholder="Rua, Número, Bairro" />
+           </div>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Município *</Label>
-          <Controller
-            name="empresa.municipio"
-            control={control}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {MUNICIPIOS.map((m) => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="endereco">Endereço Completo *</Label>
-          <Input id="endereco" {...register("empresa.endereco")} />
-        </div>
-      </div>
-
-      <div className="space-y-2">
+      <div className="space-y-4">
         <Label htmlFor="apresentacao">Apresentação da Indústria *</Label>
         <Textarea 
           id="apresentacao" 
           {...register("empresa.apresentacao")} 
-          placeholder="Conte a história e o propósito da sua empresa..."
-          className="min-h-[100px]"
+          placeholder="Conte sobre a história, missão e valores da sua indústria..."
+          className="min-h-[120px]"
         />
-        {errors.empresa?.apresentacao && (
-          <p className="text-red-500 text-xs">{errors.empresa.apresentacao.message}</p>
-        )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="descricao_produtos">Descrição Geral dos Produtos *</Label>
-        <Textarea 
-          id="descricao_produtos" 
-          {...register("empresa.descricao_produtos")} 
-          placeholder="Ex: Fabricação de móveis planejados sob medida..."
-        />
-        {errors.empresa?.descricao_produtos && (
-          <p className="text-red-500 text-xs">{errors.empresa.descricao_produtos.message}</p>
-        )}
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4 border-t pt-4">
+      {/* Documentos Institucionais */}
+      <div className="grid md:grid-cols-2 gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
         <div className="space-y-2">
-          <Label htmlFor="instagram">Instagram (Link ou @)</Label>
-          <Input id="instagram" {...register("empresa.instagram")} />
+          <Label>Folder de Apresentação (PDF)</Label>
+          <UploadComponent
+            onUploadSuccess={(url) => setValue("empresa.folder_apresentacao_url", url)}
+            currentUrl={folderUrl || ""}
+            acceptedFileTypes="application/pdf"
+            buttonText="Upload PDF (Máx 5MB)"
+          />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="youtube">Vídeo de Apresentação (Link YouTube)</Label>
-          <Input id="youtube" {...register("empresa.video_apresentacao")} placeholder="https://youtube.com/..." />
+          <Label>Outros Documentos Importantes</Label>
+          <div className="space-y-2">
+             <UploadComponent
+               onUploadSuccess={(url) => {
+                 if (url) setValue("empresa.outros_arquivos_urls", [...outrosArquivos, url])
+               }}
+               autoReset={true}
+               acceptedFileTypes="application/pdf,image/*"
+               buttonText="Adicionar Arquivo"
+             />
+             <div className="flex flex-wrap gap-2">
+                {outrosArquivos.map((url, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-white border rounded-full px-3 py-1 text-[10px] font-bold">
+                    <FileText className="h-3 w-3 text-red-500" />
+                    <span className="truncate max-w-[80px]">{url.split('/').pop()}</span>
+                    <button type="button" onClick={() => setValue("empresa.outros_arquivos_urls", outrosArquivos.filter((_, idx) => idx !== i))}>
+                      <X className="h-3 w-3 text-slate-400 hover:text-red-500" />
+                    </button>
+                  </div>
+                ))}
+             </div>
+          </div>
         </div>
       </div>
     </div>

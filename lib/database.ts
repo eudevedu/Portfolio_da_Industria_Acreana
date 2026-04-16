@@ -1,7 +1,7 @@
 "use server"
 
 import { createServerSideClient } from "./supabase"
-import { requireAuth, ensureEmpresaAccess } from "./auth-guards"
+import { requireAuth, requireEmpresa } from "./auth-guards"
 import * as empresaService from "./services/empresa-service"
 import * as produtoService from "./services/produto-service"
 import * as arquivoService from "./services/arquivo-service"
@@ -25,12 +25,12 @@ export async function criarEmpresa(empresa: any) {
 }
 
 export async function atualizarEmpresa(id: string, updates: any) {
-  await ensureEmpresaAccess(id)
+  await requireEmpresa(id) // Passamos o id da própria empresa para validar posse
   return empresaService.atualizarEmpresa(id, updates)
 }
 
 export async function deletarEmpresa(id: string) {
-  await ensureEmpresaAccess(id)
+  await requireEmpresa(id)
   return empresaService.deletarEmpresa(id)
 }
 
@@ -41,14 +41,14 @@ export async function buscarProdutosPorEmpresa(empresaId: string) {
 }
 
 export async function criarProduto(produto: any) {
-  await ensureEmpresaAccess(produto.empresa_id)
+  await requireEmpresa(produto.empresa_id)
   return produtoService.criarProduto(produto)
 }
 
 export async function atualizarProduto(id: string, updates: any) {
   const supabase = await createServerSideClient()
   const { data } = await supabase.from("produtos").select("empresa_id").eq("id", id).single()
-  if (data) await ensureEmpresaAccess(data.empresa_id)
+  if (data) await requireEmpresa(data.empresa_id)
   
   return produtoService.atualizarProduto(id, updates)
 }
@@ -56,7 +56,7 @@ export async function atualizarProduto(id: string, updates: any) {
 export async function deletarProduto(id: string) {
   const supabase = await createServerSideClient()
   const { data } = await supabase.from("produtos").select("empresa_id").eq("id", id).single()
-  if (data) await ensureEmpresaAccess(data.empresa_id)
+  if (data) await requireEmpresa(data.empresa_id)
   
   return produtoService.deletarProduto(id)
 }
@@ -68,14 +68,14 @@ export async function buscarArquivosPorEmpresa(empresaId: string) {
 }
 
 export async function criarArquivo(arquivo: any) {
-  await ensureEmpresaAccess(arquivo.empresa_id)
+  await requireEmpresa(arquivo.empresa_id)
   return arquivoService.criarArquivo(arquivo)
 }
 
 export async function deletarArquivo(id: string) {
   const supabase = await createServerSideClient()
   const { data } = await supabase.from("arquivos").select("empresa_id").eq("id", id).single()
-  if (data) await ensureEmpresaAccess(data.empresa_id)
+  if (data) await requireEmpresa(data.empresa_id)
   
   return arquivoService.deletarArquivo(id)
 }
@@ -83,7 +83,7 @@ export async function deletarArquivo(id: string) {
 // --- ANALYTICS / OUTROS ---
 
 export async function obterAnalytics(empresaId: string) {
-  await ensureEmpresaAccess(empresaId)
+  await requireEmpresa(empresaId)
   return analyticsService.obterAnalytics(empresaId)
 }
 
