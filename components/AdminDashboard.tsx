@@ -34,6 +34,7 @@ import {
 } from "lucide-react"
 import { IndustrialDetailsModal } from "@/components/IndustrialDetailsModal"
 import { ConfiguracoesModal } from "@/components/ConfiguracoesModal"
+import { CategoryManager } from "@/components/CategoryManager"
 import { UploadComponent } from "./upload-component"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -583,24 +584,72 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
             </Link>
           </div>
 
-          <nav className="flex-1 p-6 space-y-2">
-            <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Gestão de Plataforma</p>
-            <TabsList className="flex flex-col w-full bg-transparent p-0 gap-2 h-auto">
-              {[
-                { id: 'dashboard', label: 'Visão Geral', icon: LayoutDashboard },
-                { id: 'empresas', label: 'Gestão de Empresas', icon: Building2 },
-                { id: 'administradores', label: 'Equipe Admin', icon: Users },
-              ].map((item) => (
+          <nav className="flex-1 p-6 space-y-4 overflow-y-auto">
+            <div>
+              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Principal</p>
+              <TabsList className="flex flex-col w-full bg-transparent p-0 gap-2 h-auto">
                 <TabsTrigger
-                  key={item.id}
-                  value={item.id}
+                  value="dashboard"
                   className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent"
                 >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
+                  <LayoutDashboard className="h-5 w-5" />
+                  Visão Geral
                 </TabsTrigger>
-              ))}
-            </TabsList>
+              </TabsList>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-2 px-3">Menu Gestão de Empresas</p>
+              <div className="space-y-1">
+                <TabsList className="flex flex-col w-full bg-transparent p-0 gap-1 h-auto items-start">
+                  <TabsTrigger
+                    value="empresas"
+                    className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-sm"
+                  >
+                    <Building2 className="h-4 w-4" />
+                    Empresas Cadastradas
+                  </TabsTrigger>
+                  
+                  <Button
+                    variant="ghost"
+                    onClick={handleCreateNewClick}
+                    className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all font-medium text-sm text-left"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Cadastrar Empresa
+                  </Button>
+
+                  <TabsTrigger
+                    value="categorias"
+                    className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-sm"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                    Categorias
+                  </TabsTrigger>
+
+                  <TabsTrigger
+                    value="cadastrar-categoria"
+                    className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Gerir Categorias & Subs
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-2 px-3">Configurações</p>
+              <TabsList className="flex flex-col w-full bg-transparent p-0 gap-1 h-auto">
+                <TabsTrigger
+                  value="administradores"
+                  className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-sm"
+                >
+                  <Users className="h-4 w-4" />
+                  Equipe Admin
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <div className="pt-8 space-y-2">
               <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Atalhos</p>
@@ -633,7 +682,11 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
           <header className="bg-gradient-to-r from-green-900 to-green-700 h-24 sticky top-0 z-30 px-8 flex items-center justify-between shadow-lg">
             <div>
               <h1 className="text-2xl font-display font-black tracking-tight text-white uppercase">
-                {activeTab === 'dashboard' ? 'Painel de Controle' : activeTab === 'empresas' ? 'Indústrias' : 'Administradores'}
+                {activeTab === 'dashboard' ? 'Painel de Controle' : 
+                 activeTab === 'empresas' ? 'Indústrias' : 
+                 activeTab === 'categorias' ? 'Categorias' :
+                 activeTab === 'cadastrar-categoria' ? 'Gestão de Categorias' :
+                 'Administradores'}
               </h1>
               <p className="text-sm text-green-50/80 font-medium">Gestão centralizada do Portfólio Industrial</p>
             </div>

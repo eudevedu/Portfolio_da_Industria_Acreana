@@ -7,36 +7,35 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UploadComponent } from "@/components/upload-component"
 import { CadastroFormData } from "@/lib/schemas/cadastro-schema"
-import { X, AlertCircle } from "lucide-react"
+import { X, AlertCircle, PlusCircle } from "lucide-react"
 import { formatCnpj } from "@/lib/cnpj-mask"
-
-const SETORES_ECONOMICOS = [
-  { value: "industria", label: "Indústria" },
-  { value: "agroindustria", label: "Agroindústria" },
-  { value: "servicos", label: "Serviços" },
-  { value: "comercio", label: "Comércio" },
-]
-
-const SETORES_EMPRESA = [
-  { value: "alimentos", label: "Alimentos e Bebidas" },
-  { value: "madeira", label: "Madeira e Móveis" },
-  { value: "construcao", label: "Construção Civil" },
-  { value: "tecnologia", label: "Tecnologia" },
-  { value: "textil", label: "Têxtil" },
-  { value: "outros", label: "Outros" },
-]
-
-const MUNICIPIOS = [
-  "Rio Branco", "Cruzeiro do Sul", "Sena Madureira", "Feijó", "Tarauacá", 
-  "Brasiléia", "Xapuri", "Senador Guiomard", "Plácido de Castro", "Manoel Urbano", 
-  "Assis Brasil", "Capixaba", "Porto Acre", "Rodrigues Alves", "Marechal Thaumaturgo", 
-  "Porto Walter", "Santa Rosa do Purus", "Jordão", "Acrelândia", "Bujari", 
-  "Epitaciolândia", "Mâncio Lima"
-].sort()
+import { useState, useEffect } from "react"
+import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export function EmpresaFormAdmin() {
   const { register, control, setValue, watch, formState: { errors } } = useFormContext<CadastroFormData>()
   const logoUrl = watch("empresa.logo_url")
+  const selectedSectorId = watch("empresa.setor_economico")
+
+  const [allCategories, setAllCategories] = useState<Categoria[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      const data = await buscarCategorias()
+      setAllCategories(data || [])
+      setLoading(false)
+    }
+    fetchCats()
+  }, [])
+
+  const setores = allCategories.filter(c => c.tipo === "setor_economico")
+  const atividades = allCategories.filter(c => 
+    c.tipo === "atividade_principal" && 
+    (!selectedSectorId || c.parent_id === selectedSectorId || !c.parent_id)
+  )
 
   return (
     <div className="space-y-6 mt-6">
@@ -102,18 +101,23 @@ export function EmpresaFormAdmin() {
 
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Setor Econômico *</Label>
+          <div className="flex items-center justify-between">
+            <Label>Setor Econômico *</Label>
+            <span className="text-[10px] text-primary font-bold flex items-center gap-1 cursor-help opacity-70 hover:opacity-100 transition-opacity">
+              <PlusCircle className="h-3 w-3" /> Gerenciar Categorias no Menu
+            </span>
+          </div>
           <Controller
             name="empresa.setor_economico"
             control={control}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger className={`rounded-xl ${errors.empresa?.setor_economico ? "border-red-500 bg-red-50" : ""}`}>
-                  <SelectValue placeholder="Selecione..." />
+                  <SelectValue placeholder={loading ? "Carregando..." : "Selecione..."} />
                 </SelectTrigger>
                 <SelectContent>
-                  {SETORES_ECONOMICOS.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  {setores.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.nome}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -127,19 +131,24 @@ export function EmpresaFormAdmin() {
         </div>
 
         <div className="space-y-2">
-          <Label>Atividade Principal *</Label>
+          <div className="flex items-center justify-between">
+            <Label>Atividade Principal *</Label>
+          </div>
           <Controller
             name="empresa.setor_empresa"
             control={control}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger className={`rounded-xl ${errors.empresa?.setor_empresa ? "border-red-500 bg-red-50" : ""}`}>
-                  <SelectValue placeholder="Selecione..." />
+                  <SelectValue placeholder={loading ? "Carregando..." : "Selecione..."} />
                 </SelectTrigger>
                 <SelectContent>
-                  {SETORES_EMPRESA.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  {atividades.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.nome}</SelectItem>
                   ))}
+                  {atividades.length === 0 && !loading && (
+                    <p className="p-2 text-xs text-muted-foreground text-center">Nenhuma atividade para este setor</p>
+                  )}
                 </SelectContent>
               </Select>
             )}
@@ -219,7 +228,13 @@ export function EmpresaFormAdmin() {
                   <SelectValue placeholder="Selecione o município" />
                 </SelectTrigger>
                 <SelectContent>
-                  {MUNICIPIOS.map((m) => (
+                  {[
+                    "Rio Branco", "Cruzeiro do Sul", "Sena Madureira", "Feijó", "Tarauacá", 
+                    "Brasiléia", "Xapuri", "Senador Guiomard", "Plácido de Castro", "Manoel Urbano", 
+                    "Assis Brasil", "Capixaba", "Porto Acre", "Rodrigues Alves", "Marechal Thaumaturgo", 
+                    "Porto Walter", "Santa Rosa do Purus", "Jordão", "Acrelândia", "Bujari", 
+                    "Epitaciolândia", "Mâncio Lima"
+                  ].sort().map((m) => (
                     <SelectItem key={m} value={m}>{m}</SelectItem>
                   ))}
                 </SelectContent>
