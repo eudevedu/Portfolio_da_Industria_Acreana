@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { buscarEmpresas } from "@/lib/database"
 
-export const dynamic = 'force-dynamic'
-
 export async function GET(request: NextRequest) {
   try {
     console.log("🔍 API Debug - Buscando todas as empresas...")

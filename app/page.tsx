@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { isLoggedIn, getCurrentUser } from "@/lib/auth"
-import { getLastCompanies, obterEstatisticasHome } from "@/lib/database"
+import { getLastCompanies } from "@/lib/empresa"
+import { obterEstatisticasHome } from "@/lib/database"
 import HomeCompanyGrid from "@/components/HomeCompanyGrid"
 
 export const dynamic = 'force-dynamic'
