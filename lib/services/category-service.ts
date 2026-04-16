@@ -33,10 +33,13 @@ export async function criarCategoria(categoria: { nome: string; tipo: string; pa
 
   const slug = categoria.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-")
   
-  const { data, error } = await supabase.from("categorias").insert([{ ...categoria, slug }]).select().single()
+  // Garantir que parent_id seja null se for string vazia
+  const parent_id = categoria.parent_id === "" ? null : categoria.parent_id
+
+  const { data, error } = await supabase.from("categorias").insert([{ ...categoria, slug, parent_id }]).select().single()
   if (error) {
     console.error("Erro ao criar categoria:", error)
-    return null
+    throw error
   }
   return data as Categoria
 }
@@ -45,10 +48,22 @@ export async function atualizarCategoria(id: string, updates: Partial<Categoria>
   const supabase = await createServerSideClient()
   if (!supabase) return null
 
-  const { data, error } = await supabase.from("categorias").update(updates).eq("id", id).select().single()
+  const dataToUpdate: any = { ...updates }
+  
+  // Atualizar slug se o nome mudar
+  if (updates.nome) {
+    dataToUpdate.slug = updates.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-")
+  }
+
+  // Garantir que parent_id seja null se for string vazia
+  if (updates.parent_id === "") {
+    dataToUpdate.parent_id = null
+  }
+
+  const { data, error } = await supabase.from("categorias").update(dataToUpdate).eq("id", id).select().single()
   if (error) {
     console.error("Erro ao atualizar categoria:", error)
-    return null
+    throw error
   }
   return data as Categoria
 }

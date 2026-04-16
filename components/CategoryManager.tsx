@@ -11,7 +11,9 @@ import {
   ChevronRight,
   Loader2,
   FolderOpen,
-  LayoutGrid
+  LayoutGrid,
+  CornerDownRight,
+  PlusCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -82,6 +84,7 @@ export function CategoryManager({ initialTab = "list", defaultOpenForm = false }
       setFormData({ nome: "", tipo: "setor_economico", parent_id: "" })
     } catch (error) {
       console.error(error)
+      alert("Erro ao salvar categoria. Verifique se o nome é único ou tente novamente.")
     } finally {
       setSaving(false)
     }
@@ -122,6 +125,38 @@ export function CategoryManager({ initialTab = "list", defaultOpenForm = false }
   const setores = categorias.filter(c => c.tipo === "setor_economico")
   const atividades = categorias.filter(c => c.tipo === "atividade_principal")
 
+  // Componente interno para as linhas simples (nas abas de filtro)
+  const CategoryRow = ({ cat }: { cat: Categoria }) => (
+    <div className="flex items-center justify-between p-6 hover:bg-slate-50 transition-colors group">
+      <div className="flex items-center gap-4">
+        <div className={cat.tipo === "setor_economico" ? "p-3 bg-blue-50 text-blue-600 rounded-xl" : "p-3 bg-green-50 text-green-600 rounded-xl"}>
+          {cat.tipo === "setor_economico" ? <LayoutGrid className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-slate-900">{cat.nome}</span>
+            <Badge variant="outline" className="text-[10px] uppercase font-bold text-slate-400 border-slate-200">
+              {cat.tipo === "setor_economico" ? "Setor" : "Atividade"}
+            </Badge>
+          </div>
+          {cat.tipo === "atividade_principal" && cat.parent_id && (
+            <p className="text-xs text-slate-500 mt-1">
+              Vinculado a: <span className="font-semibold">{setores.find(s => s.id === cat.parent_id)?.nome || "Não encontrado"}</span>
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-blue-500 hover:bg-blue-50" onClick={() => handleEditClick(cat)}>
+          <Edit className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-red-500 hover:bg-red-50" onClick={() => handleDelete(cat.id)}>
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -158,25 +193,25 @@ export function CategoryManager({ initialTab = "list", defaultOpenForm = false }
                 variant={activeTab === "list" ? "secondary" : "ghost"} 
                 size="sm" 
                 onClick={() => setActiveTab("list")}
-                className="rounded-lg h-8"
+                className="rounded-lg h-8 px-4 font-bold"
               >
-                Tudo
+                Hierarquia
               </Button>
                <Button 
                 variant={activeTab === "setores" ? "secondary" : "ghost"} 
                 size="sm" 
                 onClick={() => setActiveTab("setores")}
-                className="rounded-lg h-8"
+                className="rounded-lg h-8 px-4 font-bold"
               >
-                Setores
+                Só Setores
               </Button>
                <Button 
                 variant={activeTab === "atividades" ? "secondary" : "ghost"} 
                 size="sm" 
                 onClick={() => setActiveTab("atividades")}
-                className="rounded-lg h-8"
+                className="rounded-lg h-8 px-4 font-bold"
               >
-                Atividades
+                Só Atividades
               </Button>
             </div>
           </div>
@@ -195,36 +230,123 @@ export function CategoryManager({ initialTab = "list", defaultOpenForm = false }
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
-              {(activeTab === "list" ? filteredCategorias : activeTab === "setores" ? setores : atividades).map(cat => (
-                <div key={cat.id} className="flex items-center justify-between p-6 hover:bg-slate-50 transition-colors group">
-                  <div className="flex items-center gap-4">
-                    <div className={cat.tipo === "setor_economico" ? "p-3 bg-blue-50 text-blue-600 rounded-xl" : "p-3 bg-green-50 text-green-600 rounded-xl"}>
-                      {cat.tipo === "setor_economico" ? <LayoutGrid className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900">{cat.nome}</span>
-                        <Badge variant="outline" className="text-[10px] uppercase font-bold text-slate-400 border-slate-200">
-                          {cat.tipo === "setor_economico" ? "Setor" : "Atividade"}
-                        </Badge>
+              {activeTab === "setores" ? (
+                setores.filter(s => s.nome.toLowerCase().includes(searchTerm.toLowerCase())).map(cat => (
+                  <CategoryRow key={cat.id} cat={cat} />
+                ))
+              ) : activeTab === "atividades" ? (
+                atividades.filter(a => a.nome.toLowerCase().includes(searchTerm.toLowerCase())).map(cat => (
+                  <CategoryRow key={cat.id} cat={cat} />
+                ))
+              ) : (
+                // Lógica de Árvore (TUDO)
+                setores.map(setor => {
+                  const children = atividades.filter(a => a.parent_id === setor.id)
+                  const matchesSearch = setor.nome.toLowerCase().includes(searchTerm.toLowerCase())
+                  const matchingChildren = children.filter(c => c.nome.toLowerCase().includes(searchTerm.toLowerCase()))
+                  
+                  if (!matchesSearch && matchingChildren.length === 0 && searchTerm) return null
+
+                  return (
+                    <div key={setor.id} className="bg-white">
+                      <div className="flex items-center justify-between p-6 hover:bg-slate-50 transition-colors group border-b border-slate-50">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shadow-sm border border-blue-100/50">
+                            <LayoutGrid className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-slate-900 tracking-tight">{setor.nome}</span>
+                              <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[9px] uppercase font-black px-2">Setor</Badge>
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider font-bold">
+                              {children.length} subcategor{children.length === 1 ? 'ia' : 'ias'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 gap-1 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg px-2"
+                            onClick={() => {
+                              setIsEditing(false)
+                              setFormData({ nome: "", tipo: "atividade_principal", parent_id: setor.id })
+                              setShowFormDialog(true)
+                            }}
+                          >
+                            <PlusCircle className="h-3.5 w-3.5" /> <span className="text-[10px] font-bold uppercase">Sub</span>
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg" onClick={() => handleEditClick(setor)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg" onClick={() => handleDelete(setor.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      {cat.tipo === "atividade_principal" && cat.parent_id && (
-                        <p className="text-xs text-slate-500 mt-1">
-                          Vinculado a: <span className="font-semibold">{setores.find(s => s.id === cat.parent_id)?.nome || "Não encontrado"}</span>
-                        </p>
-                      )}
+
+                      {/* Filhos */}
+                      <div className="bg-slate-50/30">
+                        {children.map((child, idx) => {
+                          const isChildVisible = !searchTerm || child.nome.toLowerCase().includes(searchTerm.toLowerCase())
+                          if (!isChildVisible) return null
+
+                          return (
+                            <div key={child.id} className="flex items-center justify-between py-3 pr-6 pl-12 hover:bg-white transition-colors group/child animate-in slide-in-from-left-2 duration-200" style={{ transitionDelay: `${idx * 50}ms` }}>
+                              <div className="flex items-center gap-3">
+                                <CornerDownRight className="h-4 w-4 text-slate-300" />
+                                <div className="p-2 bg-white text-green-600 rounded-lg shadow-sm border border-slate-200">
+                                  <ChevronRight className="h-4 w-4" />
+                                </div>
+                                <span className="font-semibold text-slate-700 text-sm">{child.nome}</span>
+                              </div>
+                              <div className="flex gap-1 opacity-0 group-hover/child:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-md" onClick={() => handleEditClick(child)}>
+                                  <Edit className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md" onClick={() => handleDelete(child.id)}>
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
+                  )
+                })
+              )}
+
+              {/* Atividades Órfãs (sem pai) - Se houver */}
+              {activeTab === "list" && atividades.filter(a => !a.parent_id).length > 0 && (
+                <div className="mt-4">
+                  <div className="px-6 py-2 bg-slate-100/50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
+                    Sem Vínculo (Atividades Soltas)
                   </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-blue-500 hover:bg-blue-50" onClick={() => handleEditClick(cat)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-red-500 hover:bg-red-50" onClick={() => handleDelete(cat.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {atividades.filter(a => !a.parent_id).map(child => (
+                    <div key={child.id} className="flex items-center justify-between p-6 hover:bg-slate-50 transition-colors group">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-slate-100 text-slate-400 rounded-xl">
+                          <ChevronRight className="h-5 w-5" />
+                        </div>
+                        <div>
+                           <span className="font-bold text-slate-900">{child.nome}</span>
+                           <Badge variant="outline" className="ml-2 text-[10px] uppercase font-bold text-slate-300">Órfã</Badge>
+                        </div>
+                      </div>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-blue-500 hover:bg-blue-50" onClick={() => handleEditClick(child)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-red-500 hover:bg-red-50" onClick={() => handleDelete(child.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           )}
         </CardContent>

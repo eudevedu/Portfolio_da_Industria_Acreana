@@ -9,6 +9,7 @@ import type { Empresa } from "../supabase.types"
 export async function buscarEmpresas(filters?: {
   status?: string
   setor_economico?: string
+  setor_empresa?: string
   municipio?: string
   busca?: string
 }): Promise<Empresa[]> {
@@ -22,6 +23,9 @@ export async function buscarEmpresas(filters?: {
   }
   if (filters?.setor_economico && filters.setor_economico !== "all") {
     query = query.eq("setor_economico", filters.setor_economico)
+  }
+  if (filters?.setor_empresa && filters.setor_empresa !== "all") {
+    query = query.eq("setor_empresa", filters.setor_empresa)
   }
   if (filters?.municipio && filters.municipio !== "all") {
     query = query.eq("municipio", filters.municipio)

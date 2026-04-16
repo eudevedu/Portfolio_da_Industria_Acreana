@@ -93,8 +93,10 @@ import {
 import { 
   criarEmpresa, 
   excluirEmpresa, 
-  atualizarEmpresa 
+  atualizarEmpresa,
+  buscarEmpresas as buscarEmpresasService
 } from "@/lib/services/empresa-service"
+import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
 import { logout } from "@/lib/auth"
 import type { Empresa, Admin } from "@/lib/supabase.types"
 import { formatBrazilianShortDate, cn } from "@/lib/utils"
@@ -132,8 +134,12 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedSector, setSelectedSector] = useState("all")
+  const [selectedActivity, setSelectedActivity] = useState("all")
   const [selectedCity, setSelectedCity] = useState("all")
+  const [categorias, setCategorias] = useState<Categoria[]>([])
+  const [loadingData, setLoadingData] = useState(false)
 
+<<<<<<< HEAD
   // Derivando setores dos dados do banco para os filtros
   const SETORES_ECONOMICOS = allCategories
     .filter(c => c.tipo === "setor_economico")
@@ -147,6 +153,41 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
   const getCategoryName = (id: string) => {
     return allCategories.find(c => c.id === id)?.nome || id
   }
+=======
+  // Carregar categorias dinâmicas
+  useEffect(() => {
+    const loadCategories = async () => {
+      const cats = await buscarCategorias()
+      setCategorias(cats)
+    }
+    loadCategories()
+  }, [])
+
+  const setoresDinamicos = categorias.filter(c => c.tipo === "setor_economico")
+  const atividadesDinamicas = categorias.filter(c => 
+    c.tipo === "atividade_principal" && 
+    (selectedSector === "all" || c.parent_id === selectedSector)
+  )
+
+  // Recarregar empresas quando os filtros mudarem
+  useEffect(() => {
+    if (!mounted) return
+    
+    const fetchFiltered = async () => {
+      setLoadingData(true)
+      const data = await buscarEmpresasService({
+        status: selectedStatus,
+        setor_economico: selectedSector,
+        setor_empresa: selectedActivity,
+        busca: searchTerm
+      })
+      setEmpresas(data)
+      setLoadingData(false)
+    }
+    
+    fetchFiltered()
+  }, [selectedStatus, selectedSector, selectedActivity, searchTerm, mounted])
+>>>>>>> 0da37b8 (feat: implement dynamic category-based filtering and refactor admin dashboard navigation sidebar)
 
   // Estados para modais
   const [showFormDialog, setShowFormDialog] = useState(false)
@@ -592,88 +633,78 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
             </Link>
           </div>
 
-          <nav className="flex-1 p-6 space-y-4 overflow-y-auto">
-            <div>
-              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Principal</p>
-              <TabsList className="flex flex-col w-full bg-transparent p-0 gap-2 h-auto">
-                <TabsTrigger
-                  value="dashboard"
-                  className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent"
-                >
-                  <LayoutDashboard className="h-5 w-5" />
-                  Visão Geral
-                </TabsTrigger>
-              </TabsList>
-            </div>
+          <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
+            <TabsList className="flex flex-col w-full bg-transparent p-0 gap-1 h-auto items-start">
+              <TabsTrigger
+                value="dashboard"
+                className="w-full justify-start gap-4 px-4 py-3 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent"
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                Visão Geral
+              </TabsTrigger>
 
-            <div className="space-y-2">
-              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-2 px-3">Menu Gestão de Empresas</p>
-              <div className="space-y-1">
-                <TabsList className="flex flex-col w-full bg-transparent p-0 gap-1 h-auto items-start">
+              <div className="w-full pt-2">
+                <div className="flex items-center gap-4 px-4 py-2 text-slate-400 font-bold text-[0.65rem] uppercase tracking-widest">
+                  <Building2 className="h-4 w-4" />
+                  Gestão de Empresas
+                </div>
+                
+                <div className="mt-1 ml-4 border-l-2 border-slate-100 space-y-1 pl-2">
                   <TabsTrigger
                     value="empresas"
-                    className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-sm"
+                    className="w-full justify-start gap-3 px-4 py-2 rounded-lg text-slate-500 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-xs"
                   >
-                    <Building2 className="h-4 w-4" />
                     Empresas Cadastradas
                   </TabsTrigger>
                   
                   <Button
                     variant="ghost"
                     onClick={handleCreateNewClick}
-                    className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all font-medium text-sm text-left"
+                    className="w-full justify-start gap-3 px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all font-medium text-xs text-left h-auto"
                   >
-                    <Plus className="h-4 w-4" />
                     Cadastrar Empresa
                   </Button>
 
                   <TabsTrigger
                     value="categorias"
-                    className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-sm"
+                    className="w-full justify-start gap-3 px-4 py-2 rounded-lg text-slate-500 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-xs"
                   >
-                    <LayoutGrid className="h-4 w-4" />
-                    Categorias
+                    Lista de Categorias
                   </TabsTrigger>
 
                   <TabsTrigger
                     value="cadastrar-categoria"
-                    className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-sm"
+                    className="w-full justify-start gap-3 px-4 py-2 rounded-lg text-slate-500 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-xs"
                   >
-                    <Plus className="h-4 w-4" />
                     Gerir Categorias & Subs
                   </TabsTrigger>
-                </TabsList>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-2 px-3">Configurações</p>
-              <TabsList className="flex flex-col w-full bg-transparent p-0 gap-1 h-auto">
+              <div className="w-full pt-4 space-y-1">
                 <TabsTrigger
                   value="administradores"
-                  className="w-full justify-start gap-3 px-4 py-2.5 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent text-sm"
+                  className="w-full justify-start gap-4 px-4 py-3 rounded-xl text-slate-600 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent"
                 >
-                  <Users className="h-4 w-4" />
+                  <Users className="h-5 w-5" />
                   Equipe Admin
                 </TabsTrigger>
-              </TabsList>
-            </div>
 
-            <div className="pt-8 space-y-2">
-              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Atalhos</p>
-              <Link href="/" target="_blank" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group">
-                <ExternalLink className="h-5 w-5 text-slate-400 group-hover:text-blue-500" />
-                <span>Ver Site Público</span>
-              </Link>
-              <Button
-                variant="ghost"
-                onClick={() => setShowSettingsModal(true)}
-                className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group text-left"
-              >
-                <Settings className="h-5 w-5 text-slate-400 group-hover:text-slate-900" />
-                <span>Configurações</span>
-              </Button>
-            </div>
+                <Link href="/" target="_blank" className="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group">
+                  <ExternalLink className="h-5 w-5 text-slate-400 group-hover:text-blue-500" />
+                  <span>Ver Site Público</span>
+                </Link>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowSettingsModal(true)}
+                  className="w-full justify-start gap-4 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium group text-left h-auto"
+                >
+                  <Settings className="h-5 w-5 text-slate-400 group-hover:text-slate-900" />
+                  <span>Configurações</span>
+                </Button>
+              </div>
+            </TabsList>
           </nav>
 
           <div className="p-6 border-t border-slate-100">
@@ -801,14 +832,34 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
                     <CardTitle className="font-display font-black text-slate-900">Listagem Completa</CardTitle>
                     <CardDescription>Gerencie todas as empresas cadastradas no portal</CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                      <SelectTrigger className="w-40 rounded-xl h-10"><SelectValue placeholder="Filtrar Status" /></SelectTrigger>
+                      <SelectTrigger className="w-40 rounded-xl h-10 border-slate-200"><SelectValue placeholder="Status" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos Status</SelectItem>
                         <SelectItem value="ativo">Ativo</SelectItem>
                         <SelectItem value="pendente">Pendente</SelectItem>
                         <SelectItem value="inativo">Inativo</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={selectedSector} onValueChange={(v) => { setSelectedSector(v); setSelectedActivity("all"); }}>
+                      <SelectTrigger className="w-48 rounded-xl h-10 border-slate-200"><SelectValue placeholder="Setor Econômico" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos Setores</SelectItem>
+                        {setoresDinamicos.map(s => (
+                          <SelectItem key={s.id} value={s.id}>{s.nome}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={selectedActivity} onValueChange={setSelectedActivity}>
+                      <SelectTrigger className="w-48 rounded-xl h-10 border-slate-200"><SelectValue placeholder="Atividade" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas Atividades</SelectItem>
+                        {atividadesDinamicas.map(a => (
+                          <SelectItem key={a.id} value={a.id}>{a.nome}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -838,7 +889,26 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
                               </div>
                             </div>
                           </TableCell>
+<<<<<<< HEAD
                           <TableCell className="text-sm font-medium text-slate-600">{getCategoryName(empresa.setor_economico)}</TableCell>
+=======
+                          <TableCell className="text-sm font-medium text-slate-600">
+                            <div className="flex flex-col">
+                              <span className="font-bold text-slate-900">
+                                {categorias.find(c => c.id === empresa.setor_economico)?.nome || 
+                                 categorias.find(c => c.slug === empresa.setor_economico)?.nome || 
+                                 empresa.setor_economico}
+                              </span>
+                              {empresa.setor_empresa && (
+                                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
+                                  {categorias.find(c => c.id === empresa.setor_empresa)?.nome || 
+                                   categorias.find(c => c.slug === empresa.setor_empresa)?.nome || 
+                                   empresa.setor_empresa}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+>>>>>>> 0da37b8 (feat: implement dynamic category-based filtering and refactor admin dashboard navigation sidebar)
                           <TableCell>
                             <div className="flex flex-col gap-1">
                               <span className="text-xs font-bold text-slate-700">{empresa.telefone || "-"}</span>
@@ -888,12 +958,21 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
               </Card>
             </TabsContent>
 
+<<<<<<< HEAD
             <TabsContent value="categorias" className="mt-0 outline-none animate-in fade-in duration-500">
               <CategoryManager initialTab="list" />
             </TabsContent>
 
             <TabsContent value="cadastrar-categoria" className="mt-0 outline-none animate-in fade-in duration-500">
               <CategoryManager initialTab="list" defaultOpenForm={true} />
+=======
+            <TabsContent value="categorias" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
+               <CategoryManager initialTab="list" />
+            </TabsContent>
+
+            <TabsContent value="cadastrar-categoria" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
+               <CategoryManager initialTab="list" defaultOpenForm={true} />
+>>>>>>> 0da37b8 (feat: implement dynamic category-based filtering and refactor admin dashboard navigation sidebar)
             </TabsContent>
 
             <TabsContent value="administradores" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
