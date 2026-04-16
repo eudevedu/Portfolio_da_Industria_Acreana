@@ -87,6 +87,10 @@ import {
   criarAdmin,
 } from "@/lib/admin"
 import { 
+  buscarCategorias, 
+  type Categoria 
+} from "@/lib/services/category-service"
+import { 
   criarEmpresa, 
   excluirEmpresa, 
   atualizarEmpresa 
@@ -123,27 +127,26 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
   const [stats, setStats] = useState(initialStats)
   const [empresas, setEmpresas] = useState(initialEmpresas)
   const [admins, setAdmins] = useState<Admin[]>([])
+  const [allCategories, setAllCategories] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedSector, setSelectedSector] = useState("all")
   const [selectedCity, setSelectedCity] = useState("all")
 
-  const SETORES_ECONOMICOS = [
-    { value: "industria", label: "Indústria" },
-    { value: "agroindustria", label: "Agroindústria" },
-    { value: "servicos", label: "Serviços" },
-    { value: "comercio", label: "Comércio" },
-  ]
+  // Derivando setores dos dados do banco para os filtros
+  const SETORES_ECONOMICOS = allCategories
+    .filter(c => c.tipo === "setor_economico")
+    .map(c => ({ value: c.id, label: c.nome }))
 
-  const SETORES_EMPRESA = [
-    { value: "alimentos", label: "Alimentos e Bebidas" },
-    { value: "madeira", label: "Madeira e Móveis" },
-    { value: "construcao", label: "Construção Civil" },
-    { value: "tecnologia", label: "Tecnologia" },
-    { value: "textil", label: "Têxtil" },
-    { value: "outros", label: "Outros" },
-  ]
+  const SETORES_EMPRESA = allCategories
+    .filter(c => c.tipo === "atividade_principal")
+    .map(c => ({ value: c.id, label: c.nome }))
+
+  // Função auxiliar para obter nome da categoria por ID
+  const getCategoryName = (id: string) => {
+    return allCategories.find(c => c.id === id)?.nome || id
+  }
 
   // Estados para modais
   const [showFormDialog, setShowFormDialog] = useState(false)
@@ -256,10 +259,14 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
   useEffect(() => {
     const loadAdmins = async () => {
       try {
-        const adminsData = await obterTodosAdmins()
+        const [adminsData, catsData] = await Promise.all([
+          obterTodosAdmins(),
+          buscarCategorias()
+        ])
         setAdmins(adminsData)
+        setAllCategories(catsData)
       } catch (err) {
-        console.error("Erro ao carregar administradores:", err)
+        console.error("Erro ao carregar dados complementares:", err)
       }
     }
     loadAdmins()
@@ -831,7 +838,7 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-sm font-medium text-slate-600">{empresa.setor_economico}</TableCell>
+                          <TableCell className="text-sm font-medium text-slate-600">{getCategoryName(empresa.setor_economico)}</TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
                               <span className="text-xs font-bold text-slate-700">{empresa.telefone || "-"}</span>
@@ -1142,6 +1149,7 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
         isOpen={showDetailsDialog}
         onClose={() => setShowDetailsDialog(false)}
         company={companyToView}
+        allCategories={allCategories}
       />
 
       <ConfiguracoesModal

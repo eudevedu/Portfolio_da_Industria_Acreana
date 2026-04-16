@@ -8,11 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { buscarEmpresas } from "@/lib/database"
-import type { Empresa } from "@/lib/supabase.types"
 import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import EmpresaDetailsModal from "@/components/EmpresaDetailsModal"
+import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
@@ -24,6 +23,7 @@ export default function BuscarPage() {
   const initialCity = searchParams.get("municipio") || "all"
 
   const [empresas, setEmpresas] = useState<Empresa[]>([])
+  const [allCategories, setAllCategories] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm)
   const [selectedStatus] = useState(initialStatus)
@@ -31,12 +31,9 @@ export default function BuscarPage() {
   const [selectedCity, setSelectedCity] = useState(initialCity)
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null)
 
-  const setoresEconomicos = [
-    { value: "industria", label: "Indústria" },
-    { value: "agroindustria", label: "Agroindústria" },
-    { value: "servicos", label: "Serviços" },
-    { value: "comercio", label: "Comércio" },
-  ]
+  const setoresEconomicos = allCategories
+    .filter(c => c.tipo === "setor_economico")
+    .map(c => ({ value: c.id, label: c.nome }))
 
   const municipios = [
     { value: "Rio Branco", label: "Rio Branco" },
@@ -82,8 +79,24 @@ export default function BuscarPage() {
   }
 
   useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await buscarCategorias()
+        setAllCategories(cats)
+      } catch (err) {
+        console.error("Erro ao carregar categorias:", err)
+      }
+    }
+    loadCategories()
+  }, [])
+
+  useEffect(() => {
     fetchEmpresas()
   }, [selectedStatus, selectedSector, selectedCity, searchTerm])
+
+  const getCategoryName = (id: string) => {
+    return allCategories.find(c => c.id === id)?.nome || id
+  }
 
   return (
     <div className="min-h-screen bg-background py-12">
@@ -202,7 +215,7 @@ export default function BuscarPage() {
                           {empresa.nome_fantasia}
                         </CardTitle>
                         <CardDescription className="text-xs font-medium uppercase tracking-tighter text-muted-foreground">
-                          {empresa.setor_economico}
+                          {getCategoryName(empresa.setor_economico)}
                         </CardDescription>
                       </div>
                     </div>
@@ -254,6 +267,7 @@ export default function BuscarPage() {
         empresa={selectedEmpresa} 
         isOpen={!!selectedEmpresa} 
         onClose={() => setSelectedEmpresa(null)} 
+        allCategories={allCategories}
       />
     </div>
   )
