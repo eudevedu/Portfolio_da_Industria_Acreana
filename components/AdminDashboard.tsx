@@ -33,6 +33,7 @@ import {
 } from "lucide-react"
 import { IndustrialDetailsModal } from "@/components/IndustrialDetailsModal"
 import { ConfiguracoesModal } from "@/components/ConfiguracoesModal"
+import { UploadComponent } from "./upload-component"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -59,6 +60,22 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useForm, FormProvider } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { cadastroCompletoSchema, type CadastroFormData } from "@/lib/schemas/cadastro-schema"
+import { EmpresaFormAdmin } from "@/components/cadastro/EmpresaFormAdmin"
+import { ProdutosForm } from "@/components/cadastro/ProdutosForm"
+import { RedesSociaisForm } from "@/components/cadastro/RedesSociaisForm"
+import {
   obterEstatisticasAdmin,
   buscarEmpresasAdmin,
   atualizarStatusEmpresa,
@@ -66,15 +83,16 @@ import {
   atualizarStatusAdmin,
   atualizarEmpresa,
   excluirEmpresa,
-  criarAdmin
-} from "@/lib/admin"
-import { criarEmpresa } from "@/lib/database"
+  criarAdmin,
+  criarEmpresa
+} from "@/lib/database"
 import { logout } from "@/lib/auth"
 import type { Empresa, Admin } from "@/lib/supabase.types"
 import { formatBrazilianShortDate, cn } from "@/lib/utils"
 import { LogoSeict } from "@/components/LogoIndustria"
+import { createServerSideClient } from "@/lib/supabase"
 
-interface AdminContentProps {
+interface AdminDashboardProps {
   initialStats: {
     totalEmpresas: number
     empresasAtivas: number
@@ -89,8 +107,14 @@ interface AdminContentProps {
   user: any
 }
 
-export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, user }: AdminContentProps) {
+export default function AdminDashboard({ initialStats, initialEmpresas, isConfiguredProp, user }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState("dashboard")
+  const [mounted, setMounted] = useState(false)
+  
+  // Impede erro de hidratação garantindo que o render coincida com o servidor no primeiro frame
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   const [stats, setStats] = useState(initialStats)
   const [empresas, setEmpresas] = useState(initialEmpresas)
   const [admins, setAdmins] = useState<Admin[]>([])
@@ -100,35 +124,41 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
   const [selectedSector, setSelectedSector] = useState("all")
   const [selectedCity, setSelectedCity] = useState("all")
 
-  // Estados para modais
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [creatingEmpresa, setCreatingEmpresa] = useState(false)
-  const [novaEmpresa, setNovaEmpresa] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    nome_fantasia: "",
-    razao_social: "",
-    cnpj: "",
-    setor_economico: "",
-    setor_empresa: "",
-    segmento: "",
-    tema_segmento: "",
-    municipio: "",
-    endereco: "",
-    apresentacao: "",
-    descricao_produtos: "",
-    instagram: "",
-    facebook: "",
-    youtube: "",
-    linkedin: "",
-    twitter: "",
-    video_apresentacao: ""
-  })
+  const SETORES_ECONOMICOS = [
+    { value: "industria", label: "Indústria" },
+    { value: "agroindustria", label: "Agroindústria" },
+    { value: "servicos", label: "Serviços" },
+    { value: "comercio", label: "Comércio" },
+  ]
 
-  const [showEditCompanyDialog, setShowEditCompanyDialog] = useState(false)
+  const SETORES_EMPRESA = [
+    { value: "alimentos", label: "Alimentos e Bebidas" },
+    { value: "madeira", label: "Madeira e Móveis" },
+    { value: "construcao", label: "Construção Civil" },
+    { value: "tecnologia", label: "Tecnologia" },
+    { value: "textil", label: "Têxtil" },
+    { value: "outros", label: "Outros" },
+  ]
+
+  // Estados para modais
+  const [showFormDialog, setShowFormDialog] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [currentEditingId, setCurrentEditingId] = useState<string | null>(null)
+  
+  const [creatingEmpresa, setCreatingEmpresa] = useState(false)
   const [updatingCompany, setUpdatingCompany] = useState(false)
-  const [companyToEdit, setCompanyToEdit] = useState<Empresa | null>(null)
+
+  // State para as abas internas do diálogo
+  const [createStepTab, setCreateStepTab] = useState("empresa")
+
+  const methods = useForm<CadastroFormData>({
+    resolver: zodResolver(cadastroCompletoSchema),
+    defaultValues: {
+      acesso: { email: `temp-${Date.now()}@example.com`, password: "dummy-password-123", confirmPassword: "dummy-password-123", contactName: "Admin Created" },
+      empresa: { status: "ativo" },
+      produtos: []
+    }
+  })
 
   const [showDetailsDialog, setShowDetailsDialog] = useState(false)
   const [companyToView, setCompanyToView] = useState<Empresa | null>(null)
@@ -147,15 +177,19 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
   const [showEditAdminDialog, setShowEditAdminDialog] = useState(false)
   const [editingAdmin, setEditingAdmin] = useState(false)
   const [adminToEdit, setAdminToEdit] = useState<Admin | null>(null)
+  
+  // Estados para exclusão de empresa
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [companyToDelete, setCompanyToDelete] = useState<Empresa | null>(null)
+  const [deletingCompany, setDeletingCompany] = useState(false)
 
-  const municipios = [
-    { value: "Rio Branco", label: "Rio Branco" },
-    { value: "Cruzeiro do Sul", label: "Cruzeiro do Sul" },
-    { value: "Sena Madureira", label: "Sena Madureira" },
-    { value: "Feijo", label: "Feijó" },
-    { value: "Tarauaca", label: "Tarauacá" },
-    { value: "Brasileia", label: "Brasiléia" },
-  ]
+  const MUNICIPIOS_LIST = [
+    "Rio Branco", "Cruzeiro do Sul", "Sena Madureira", "Feijó", "Tarauacá", 
+    "Brasiléia", "Xapuri", "Senador Guiomard", "Plácido de Castro", "Manoel Urbano", 
+    "Assis Brasil", "Capixaba", "Porto Acre", "Rodrigues Alves", "Marechal Thaumaturgo", 
+    "Porto Walter", "Santa Rosa do Purus", "Jordão", "Acrelândia", "Bujari", 
+    "Epitaciolândia", "Mâncio Lima"
+  ].sort()
 
   useEffect(() => {
     const loadFilteredData = async () => {
@@ -189,47 +223,283 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
     loadAdmins()
   }, [])
 
-  const handleCreateEmpresa = async () => {
-    if (!novaEmpresa.email || !novaEmpresa.password || !novaEmpresa.nome_fantasia) {
-      alert("Preencha os campos obrigatórios")
-      return
-    }
+  const handleCreateEmpresa = async (data: CadastroFormData) => {
     setCreatingEmpresa(true)
     try {
-      const result = await criarEmpresa({ ...novaEmpresa })
-      if (result) {
-        const updatedStats = await obterEstatisticasAdmin()
-        setStats(updatedStats)
-        setEmpresas(prev => [result, ...prev])
-        setShowCreateDialog(false)
-        alert("Empresa criada!")
+      const { criarProduto, criarArquivo } = await import("@/lib/database")
+      
+      // 1. Cria a Empresa
+      const empresa = await criarEmpresa(data.empresa)
+      
+      if (empresa) {
+        const empresaId = (empresa as any).id
+        const filePromises: Promise<any>[] = []
+
+        // Registrar Logo
+        if (data.empresa.logo_url) {
+          filePromises.push(
+            criarArquivo({
+              empresa_id: empresaId,
+              nome: "Logo da Empresa",
+              url: data.empresa.logo_url,
+              tipo: "imagem",
+              categoria: "logo",
+            })
+          )
+        }
+
+        // Registrar Folder Institucional
+        if (data.empresa.folder_apresentacao_url) {
+          filePromises.push(
+            criarArquivo({
+              empresa_id: empresaId,
+              nome: "Folder de Apresentação",
+              url: data.empresa.folder_apresentacao_url,
+              tipo: "pdf",
+              categoria: "institucional_folder",
+            })
+          )
+        }
+
+        // Registrar Outros Arquivos Institucionais
+        if (data.empresa.outros_arquivos_urls && data.empresa.outros_arquivos_urls.length > 0) {
+          data.empresa.outros_arquivos_urls.forEach((url) => {
+            filePromises.push(
+              criarArquivo({
+                empresa_id: empresaId,
+                nome: "Outro Arquivo da Empresa",
+                url: url,
+                tipo: url.endsWith(".pdf") ? "pdf" : "imagem",
+                categoria: "institucional_outros",
+              })
+            )
+          })
+        }
+
+        // 2. Cria os Produtos vinculados
+        if (data.produtos && data.produtos.length > 0) {
+          for (const p of data.produtos) {
+            const novoProduto = await criarProduto({ 
+              ...p, 
+              status: 'ativo',
+              empresa_id: empresaId 
+            })
+
+            if (novoProduto) {
+              if (p.ficha_tecnica_url) {
+                filePromises.push(
+                  criarArquivo({
+                    empresa_id: empresaId,
+                    nome: `Ficha Técnica - ${p.nome}`,
+                    url: p.ficha_tecnica_url,
+                    tipo: "pdf",
+                    categoria: "produto_ficha_tecnica",
+                  })
+                )
+              }
+              
+              if (p.folder_produto_url) {
+                filePromises.push(
+                  criarArquivo({
+                    empresa_id: empresaId,
+                    nome: `Folder Produto - ${p.nome}`,
+                    url: p.folder_produto_url,
+                    tipo: "pdf",
+                    categoria: "produto_folder",
+                  })
+                )
+              }
+              
+              if (p.imagens_produto_urls && p.imagens_produto_urls.length > 0) {
+                p.imagens_produto_urls.forEach((url) => {
+                  filePromises.push(
+                    criarArquivo({
+                      empresa_id: empresaId,
+                      nome: `Imagem Produto - ${p.nome}`,
+                      url: url,
+                      tipo: "imagem",
+                      categoria: "produto_imagem",
+                    })
+                  )
+                })
+              }
+            }
+          }
+        }
+
+        await Promise.allSettled(filePromises)
+
+        const empresasData = await buscarEmpresasAdmin()
+        setEmpresas(empresasData)
+        setShowFormDialog(false)
+        methods.reset()
+        setCreateStepTab("empresa")
+        alert("Empresa cadastrada com sucesso!")
       }
+    } catch (error) {
+      console.error("Erro ao criar empresa:", error)
+      alert("Erro ao criar perfil industrial")
     } finally {
       setCreatingEmpresa(false)
     }
   }
 
-  const handleUpdateCompany = async () => {
-    if (!companyToEdit) return
+  const handleUpdateEmpresa = async (data: CadastroFormData) => {
+    if (!currentEditingId) return
     setUpdatingCompany(true)
     try {
-      const result = await atualizarEmpresa(companyToEdit.id, companyToEdit)
+      const { atualizarEmpresa, criarProduto, criarArquivo } = await import("@/lib/database")
+      
+      // 1. Atualizar Empresa
+      const result = await atualizarEmpresa(currentEditingId, data.empresa)
+      
       if (result) {
-        setEmpresas(prev => prev.map(e => e.id === result.id ? result : e))
-        setShowEditCompanyDialog(false)
-        alert("Dados da empresa atualizados com sucesso!")
+        // Sincronizar Arquivos e Produtos (Simplificado: Deleta e reconstrói para garantir integridade dos vínculos complexos)
+        const supabase = await createServerSideClient()
+        await supabase.from("produtos").delete().eq("empresa_id", currentEditingId)
+        await supabase.from("arquivos").delete().eq("empresa_id", currentEditingId)
+
+        const filePromises: Promise<any>[] = []
+
+        // Logo
+        if (data.empresa.logo_url) {
+          filePromises.push(
+            criarArquivo({
+              empresa_id: currentEditingId,
+              nome: "Logo da Empresa",
+              url: data.empresa.logo_url,
+              tipo: "imagem",
+              categoria: "logo",
+            })
+          )
+        }
+
+        // Folder Institucional
+        if (data.empresa.folder_apresentacao_url) {
+          filePromises.push(
+            criarArquivo({
+              empresa_id: currentEditingId,
+              nome: "Folder de Apresentação",
+              url: data.empresa.folder_apresentacao_url,
+              tipo: "pdf",
+              categoria: "institucional_folder",
+            })
+          )
+        }
+
+        // Outros Arquivos
+        if (data.empresa.outros_arquivos_urls && data.empresa.outros_arquivos_urls.length > 0) {
+          data.empresa.outros_arquivos_urls.forEach((url) => {
+            filePromises.push(
+              criarArquivo({
+                empresa_id: currentEditingId,
+                nome: "Outro Arquivo da Empresa",
+                url: url,
+                tipo: url.endsWith(".pdf") ? "pdf" : "imagem",
+                categoria: "institucional_outros",
+              })
+            )
+          })
+        }
+
+        // 2. Recriar Produtos
+        if (data.produtos && data.produtos.length > 0) {
+          for (const p of data.produtos) {
+            const novoProduto = await criarProduto({ ...p, status: 'ativo', empresa_id: currentEditingId })
+            if (novoProduto) {
+              if (p.ficha_tecnica_url) {
+                filePromises.push(criarArquivo({
+                  empresa_id: currentEditingId,
+                  nome: `Ficha Técnica - ${p.nome}`,
+                  url: p.ficha_tecnica_url,
+                  tipo: "pdf",
+                  categoria: "produto_ficha_tecnica",
+                }))
+              }
+              if (p.folder_produto_url) {
+                filePromises.push(criarArquivo({
+                  empresa_id: currentEditingId,
+                  nome: `Folder Produto - ${p.nome}`,
+                  url: p.folder_produto_url,
+                  tipo: "pdf",
+                  categoria: "produto_folder",
+                }))
+              }
+              if (p.imagens_produto_urls && p.imagens_produto_urls.length > 0) {
+                p.imagens_produto_urls.forEach((url) => {
+                  filePromises.push(criarArquivo({
+                    empresa_id: currentEditingId,
+                    nome: `Imagem Produto - ${p.nome}`,
+                    url: url,
+                    tipo: "imagem",
+                    categoria: "produto_imagem",
+                  }))
+                })
+              }
+            }
+          }
+        }
+
+        await Promise.allSettled(filePromises)
+
+        const empresasData = await buscarEmpresasAdmin()
+        setEmpresas(empresasData)
+        setShowFormDialog(false)
+        alert("Perfil industrial atualizado com sucesso!")
       }
     } catch (error) {
-      console.error("Erro ao atualizar empresa:", error)
-      alert("Erro ao atualizar dados da empresa")
+      console.error("Erro ao atualizar:", error)
+      alert("Erro ao atualizar perfil industrial")
     } finally {
       setUpdatingCompany(false)
     }
   }
 
-  const handleEditCompany = (empresa: Empresa) => {
-    setCompanyToEdit({ ...empresa })
-    setShowEditCompanyDialog(true)
+  const handleEditClick = (company: Empresa) => {
+    setIsEditing(true)
+    setCurrentEditingId(company.id)
+    
+    // Mapear arquivos institucionais
+    const folder = company.arquivos?.find(a => a.categoria === 'institucional_folder')?.url || ""
+    const outros = company.arquivos?.filter(a => a.categoria === 'institucional_outros').map(a => a.url) || []
+
+    // Mapear produtos
+    const produtosFixed = company.produtos?.map(p => {
+      const ficha = company.arquivos?.find(a => a.categoria === 'produto_ficha_tecnica' && a.nome.includes(p.nome))?.url || ""
+      const folderProd = company.arquivos?.find(a => a.categoria === 'produto_folder' && a.nome.includes(p.nome))?.url || ""
+      const imagens = company.arquivos?.filter(a => a.categoria === 'produto_imagem' && a.nome.includes(p.nome)).map(a => a.url) || []
+      
+      return {
+        ...p,
+        ficha_tecnica_url: ficha,
+        folder_produto_url: folderProd,
+        imagens_produto_urls: imagens
+      }
+    }) || []
+
+    methods.reset({
+      empresa: {
+        ...company,
+        folder_apresentacao_url: folder,
+        outros_arquivos_urls: outros
+      },
+      produtos: produtosFixed,
+      acesso: { email: "edit@example.com", password: "dummy", confirmPassword: "dummy", contactName: "Edit Mode" }
+    })
+    setCreateStepTab("empresa")
+    setShowFormDialog(true)
+  }
+
+  const handleCreateNewClick = () => {
+    setIsEditing(false)
+    setCurrentEditingId(null)
+    methods.reset({
+      acesso: { email: `temp-${Date.now()}@example.com`, password: "dummy-password-123", confirmPassword: "dummy-password-123", contactName: "Admin Created" },
+      empresa: { status: "ativo" },
+      produtos: []
+    })
+    setCreateStepTab("empresa")
+    setShowFormDialog(true)
   }
 
   const handleViewDetails = (empresa: Empresa) => {
@@ -237,17 +507,32 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
     setShowDetailsDialog(true)
   }
 
-  const handleDeleteCompany = async (empresa: Empresa) => {
-    if (!confirm(`Excluir permanentemente "${empresa.nome_fantasia}"?`)) return
+  const handleDeleteCompanyClick = (empresa: Empresa) => {
+    setCompanyToDelete(empresa)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDeleteCompany = async () => {
+    if (!companyToDelete) return
+    
+    setDeletingCompany(true)
     try {
-      const success = await excluirEmpresa(empresa.id)
-      if (success) {
-        setEmpresas(prev => prev.filter(e => e.id !== empresa.id))
+      const result = await excluirEmpresa(companyToDelete.id)
+      
+      if (result) {
+        setEmpresas(prev => prev.filter(e => e.id !== companyToDelete.id))
         const updatedStats = await obterEstatisticasAdmin()
         setStats(updatedStats)
+      } else {
+        alert("Erro ao excluir empresa")
       }
     } catch (error) {
       console.error("Erro ao excluir:", error)
+      alert("Erro de conexão ao excluir empresa")
+    } finally {
+      setDeletingCompany(false)
+      setShowDeleteDialog(false)
+      setCompanyToDelete(null)
     }
   }
 
@@ -317,10 +602,17 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
     }
   }
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#f8fafc] flex">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col h-full">
-        {/* Sidebar Navigation - Mirroring Dashboard */}
         <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col z-50">
           <div className="p-8 border-b border-slate-100">
             <Link href="/" className="flex items-center gap-3 group">
@@ -380,9 +672,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
           </div>
         </aside>
 
-        {/* Main Content Area */}
         <div className="flex-1 lg:ml-72 flex flex-col min-h-screen">
-          {/* Header Area */}
           <header className="bg-gradient-to-r from-green-900 to-green-700 h-24 sticky top-0 z-30 px-8 flex items-center justify-between shadow-lg">
             <div>
               <h1 className="text-2xl font-display font-black tracking-tight text-white uppercase">
@@ -394,7 +684,9 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex flex-col items-end mr-2">
                 <span className="text-sm font-bold text-white leading-tight">{user?.nome || user?.email?.split('@')[0]}</span>
-                <span className="text-[10px] font-bold text-green-100/70 uppercase tracking-tighter leading-none mb-1">Administrador</span>
+                <span className="text-[10px] font-bold text-green-100/70 uppercase tracking-tighter leading-none mb-1">
+                  {user?.isSuperAdmin ? 'Administrador Geral' : 'Administrador'}
+                </span>
                 <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-extrabold bg-white/10 text-white border-white/20 flex items-center gap-1 h-5 px-2">
                   <ShieldCheck className="h-3 w-3" />
                   Sistema Seguro
@@ -414,7 +706,6 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
               </div>
             )}
 
-            {/* Dashboard View */}
             <TabsContent value="dashboard" className="mt-0 outline-none space-y-8 animate-in fade-in duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard label="Total Empresas" value={stats.totalEmpresas} icon={<Factory className="h-5 w-5" />} trend="+3 este mês" />
@@ -440,8 +731,11 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400" onClick={() => handleViewDetails(e)}>
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400" onClick={() => handleEditCompany(e)}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5" onClick={() => handleEditClick(e)}>
                                 <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50" onClick={() => handleDeleteCompanyClick(e)}>
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -471,7 +765,6 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
               </div>
             </TabsContent>
 
-            {/* Empresas View */}
             <TabsContent value="empresas" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
               <div className="flex flex-col md:flex-row gap-4 items-end bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                 <div className="flex-1 w-full space-y-2">
@@ -481,7 +774,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                     <Input placeholder="Nome da empresa, CNPJ, responsável..." className="pl-10 rounded-xl h-11 border-slate-200" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                   </div>
                 </div>
-                <Button onClick={() => setShowCreateDialog(true)} className="rounded-xl bg-primary h-11 font-bold px-6 shadow-lg shadow-primary/20"><Plus className="h-4 w-4 mr-2" /> Nova Indústria</Button>
+                <Button onClick={handleCreateNewClick} className="rounded-xl bg-primary h-11 font-bold px-6 shadow-lg shadow-primary/20"><Plus className="h-4 w-4 mr-2" /> Nova Indústria</Button>
               </div>
 
               <Card className="rounded-[2rem] overflow-hidden border-slate-200 shadow-2xl shadow-slate-200/50">
@@ -508,6 +801,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                       <TableRow>
                         <TableHead className="pl-8 h-12">Indústria</TableHead>
                         <TableHead className="h-12">Setor</TableHead>
+                        <TableHead className="h-12">Contato</TableHead>
                         <TableHead className="h-12">Status</TableHead>
                         <TableHead className="h-12 text-right pr-8">Ações</TableHead>
                       </TableRow>
@@ -528,6 +822,12 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                           </TableCell>
                           <TableCell className="text-sm font-medium text-slate-600">{empresa.setor_economico}</TableCell>
                           <TableCell>
+                            <div className="flex flex-col gap-1">
+                              <span className="text-xs font-bold text-slate-700">{empresa.telefone || "-"}</span>
+                              <span className="text-[10px] text-slate-400 truncate max-w-[150px]">{empresa.email || "-"}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
                             <Badge className={`rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${empresa.status === 'ativo' ? 'bg-green-50 text-green-700 border-green-100' :
                               empresa.status === 'pendente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                                 'bg-slate-50 text-slate-700 border-slate-100'
@@ -535,25 +835,32 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
                               {empresa.status}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right pr-8">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="rounded-xl"><ChevronDown className="h-4 w-4 text-slate-400" /></Button></DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="min-w-[180px] rounded-xl p-2">
-                                <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => handleViewDetails(empresa)}>
-                                  <Eye className="h-4 w-4" /> Visualizar Detalhes
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer" onClick={() => handleEditCompany(empresa)}>
-                                  <Edit className="h-4 w-4" /> Editar Perfil
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuLabel className="text-[0.6rem] uppercase tracking-[0.2em] opacity-50 px-2 py-2">Alterar Status</DropdownMenuLabel>
-                                <DropdownMenuCheckboxItem className="rounded-lg" checked={empresa.status === 'ativo'} onCheckedChange={() => handleStatusChange(empresa.id, 'ativo')}>Ativo</DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem className="rounded-lg" checked={empresa.status === 'pendente'} onCheckedChange={() => handleStatusChange(empresa.id, 'pendente')}>Pendente</DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem className="rounded-lg" checked={empresa.status === 'inativo'} onCheckedChange={() => handleStatusChange(empresa.id, 'inativo')}>Inativo</DropdownMenuCheckboxItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700" onClick={() => handleDeleteCompany(empresa)}><Trash2 className="h-4 w-4" /> Excluir</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                          <TableCell className="text-right pr-4">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5" title="Visualizar" onClick={() => handleViewDetails(empresa)}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50" title="Editar" onClick={() => handleEditClick(empresa)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50" title="Excluir" onClick={() => handleDeleteCompanyClick(empresa)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                              
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl">
+                                    <ChevronDown className="h-4 w-4 text-slate-400" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="min-w-[180px] rounded-xl p-2">
+                                  <DropdownMenuLabel className="text-[0.6rem] uppercase tracking-[0.2em] opacity-50 px-2 py-2">Estado Industrial</DropdownMenuLabel>
+                                  <DropdownMenuCheckboxItem className="rounded-lg" checked={empresa.status === 'ativo'} onCheckedChange={() => handleStatusChange(empresa.id, 'ativo')}>Ativo</DropdownMenuCheckboxItem>
+                                  <DropdownMenuCheckboxItem className="rounded-lg" checked={empresa.status === 'pendente'} onCheckedChange={() => handleStatusChange(empresa.id, 'pendente')}>Pendente</DropdownMenuCheckboxItem>
+                                  <DropdownMenuCheckboxItem className="rounded-lg" checked={empresa.status === 'inativo'} onCheckedChange={() => handleStatusChange(empresa.id, 'inativo')}>Inativo</DropdownMenuCheckboxItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -563,7 +870,6 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
               </Card>
             </TabsContent>
 
-            {/* Administradores View */}
             <TabsContent value="administradores" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold text-slate-900">Equipe Técnica Aleac</h2>
@@ -641,141 +947,79 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
         </div>
       </Tabs>
 
-      {/* Reusing existing Dialogs with updated styling */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+  <Dialog open={showFormDialog} onOpenChange={setShowFormDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl p-8 border-none shadow-2xl">
-          <DialogHeader><DialogTitle className="text-2xl font-black">Cadastrar Nova Indústria</DialogTitle></DialogHeader>
-          <div className="grid md:grid-cols-2 gap-6 py-6">
-            <div className="space-y-4">
-              <div><Label className="text-xs font-black uppercase text-slate-400">E-mail de Acesso *</Label><Input className="rounded-xl mt-1.5" value={novaEmpresa.email} onChange={e => setNovaEmpresa({ ...novaEmpresa, email: e.target.value })} /></div>
-              <div><Label className="text-xs font-black uppercase text-slate-400">Senha Padrão *</Label><Input type="password" className="rounded-xl mt-1.5" value={novaEmpresa.password} onChange={e => setNovaEmpresa({ ...novaEmpresa, password: e.target.value })} /></div>
-              <div><Label className="text-xs font-black uppercase text-slate-400">Nome Fantasia *</Label><Input className="rounded-xl mt-1.5" value={novaEmpresa.nome_fantasia} onChange={e => setNovaEmpresa({ ...novaEmpresa, nome_fantasia: e.target.value })} /></div>
-            </div>
-            <div className="space-y-4">
-              <div><Label className="text-xs font-black uppercase text-slate-400">Município Sede *</Label>
-                <Select value={novaEmpresa.municipio} onValueChange={v => setNovaEmpresa({ ...novaEmpresa, municipio: v })}>
-                  <SelectTrigger className="rounded-xl mt-1.5"><SelectValue /></SelectTrigger>
-                  <SelectContent>{municipios.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
-                </Select></div>
-              <div><Label className="text-xs font-black uppercase text-slate-400">Apresentação Breve *</Label><Textarea className="rounded-xl mt-1.5 min-h-[100px]" value={novaEmpresa.apresentacao} onChange={e => setNovaEmpresa({ ...novaEmpresa, apresentacao: e.target.value })} /></div>
-            </div>
-          </div>
-          <DialogFooter className="pt-4"><Button onClick={handleCreateEmpresa} className="w-full md:w-auto rounded-xl bg-slate-900 h-11 px-8 font-bold">{creatingEmpresa ? "Sincronizando..." : "Concluir Cadastro"}</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Company Dialog */}
-      <Dialog open={showEditCompanyDialog} onOpenChange={setShowEditCompanyDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl p-8 border-none shadow-2xl">
-          <DialogHeader>
+          <DialogHeader className="pb-4">
             <DialogTitle className="text-2xl font-black flex items-center gap-3">
-              <Edit className="h-6 w-6 text-primary" />
-              Editar Perfil Industrial
+              <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                {isEditing ? <Edit className="h-6 w-6 text-primary" /> : <Building2 className="h-6 w-6 text-primary" />}
+              </div>
+              {isEditing ? "Editar Perfil Industrial" : "Cadastrar Nova Empresa"}
             </DialogTitle>
+            <p className="text-slate-500 text-sm mt-1">
+              {isEditing ? "Atualize as informações completas desta indústria" : "Preencha as informações da sua empresa para aparecer na plataforma"}
+            </p>
           </DialogHeader>
+          
+          <FormProvider {...methods}>
+            <Tabs value={createStepTab} onValueChange={setCreateStepTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-6 h-12 p-1 bg-slate-100/50 rounded-2xl">
+                <TabsTrigger value="empresa" className="rounded-xl font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">Dados da Empresa</TabsTrigger>
+                <TabsTrigger value="contato" className="rounded-xl font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">Contato e Redes</TabsTrigger>
+                <TabsTrigger value="produtos" className="rounded-xl font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">Produtos</TabsTrigger>
+              </TabsList>
 
-          {companyToEdit && (
-            <div className="grid md:grid-cols-2 gap-6 py-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400">Nome Fantasia</Label>
-                  <Input
-                    className="rounded-xl"
-                    value={companyToEdit.nome_fantasia}
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, nome_fantasia: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400">Razão Social</Label>
-                  <Input
-                    className="rounded-xl"
-                    value={companyToEdit.razao_social || ""}
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, razao_social: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400">CNPJ</Label>
-                  <Input
-                    className="rounded-xl"
-                    value={companyToEdit.cnpj || ""}
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, cnpj: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400">Setor Econômico</Label>
-                  <Input
-                    className="rounded-xl"
-                    value={companyToEdit.setor_economico || ""}
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, setor_economico: e.target.value })}
-                  />
-                </div>
+              <div className="max-h-[60vh] overflow-y-auto px-1">
+                <TabsContent value="empresa" className="mt-0 focus-visible:outline-none">
+                  <EmpresaFormAdmin />
+                  <div className="mt-8 flex justify-end">
+                    <Button type="button" onClick={() => setCreateStepTab("contato")} className="rounded-xl h-12 px-8 font-bold">
+                      Próximo Passo
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="contato" className="mt-0 focus-visible:outline-none">
+                  <RedesSociaisForm />
+                  <div className="mt-8 flex justify-between gap-4">
+                    <Button type="button" variant="outline" onClick={() => setCreateStepTab("empresa")} className="rounded-xl h-12 px-8 font-bold">
+                      Voltar
+                    </Button>
+                    <Button type="button" onClick={() => setCreateStepTab("produtos")} className="rounded-xl h-12 px-8 font-bold">
+                      Próximo Passo
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="produtos" className="mt-0 focus-visible:outline-none">
+                  <ProdutosForm />
+                  <div className="mt-8 flex justify-between gap-4">
+                    <Button type="button" variant="outline" onClick={() => setCreateStepTab("contato")} className="rounded-xl h-12 px-8 font-bold">
+                      Voltar
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={methods.handleSubmit((data) => isEditing ? handleUpdateEmpresa(data) : handleCreateEmpresa(data))} 
+                      disabled={creatingEmpresa || updatingCompany} 
+                      className="rounded-xl h-12 px-8 font-bold bg-slate-900"
+                    >
+                      {creatingEmpresa || updatingCompany ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processando...
+                        </>
+                      ) : (
+                        isEditing ? "Salvar Alterações" : "Concluir Cadastro"
+                      )}
+                    </Button>
+                  </div>
+                </TabsContent>
               </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400">Município</Label>
-                  <Select
-                    value={companyToEdit.municipio}
-                    onValueChange={v => setCompanyToEdit({ ...companyToEdit, municipio: v })}
-                  >
-                    <SelectTrigger className="rounded-xl">
-                      <SelectValue placeholder="Selecione o município" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {municipios.map(m => (
-                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400">Apresentação</Label>
-                  <Textarea
-                    className="rounded-xl min-h-[120px] resize-none"
-                    value={companyToEdit.apresentacao || ""}
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, apresentacao: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400">Vídeo de Apresentação (URL)</Label>
-                  <Input
-                    className="rounded-xl"
-                    placeholder="https://youtube.com/..."
-                    value={companyToEdit.video_apresentacao || ""}
-                    onChange={e => setCompanyToEdit({ ...companyToEdit, video_apresentacao: e.target.value })}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowEditCompanyDialog(false)}
-              className="rounded-xl h-12 px-8 font-bold"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleUpdateCompany}
-              disabled={updatingCompany}
-              className="rounded-xl bg-slate-900 hover:bg-slate-800 h-12 px-8 font-bold shadow-lg shadow-slate-900/20"
-            >
-              {updatingCompany ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando Alterações...
-                </>
-              ) : (
-                "Salvar Alterações"
-              )}
-            </Button>
-          </DialogFooter>
+            </Tabs>
+          </FormProvider>
         </DialogContent>
       </Dialog>
 
-      {/* Cadastro de Admin Dialog */}
       <Dialog open={showCreateAdminDialog} onOpenChange={setShowCreateAdminDialog}>
         <DialogContent className="max-w-md rounded-3xl p-8 border-none shadow-2xl">
           <DialogHeader>
@@ -868,6 +1112,38 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
         userType="admin"
         empresaId=""
       />
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="rounded-3xl p-8 border-none">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-black">Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500 mt-2">
+              Você está prestes a excluir permanentemente <span className="font-bold text-slate-900">"{companyToDelete?.nome_fantasia}"</span>. 
+              Esta ação não pode ser desfeita e removerá todos os produtos e arquivos associados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-3 mt-6">
+            <AlertDialogCancel className="rounded-xl h-12 px-6 font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                confirmDeleteCompany();
+              }}
+              className="rounded-xl h-12 px-6 font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 border-none"
+              disabled={deletingCompany}
+            >
+              {deletingCompany ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Sim, Excluir Empresa"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

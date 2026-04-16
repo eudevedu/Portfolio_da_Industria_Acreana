@@ -1,27 +1,17 @@
 import { NextResponse } from "next/server"
-import { supabase, isSupabaseConfigured } from "@/lib/supabase"
+import { createServerSideClient } from "@/lib/supabase"
 
 export async function POST(request: Request) {
   try {
     const { empresa_id, tipo_evento, referencia_id, ip_address, user_agent } = await request.json()
 
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json({ 
-        success: true, 
-        message: "Analytics simulado (Supabase não configurado)" 
-      })
-    }
-
-    // Validar dados obrigatórios
     if (!empresa_id || !tipo_evento) {
-      return NextResponse.json(
-        { success: false, error: "empresa_id e tipo_evento são obrigatórios" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Campos obrigatórios ausentes" }, { status: 400 })
     }
 
-    // Inserir evento de analytics
-    const { data, error } = await supabase!
+    const supabase = await createServerSideClient()
+    
+    const { error } = await supabase
       .from('analytics')
       .insert({
         empresa_id,
@@ -33,24 +23,12 @@ export async function POST(request: Request) {
       })
 
     if (error) {
-      console.error('Erro ao registrar analytics:', error)
-      return NextResponse.json(
-        { success: false, error: "Erro ao registrar evento de analytics" },
-        { status: 500 }
-      )
+      console.error('Analytics Error:', error)
+      return NextResponse.json({ success: false }, { status: 500 })
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Evento de analytics registrado com sucesso",
-      data 
-    })
-
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erro no endpoint de analytics:', error)
-    return NextResponse.json(
-      { success: false, error: "Erro interno do servidor" },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false }, { status: 500 })
   }
 }
