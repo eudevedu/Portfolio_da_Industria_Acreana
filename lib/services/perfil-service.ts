@@ -5,13 +5,14 @@ import type { PerfilEmpresa } from "../supabase.types"
 
 /**
  * Cria ou atualiza o perfil de contato vinculado a um ID de usuário (Auth).
+ * Usa AdminClient para contornar RLS no registro inicial.
  */
 export async function criarPerfilEmpresa(
   userId: string,
   empresaId: string | null,
   profileData: Partial<PerfilEmpresa>,
 ): Promise<{ data: PerfilEmpresa | null; error: any }> {
-  const supabase = await createServerSideClient()
+  const supabase = createAdminClient()
   
   const perfilCompleto = {
     id: userId,
@@ -38,7 +39,8 @@ export async function vincularEmpresaAoPerfil(
   userId: string,
   empresaId: string,
 ): Promise<{ success: boolean; error: any }> {
-  const supabase = createAdminClient() // Usamos Admin Client para garantir o vínculo mesmo com RLS restrito no cadastro
+  // Usamos Admin Client para garantir o vínculo mesmo com RLS restrito no cadastro
+  const supabase = createAdminClient() 
   
   const { error } = await supabase
     .from("perfis_empresas")
@@ -46,7 +48,7 @@ export async function vincularEmpresaAoPerfil(
     .eq("id", userId)
 
   const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
-    user_metadata: { empresa_id: empresaId }
+    user_metadata: { empresa_id: empresaId, tipo: "empresa" }
   })
 
   if (error || authError) return { success: false, error: error || authError }

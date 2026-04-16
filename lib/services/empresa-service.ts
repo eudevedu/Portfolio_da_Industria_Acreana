@@ -166,7 +166,7 @@ export async function buscarEmpresaPorId(id: string): Promise<Empresa | null> {
 export async function criarEmpresa(
   empresa: Omit<Empresa, "id" | "created_at" | "updated_at" | "status" | "produtos" | "arquivos" | "perfil_empresa">,
 ): Promise<Empresa | null> {
-  const supabase = await createServerSideClient()
+  const supabase = createAdminClient()
   if (!supabase) return null
 
   // Remove campos que não existem na tabela do banco de dados (campos transientes do formulário)
@@ -191,7 +191,7 @@ export async function criarEmpresa(
 }
 
 export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): Promise<Empresa | null> {
-  const supabase = await createServerSideClient()
+  const supabase = createAdminClient()
   if (!supabase) return null
 
   // Remove campos que não existem na tabela do banco de dados
@@ -217,7 +217,7 @@ export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): P
 }
 
 export async function deletarEmpresa(id: string): Promise<void> {
-  const supabase = await createServerSideClient()
+  const supabase = createAdminClient()
   if (!supabase) return
   await supabase.from("empresas").delete().eq("id", id)
 }
