@@ -30,7 +30,8 @@ import {
   Printer,
   Share2,
   ListFilter,
-  AlertCircle
+  AlertCircle,
+  LayoutGrid
 } from "lucide-react"
 import { IndustrialDetailsModal } from "@/components/IndustrialDetailsModal"
 import { ConfiguracoesModal } from "@/components/ConfiguracoesModal"
@@ -878,6 +879,14 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
                   </Table>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="categorias" className="mt-0 outline-none animate-in fade-in duration-500">
+              <CategoryManager initialTab="list" />
+            </TabsContent>
+
+            <TabsContent value="cadastrar-categoria" className="mt-0 outline-none animate-in fade-in duration-500">
+              <CategoryManager initialTab="list" defaultOpenForm={true} />
             </TabsContent>
 
             <TabsContent value="administradores" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
