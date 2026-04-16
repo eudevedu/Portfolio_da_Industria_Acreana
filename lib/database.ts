@@ -29,6 +29,12 @@ export async function atualizarEmpresa(id: string, updates: any) {
   return empresaService.atualizarEmpresa(id, updates)
 }
 
+export async function atualizarEmpresaCompleta(id: string, data: any) {
+  await requireEmpresa(id) // requireEmpresa internamente permite admins
+  return empresaService.atualizarEmpresaCompleta(id, data)
+}
+
+
 export async function deletarEmpresa(id: string) {
   await requireEmpresa(id)
   return empresaService.deletarEmpresa(id)

@@ -386,104 +386,18 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
     if (!currentEditingId) return
     setUpdatingCompany(true)
     try {
-      const { atualizarEmpresa, criarProduto, criarArquivo } = await import("@/lib/database")
+      const { atualizarEmpresaCompleta } = await import("@/lib/database")
       
-      // 1. Atualizar Empresa
-      const result = await atualizarEmpresa(currentEditingId, data.empresa)
+      // Chamar a nova Server Action unificada que lida com Empresa + Produtos + Arquivos no servidor
+      const success = await atualizarEmpresaCompleta(currentEditingId, data)
       
-      if (result) {
-        // Sincronizar Arquivos e Produtos (Simplificado: Deleta e reconstrói para garantir integridade dos vínculos complexos)
-        const supabase = await createServerSideClient()
-        await supabase.from("produtos").delete().eq("empresa_id", currentEditingId)
-        await supabase.from("arquivos").delete().eq("empresa_id", currentEditingId)
-
-        const filePromises: Promise<any>[] = []
-
-        // Logo
-        if (data.empresa.logo_url) {
-          filePromises.push(
-            criarArquivo({
-              empresa_id: currentEditingId,
-              nome: "Logo da Empresa",
-              url: data.empresa.logo_url,
-              tipo: "imagem",
-              categoria: "logo",
-            })
-          )
-        }
-
-        // Folder Institucional
-        if (data.empresa.folder_apresentacao_url) {
-          filePromises.push(
-            criarArquivo({
-              empresa_id: currentEditingId,
-              nome: "Folder de Apresentação",
-              url: data.empresa.folder_apresentacao_url,
-              tipo: "pdf",
-              categoria: "institucional_folder",
-            })
-          )
-        }
-
-        // Outros Arquivos
-        if (data.empresa.outros_arquivos_urls && data.empresa.outros_arquivos_urls.length > 0) {
-          data.empresa.outros_arquivos_urls.forEach((url) => {
-            filePromises.push(
-              criarArquivo({
-                empresa_id: currentEditingId,
-                nome: "Outro Arquivo da Empresa",
-                url: url,
-                tipo: url.endsWith(".pdf") ? "pdf" : "imagem",
-                categoria: "institucional_outros",
-              })
-            )
-          })
-        }
-
-        // 2. Recriar Produtos
-        if (data.produtos && data.produtos.length > 0) {
-          for (const p of data.produtos) {
-            const novoProduto = await criarProduto({ ...p, status: 'ativo', empresa_id: currentEditingId })
-            if (novoProduto) {
-              if (p.ficha_tecnica_url) {
-                filePromises.push(criarArquivo({
-                  empresa_id: currentEditingId,
-                  nome: `Ficha Técnica - ${p.nome}`,
-                  url: p.ficha_tecnica_url,
-                  tipo: "pdf",
-                  categoria: "produto_ficha_tecnica",
-                }))
-              }
-              if (p.folder_produto_url) {
-                filePromises.push(criarArquivo({
-                  empresa_id: currentEditingId,
-                  nome: `Folder Produto - ${p.nome}`,
-                  url: p.folder_produto_url,
-                  tipo: "pdf",
-                  categoria: "produto_folder",
-                }))
-              }
-              if (p.imagens_produto_urls && p.imagens_produto_urls.length > 0) {
-                p.imagens_produto_urls.forEach((url) => {
-                  filePromises.push(criarArquivo({
-                    empresa_id: currentEditingId,
-                    nome: `Imagem Produto - ${p.nome}`,
-                    url: url,
-                    tipo: "imagem",
-                    categoria: "produto_imagem",
-                  }))
-                })
-              }
-            }
-          }
-        }
-
-        await Promise.allSettled(filePromises)
-
+      if (success) {
         const empresasData = await buscarEmpresasAdmin()
         setEmpresas(empresasData)
         setShowFormDialog(false)
         alert("Perfil industrial atualizado com sucesso!")
+      } else {
+        throw new Error("Falha na sincronização dos dados no servidor.")
       }
     } catch (error: any) {
       console.error("Erro ao atualizar:", error)

@@ -85,42 +85,24 @@ export async function atualizarStatusEmpresa(
 }
 
 export async function excluirEmpresa(id: string): Promise<boolean> {
-  // Usamos createAdminClient (Service Role) para garantir que possamos limpar 
-  // todos os registros vinculados e contornar restrições de RLS no painel administrativo.
   const supabase = createAdminClient()
   if (!supabase) {
-    console.error("Supabase Admin Client não disponível. Verifique SUPABASE_SERVICE_ROLE_KEY.")
+    console.error("Supabase Admin Client não disponível.")
     return false
   }
 
   try {
-    console.log(`Iniciando exclusão completa para empresa ID: ${id}`)
-
-    // 1. Identificar e deletar usuários vinculados no Supabase Auth
-    // Buscamos na tabela perfis_empresas antes de deletar a empresa
-    const { data: profiles, error: errorSearchPerf } = await supabase
+    const { data: profiles } = await supabase
       .from("perfis_empresas")
       .select("id")
       .eq("empresa_id", id)
     
-    if (errorSearchPerf) {
-      console.warn("Aviso ao buscar perfis vinculados:", errorSearchPerf.message)
-    }
-
     if (profiles && profiles.length > 0) {
-      console.log(`Encontrados ${profiles.length} usuários vinculados. Removendo do Auth...`)
       for (const profile of profiles) {
-        const { error: errorAuth } = await supabase.auth.admin.deleteUser(profile.id)
-        if (errorAuth) {
-          console.warn(`Erro ao deletar usuário ${profile.id} do Auth:`, errorAuth.message)
-        } else {
-          console.log(`Usuário ${profile.id} removido do Auth com sucesso.`)
-        }
+        await supabase.auth.admin.deleteUser(profile.id)
       }
     }
 
-    // 2. Limpeza manual de dados relacionados (para garantir, caso o CASCADE do DB falhe)
-    // Deletar analytics, produtos e arquivos
     await Promise.allSettled([
       supabase.from("analytics").delete().eq("empresa_id", id),
       supabase.from("produtos").delete().eq("empresa_id", id),
@@ -128,23 +110,10 @@ export async function excluirEmpresa(id: string): Promise<boolean> {
       supabase.from("perfis_empresas").delete().eq("empresa_id", id)
     ])
 
-    // 3. Deletar a empresa propriamente dita
     const { error } = await supabase.from("empresas").delete().eq("id", id)
-    
-    if (error) {
-      console.error("Erro crítico ao excluir empresa [PostgrestError]:", {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      })
-      return false
-    }
-    
-    console.log(`Empresa ${id} e todos os dados vinculados excluídos com sucesso.`)
-    return true
-  } catch (err: any) {
-    console.error("Erro inesperado no processo de exclusão:", err?.message || err)
+    return !error
+  } catch (err) {
+    console.error("Erro ao excluir empresa:", err)
     return false
   }
 }
@@ -169,7 +138,6 @@ export async function criarEmpresa(
   const supabase = createAdminClient()
   if (!supabase) return null
 
-  // Remove campos que não existem na tabela do banco de dados (campos transientes do formulário)
   const { 
     outros_arquivos_urls, 
     folder_apresentacao_url, 
@@ -194,7 +162,6 @@ export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): P
   const supabase = createAdminClient()
   if (!supabase) return null
 
-  // Remove campos que não existem na tabela do banco de dados
   const { 
     outros_arquivos_urls, 
     folder_apresentacao_url, 
@@ -214,6 +181,101 @@ export async function atualizarEmpresa(id: string, updates: Partial<Empresa>): P
 
   if (error) return null
   return data as Empresa
+}
+
+/**
+ * Atualização completa (Sincronização) de empresa, produtos e arquivos.
+ * Usado principalmente pelo Painel Administrativo.
+ */
+export async function atualizarEmpresaCompleta(id: string, fullData: any): Promise<boolean> {
+  const supabase = createAdminClient()
+  if (!supabase) return false
+
+  try {
+    // 1. Atualizar dados básicos da empresa
+    const { empresa, produtos } = fullData
+    
+    // Removemos campos transientes
+    const { 
+      arquivos, 
+      folder_apresentacao_url, 
+      outros_arquivos_urls, 
+      id: _, 
+      created_at: __, 
+      updated_at: ___, 
+      ...empresaBase 
+    } = empresa
+
+    const { error: errorEmpresa } = await supabase
+      .from("empresas")
+      .update({ ...empresaBase, updated_at: new Date().toISOString() })
+      .eq("id", id)
+
+    if (errorEmpresa) throw errorEmpresa
+
+    // 2. Limpar produtos e registros de arquivos antigos (Sincronização Atômica)
+    await supabase.from("produtos").delete().eq("empresa_id", id)
+    await supabase.from("arquivos").delete().eq("empresa_id", id)
+
+    const filePromises: Promise<any>[] = []
+
+    // 3. Recriar registros de arquivos da empresa (Logo e Institucionais)
+    if (empresa.logo_url) {
+      filePromises.push(supabase.from("arquivos").insert({
+        empresa_id: id, nome: "Logo da Empresa", url: empresa.logo_url, tipo: "imagem", categoria: "logo"
+      }))
+    }
+    if (empresa.folder_apresentacao_url) {
+      filePromises.push(supabase.from("arquivos").insert({
+        empresa_id: id, nome: "Folder Institucional", url: empresa.folder_apresentacao_url, tipo: "pdf", categoria: "institucional_folder"
+      }))
+    }
+    if (empresa.outros_arquivos_urls && empresa.outros_arquivos_urls.length > 0) {
+      empresa.outros_arquivos_urls.forEach((url: string) => {
+        filePromises.push(supabase.from("arquivos").insert({
+          empresa_id: id, nome: "Outro Arquivo Institucional", url, tipo: url.endsWith(".pdf") ? "pdf" : "imagem", categoria: "institucional_outros"
+        }))
+      })
+    }
+
+    // 4. Recriar Produtos e seus respectivos vínculos de arquivos
+    if (produtos && produtos.length > 0) {
+      for (const p of produtos) {
+        const { ficha_tecnica_url, folder_produto_url, imagens_produto_urls, ...pData } = p
+        const { data: newProd, error: errorProd } = await supabase
+          .from("produtos")
+          .insert({ ...pData, empresa_id: id, status: "ativo" })
+          .select()
+          .single()
+
+        if (newProd && !errorProd) {
+          if (ficha_tecnica_url) {
+            filePromises.push(supabase.from("arquivos").insert({
+              empresa_id: id, nome: `Ficha Técnica - ${p.nome}`, url: ficha_tecnica_url, tipo: "pdf", categoria: "produto_ficha_tecnica"
+            }))
+          }
+          if (folder_produto_url) {
+            filePromises.push(supabase.from("arquivos").insert({
+              empresa_id: id, nome: `Folder Produto - ${p.nome}`, url: folder_produto_url, tipo: "pdf", categoria: "produto_folder"
+            }))
+          }
+          if (imagens_produto_urls && imagens_produto_urls.length > 0) {
+            imagens_produto_urls.forEach((url: string) => {
+              filePromises.push(supabase.from("arquivos").insert({
+                empresa_id: id, nome: `Imagem Produto - ${p.nome}`, url, tipo: "imagem", categoria: "produto_imagem"
+              }))
+            })
+          }
+        }
+      }
+    }
+
+    await Promise.all(filePromises)
+    return true
+  } catch (error) {
+    console.error("Erro em atualizarEmpresaCompleta:", error)
+    return false
+  }
 }
 
 export async function deletarEmpresa(id: string): Promise<void> {
