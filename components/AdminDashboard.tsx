@@ -96,11 +96,10 @@ import {
   atualizarEmpresa,
   buscarEmpresas as buscarEmpresasService
 } from "@/lib/services/empresa-service"
-import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
 import { logout } from "@/lib/auth"
+import { LogoSeict } from "@/components/LogoIndustria"
 import type { Empresa, Admin } from "@/lib/supabase.types"
 import { formatBrazilianShortDate, cn } from "@/lib/utils"
-import { LogoSeict } from "@/components/LogoIndustria"
 import { createServerSideClient } from "@/lib/supabase"
 
 interface AdminDashboardProps {
@@ -129,7 +128,6 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
   const [stats, setStats] = useState(initialStats)
   const [empresas, setEmpresas] = useState(initialEmpresas)
   const [admins, setAdmins] = useState<Admin[]>([])
-  const [allCategories, setAllCategories] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
@@ -139,37 +137,31 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [loadingData, setLoadingData] = useState(false)
 
-<<<<<<< HEAD
-  // Derivando setores dos dados do banco para os filtros
-  const SETORES_ECONOMICOS = allCategories
-    .filter(c => c.tipo === "setor_economico")
-    .map(c => ({ value: c.id, label: c.nome }))
-
-  const SETORES_EMPRESA = allCategories
-    .filter(c => c.tipo === "atividade_principal")
-    .map(c => ({ value: c.id, label: c.nome }))
-
-  // Função auxiliar para obter nome da categoria por ID
-  const getCategoryName = (id: string) => {
-    return allCategories.find(c => c.id === id)?.nome || id
-  }
-=======
-  // Carregar categorias dinâmicas
+  // Inicialização: Carrega categorias e administradores na montagem do componente
   useEffect(() => {
-    const loadCategories = async () => {
-      const cats = await buscarCategorias()
-      setCategorias(cats)
+    const fetchData = async () => {
+      try {
+        const [catsData, adminsData] = await Promise.all([
+          buscarCategorias(),
+          obterTodosAdmins()
+        ])
+        setCategorias(catsData)
+        setAdmins(adminsData)
+      } catch (err) {
+        console.error("Erro na inicialização do dashboard:", err)
+      }
     }
-    loadCategories()
+    fetchData()
   }, [])
 
+  // Deriva setores e atividades dinamicamente para os filtros
   const setoresDinamicos = categorias.filter(c => c.tipo === "setor_economico")
   const atividadesDinamicas = categorias.filter(c => 
     c.tipo === "atividade_principal" && 
     (selectedSector === "all" || c.parent_id === selectedSector)
   )
 
-  // Recarregar empresas quando os filtros mudarem
+  // Recarrega a lista de empresas sempre que os filtros ou termo de busca mudarem
   useEffect(() => {
     if (!mounted) return
     
@@ -187,7 +179,6 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
     
     fetchFiltered()
   }, [selectedStatus, selectedSector, selectedActivity, searchTerm, mounted])
->>>>>>> 0da37b8 (feat: implement dynamic category-based filtering and refactor admin dashboard navigation sidebar)
 
   // Estados para modais
   const [showFormDialog, setShowFormDialog] = useState(false)
@@ -277,41 +268,6 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
     "Epitaciolândia", "Mâncio Lima"
   ].sort()
 
-  useEffect(() => {
-    const loadFilteredData = async () => {
-      setLoading(true)
-      try {
-        const empresasData = await buscarEmpresasAdmin({
-          status: selectedStatus === "all" ? undefined : selectedStatus,
-          setor_economico: selectedSector === "all" ? undefined : selectedSector,
-          municipio: selectedCity === "all" ? undefined : selectedCity,
-          busca: searchTerm,
-        })
-        setEmpresas(empresasData)
-      } catch (err) {
-        console.error("Erro ao carregar dados do admin:", err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadFilteredData()
-  }, [selectedStatus, selectedSector, selectedCity, searchTerm])
-
-  useEffect(() => {
-    const loadAdmins = async () => {
-      try {
-        const [adminsData, catsData] = await Promise.all([
-          obterTodosAdmins(),
-          buscarCategorias()
-        ])
-        setAdmins(adminsData)
-        setAllCategories(catsData)
-      } catch (err) {
-        console.error("Erro ao carregar dados complementares:", err)
-      }
-    }
-    loadAdmins()
-  }, [])
 
   const handleCreateEmpresa = async (data: CadastroFormData) => {
     setCreatingEmpresa(true)
@@ -889,9 +845,6 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
                               </div>
                             </div>
                           </TableCell>
-<<<<<<< HEAD
-                          <TableCell className="text-sm font-medium text-slate-600">{getCategoryName(empresa.setor_economico)}</TableCell>
-=======
                           <TableCell className="text-sm font-medium text-slate-600">
                             <div className="flex flex-col">
                               <span className="font-bold text-slate-900">
@@ -908,7 +861,6 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
                               )}
                             </div>
                           </TableCell>
->>>>>>> 0da37b8 (feat: implement dynamic category-based filtering and refactor admin dashboard navigation sidebar)
                           <TableCell>
                             <div className="flex flex-col gap-1">
                               <span className="text-xs font-bold text-slate-700">{empresa.telefone || "-"}</span>
@@ -958,21 +910,12 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
               </Card>
             </TabsContent>
 
-<<<<<<< HEAD
-            <TabsContent value="categorias" className="mt-0 outline-none animate-in fade-in duration-500">
-              <CategoryManager initialTab="list" />
-            </TabsContent>
-
-            <TabsContent value="cadastrar-categoria" className="mt-0 outline-none animate-in fade-in duration-500">
-              <CategoryManager initialTab="list" defaultOpenForm={true} />
-=======
             <TabsContent value="categorias" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
                <CategoryManager initialTab="list" />
             </TabsContent>
 
             <TabsContent value="cadastrar-categoria" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
                <CategoryManager initialTab="list" defaultOpenForm={true} />
->>>>>>> 0da37b8 (feat: implement dynamic category-based filtering and refactor admin dashboard navigation sidebar)
             </TabsContent>
 
             <TabsContent value="administradores" className="mt-0 outline-none space-y-6 animate-in fade-in duration-500">
@@ -1228,7 +1171,7 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
         isOpen={showDetailsDialog}
         onClose={() => setShowDetailsDialog(false)}
         company={companyToView}
-        allCategories={allCategories}
+        allCategories={categorias}
       />
 
       <ConfiguracoesModal
