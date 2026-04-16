@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { Empresa } from "@/lib/supabase.types"
 import EmpresaDetailsModal from "./EmpresaDetailsModal"
+import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
+import { useEffect } from "react"
 import {
   Carousel,
   CarouselContent,
@@ -21,6 +23,23 @@ interface HomeCompanyCarouselProps {
 
 export default function HomeCompanyCarousel({ empresas }: HomeCompanyCarouselProps) {
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null)
+  const [allCategories, setAllCategories] = useState<Categoria[]>([])
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await buscarCategorias()
+        setAllCategories(data || [])
+      } catch (err) {
+        console.error("Erro ao carregar categorias na home:", err)
+      }
+    }
+    loadCategories()
+  }, [])
+
+  const getCategoryName = (id: string) => {
+    return allCategories.find(c => c.id === id)?.nome || id
+  }
 
   // Agrupa as empresas em chunks de 6 para exibir em grid de 2x3
   const chunkSize = 6
@@ -66,7 +85,7 @@ export default function HomeCompanyCarousel({ empresas }: HomeCompanyCarouselPro
                               {empresa.nome_fantasia}
                             </CardTitle>
                             <CardDescription className="text-xs font-semibold uppercase tracking-tight text-muted-foreground/80">
-                              {empresa.setor_economico}
+                              {getCategoryName(empresa.setor_economico)}
                             </CardDescription>
                           </div>
                         </div>
@@ -123,6 +142,7 @@ export default function HomeCompanyCarousel({ empresas }: HomeCompanyCarouselPro
         empresa={selectedEmpresa}
         isOpen={!!selectedEmpresa}
         onClose={() => setSelectedEmpresa(null)}
+        allCategories={allCategories}
       />
     </>
   )
