@@ -16,6 +16,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import { Factory } from "lucide-react"
 
 interface HomeCompanyCarouselProps {
   empresas: Empresa[]
@@ -48,9 +49,21 @@ export default function HomeCompanyCarousel({ empresas }: HomeCompanyCarouselPro
     chunks.push(empresas.slice(i, i + chunkSize))
   }
 
+  if (empresas.length === 0) {
+    return (
+      <div className="w-full py-20 flex flex-col items-center justify-center text-center px-4 animate-in fade-in duration-500">
+        <div className="bg-muted w-20 h-20 rounded-full flex items-center justify-center mb-6">
+          <Factory className="h-10 w-10 text-muted-foreground opacity-30" />
+        </div>
+        <h3 className="text-xl font-display font-bold text-foreground mb-2">Ops! Nenhuma empresa encontrada</h3>
+        <p className="text-muted-foreground max-w-md">Não existe empresa cadastrada para esse filtro. Escolha outro segmento ou limpe os filtros para continuar.</p>
+      </div>
+    )
+  }
+
   return (
     <>
-      <div className="relative px-4 sm:px-8 md:px-14">
+      <div className="relative">
         <Carousel
           opts={{
             align: "start",
@@ -59,6 +72,11 @@ export default function HomeCompanyCarousel({ empresas }: HomeCompanyCarouselPro
           }}
           className="w-full"
         >
+          <div className="flex justify-end items-center gap-2 mb-4 pr-1">
+            <CarouselPrevious className="static translate-y-0 w-10 h-10 bg-white border-primary/20 text-primary hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95" />
+            <CarouselNext className="static translate-y-0 w-10 h-10 bg-white border-primary/20 text-primary hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95" />
+          </div>
+          
           <CarouselContent className="-ml-4 pb-4">
             {chunks.map((chunk, index) => (
               <CarouselItem key={index} className="pl-4">
@@ -133,8 +151,6 @@ export default function HomeCompanyCarousel({ empresas }: HomeCompanyCarouselPro
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="-left-4 sm:-left-8 md:-left-12 lg:-left-16 w-12 h-12 bg-white border-primary/20 text-primary hover:bg-primary hover:text-white transition-all shadow-xl scale-110 active:scale-95" />
-          <CarouselNext className="-right-4 sm:-right-8 md:-right-12 lg:-right-16 w-12 h-12 bg-white border-primary/20 text-primary hover:bg-primary hover:text-white transition-all shadow-xl scale-110 active:scale-95" />
         </Carousel>
       </div>
 

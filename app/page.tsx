@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { isLoggedIn, getCurrentUser } from "@/lib/auth"
 import { getLastCompanies } from "@/lib/empresa"
 import { obterEstatisticasHome } from "@/lib/database"
-import HomeCompanyCarousel from "@/components/HomeCompanyCarousel"
+import FeaturedCompaniesSection from "@/components/FeaturedCompaniesSection"
+import { buscarCategorias } from "@/lib/services/category-service"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -30,6 +31,9 @@ export default async function HomePage() {
 
   // Busca estatísticas dinâmicas
   const stats = await obterEstatisticasHome()
+  
+  // Busca categorias para os filtros
+  const categorias = await buscarCategorias()
 
   return (
     <div className="flex flex-col w-full overflow-x-hidden">
@@ -125,8 +129,13 @@ export default async function HomePage() {
             </Link>
           </div>
 
+          <FeaturedCompaniesSection 
+            initialEmpresas={empresas} 
+            categorias={categorias} 
+          />
+
           {errorMsg && (
-            <div className="mb-8 p-6 glass border-red-200 bg-red-50/50 rounded-xl">
+            <div className="mt-8 p-6 glass border-red-200 bg-red-50/50 rounded-xl">
               <h4 className="font-bold text-red-800 flex items-center mb-2">
                 <span className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse" />
                 Erro ao sincronizar dados
@@ -134,8 +143,6 @@ export default async function HomePage() {
               <p className="text-red-600 text-sm leading-relaxed">{errorMsg}</p>
             </div>
           )}
-
-          <HomeCompanyCarousel empresas={empresas} />
         </div>
       </section>
     </div>

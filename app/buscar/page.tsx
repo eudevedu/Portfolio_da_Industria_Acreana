@@ -12,6 +12,8 @@ import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import EmpresaDetailsModal from "@/components/EmpresaDetailsModal"
 import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
+import { buscarEmpresas } from "@/lib/services/empresa-service"
+import type { Empresa } from "@/lib/supabase.types"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
@@ -20,6 +22,7 @@ export default function BuscarPage() {
   const initialSearchTerm = searchParams.get("busca") || ""
   const initialStatus = searchParams.get("status") || "ativo"
   const initialSector = searchParams.get("setor_economico") || "all"
+  const initialActivity = searchParams.get("atividade") || searchParams.get("subcategoria") || "all"
   const initialCity = searchParams.get("municipio") || "all"
 
   const [empresas, setEmpresas] = useState<Empresa[]>([])
@@ -28,11 +31,16 @@ export default function BuscarPage() {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm)
   const [selectedStatus] = useState(initialStatus)
   const [selectedSector, setSelectedSector] = useState(initialSector)
+  const [selectedActivity, setSelectedActivity] = useState(initialActivity)
   const [selectedCity, setSelectedCity] = useState(initialCity)
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null)
 
   const setoresEconomicos = allCategories
     .filter(c => c.tipo === "setor_economico")
+    .map(c => ({ value: c.id, label: c.nome }))
+
+  const atividadesDinamicas = allCategories
+    .filter(c => c.tipo === "atividade_principal" && (selectedSector === "all" || c.parent_id === selectedSector))
     .map(c => ({ value: c.id, label: c.nome }))
 
   const municipios = [
@@ -66,6 +74,7 @@ export default function BuscarPage() {
       const fetchedEmpresas = await buscarEmpresas({
         status: selectedStatus === "all" ? undefined : selectedStatus,
         setor_economico: selectedSector === "all" ? undefined : selectedSector,
+        setor_empresa: selectedActivity === "all" ? undefined : selectedActivity,
         municipio: selectedCity === "all" ? undefined : selectedCity,
         busca: searchTerm,
       })
@@ -92,7 +101,7 @@ export default function BuscarPage() {
 
   useEffect(() => {
     fetchEmpresas()
-  }, [selectedStatus, selectedSector, selectedCity, searchTerm])
+  }, [selectedStatus, selectedSector, selectedActivity, selectedCity, searchTerm])
 
   const getCategoryName = (id: string) => {
     return allCategories.find(c => c.id === id)?.nome || id
@@ -131,7 +140,10 @@ export default function BuscarPage() {
           <div className="flex flex-wrap justify-center gap-4">
             <div className="space-y-1.5 text-left">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Setor Econômico</label>
-              <Select value={selectedSector} onValueChange={setSelectedSector}>
+              <Select value={selectedSector} onValueChange={(val) => {
+                setSelectedSector(val)
+                setSelectedActivity("all") // Reset activity when sector changes
+              }}>
                 <SelectTrigger className="w-56 h-12 rounded-xl border-primary/10 bg-white/50 backdrop-blur-sm">
                   <SelectValue placeholder="Todos os Setores" />
                 </SelectTrigger>
@@ -140,6 +152,23 @@ export default function BuscarPage() {
                   {setoresEconomicos.map((sector) => (
                     <SelectItem key={sector.value} value={sector.value}>
                       {sector.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5 text-left">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Atividade Industrial</label>
+              <Select value={selectedActivity} onValueChange={setSelectedActivity}>
+                <SelectTrigger className="w-56 h-12 rounded-xl border-primary/10 bg-white/50 backdrop-blur-sm">
+                  <SelectValue placeholder="Todas as Atividades" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as Atividades</SelectItem>
+                  {atividadesDinamicas.map((activity) => (
+                    <SelectItem key={activity.value} value={activity.value}>
+                      {activity.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
