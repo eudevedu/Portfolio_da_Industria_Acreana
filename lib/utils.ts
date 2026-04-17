@@ -50,18 +50,28 @@ export function resolveImageUrl(url: string | null | undefined): string | null {
     return url;
   }
 
-  // Se já for uma URL completa (http/https), retorna como está para máxima performance
-  if (url.startsWith('http')) {
-    return url;
-  }
-
-  // Se for apenas o caminho (ex: "Imagem/logo.png"), monta com o domínio do Supabase
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!supabaseUrl) return url;
 
-  const cleanPath = url.startsWith('/') ? url.slice(1) : url;
+  let cleanPath = url;
   
-  // Retorna a URL direta do CDN do Supabase (Acesso mais rápido)
+  // 1. Se for uma URL completa do Supabase (mesmo de outro projeto ou proxy antigo)
+  if (url.includes('/storage/v1/object/public/')) {
+    cleanPath = url.split('/public/').pop() || url;
+  } 
+  // 2. Se for uma URL completa externa (ex: imagem de outro site), retorna como está
+  else if (url.startsWith('http')) {
+    return url;
+  }
+
+  // 3. Remove resquícios de caminhos de proxy se existirem no banco/cache
+  cleanPath = cleanPath.replace('api/storage/', '');
+  cleanPath = cleanPath.replace('/api/storage/', '');
+  
+  // 4. Limpa barras iniciais
+  cleanPath = cleanPath.startsWith('/') ? cleanPath.slice(1) : cleanPath;
+  
+  // Retorna a URL direta do CDN do Supabase atual (Configurado no .env)
   return `${supabaseUrl}/storage/v1/object/public/${cleanPath}`;
 }
 

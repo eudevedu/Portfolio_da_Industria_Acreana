@@ -103,7 +103,6 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
                   src={resolveImageUrl(empresa.logo_url) || empresa.logo_url}
                   alt={`Logo da ${empresa.nome_fantasia}`}
                   className="w-full h-full object-contain p-6"
-                  crossOrigin="anonymous"
                 />
 
               ) : (
@@ -241,7 +240,6 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
                           src={resolveImageUrl(produto.imagem_url) || produto.imagem_url} 
                           alt={produto.nome} 
                           className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700" 
-                          crossOrigin="anonymous"
                         />
 
                       ) : (
@@ -453,7 +451,7 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
                 <Card className="h-full border-border/40 hover:border-primary/20 hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white/50 backdrop-blur-sm overflow-hidden flex flex-col p-6">
                   <div className="w-16 h-16 bg-white rounded-2xl border border-border/50 shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                     {relacionada.logo_url ? (
-                      <img src={resolveImageUrl(relacionada.logo_url) || relacionada.logo_url} alt={relacionada.nome_fantasia} className="w-full h-full object-contain p-2" crossOrigin="anonymous" />
+                      <img src={resolveImageUrl(relacionada.logo_url) || relacionada.logo_url} alt={relacionada.nome_fantasia} className="w-full h-full object-contain p-2" />
                     ) : (
                       <Building2 className="h-8 w-8 text-muted-foreground/30" />
                     )}
@@ -482,7 +480,7 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
             <div className="flex flex-col md:flex-row h-full max-h-[90vh] overflow-y-auto md:overflow-hidden">
               <div className="md:w-1/2 bg-slate-50 flex items-center justify-center p-12 relative">
                 {selectedProduto.imagem_url ? (
-                  <img src={resolveImageUrl(selectedProduto.imagem_url) || selectedProduto.imagem_url} alt={selectedProduto.nome} className="max-w-full max-h-[400px] object-contain drop-shadow-2xl" crossOrigin="anonymous" />
+                  <img src={resolveImageUrl(selectedProduto.imagem_url) || selectedProduto.imagem_url} alt={selectedProduto.nome} className="max-w-full max-h-[400px] object-contain drop-shadow-2xl" />
                 ) : (
                   <Package className="h-32 w-32 text-slate-200" />
                 )}
