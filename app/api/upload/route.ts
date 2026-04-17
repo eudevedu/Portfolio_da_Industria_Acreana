@@ -58,18 +58,18 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     if (uploadError) throw uploadError
 
-    const { data: { publicUrl } } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(fileName)
+    // Retorna caminho relativo para o nosso Proxy (Agnóstico de DNS)
+    const relativeUrl = `/api/storage/${bucket}/${fileName}`
 
     return NextResponse.json({
       success: true,
       arquivo: {
-        url: publicUrl,
+        url: relativeUrl,
         nome: file.name,
       },
       message: "Upload concluído com sucesso!",
     })
+
 
   } catch (error: any) {
     console.error("Erro no Upload API:", error)

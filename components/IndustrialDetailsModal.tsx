@@ -136,8 +136,9 @@ export function IndustrialDetailsModal({ isOpen, onClose, company, allCategories
                     <Card key={produto.id} className="rounded-2xl border-slate-100 shadow-sm overflow-hidden group hover:border-green-200 transition-all">
                       <div className="aspect-video relative bg-slate-100">
                         {produto.imagem_url ? (
-                          <img src={produto.imagem_url} alt={produto.nome} className="w-full h-full object-cover" />
+                          <img src={resolveImageUrl(produto.imagem_url) || produto.imagem_url} alt={produto.nome} className="w-full h-full object-cover" />
                         ) : (
+
                           <div className="w-full h-full flex items-center justify-center text-slate-300">
                             <Package className="h-8 w-8" />
                           </div>

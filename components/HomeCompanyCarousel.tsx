@@ -17,6 +17,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Factory } from "lucide-react"
+import { resolveImageUrl } from "@/lib/utils"
+
 
 interface HomeCompanyCarouselProps {
   empresas: Empresa[]
@@ -88,10 +90,11 @@ export default function HomeCompanyCarousel({ empresas }: HomeCompanyCarouselPro
                           <div className="w-14 h-14 relative flex-shrink-0 bg-white rounded-xl border border-border/30 overflow-hidden group-hover:scale-105 transition-transform flex items-center justify-center p-2 shadow-sm">
                             {empresa.logo_url ? (
                               <img
-                                src={empresa.logo_url}
+                                src={resolveImageUrl(empresa.logo_url) || empresa.logo_url}
                                 alt={`Logo da ${empresa.nome_fantasia}`}
                                 className="w-full h-full object-contain"
                               />
+
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-muted/30">
                                 <span className="text-lg font-black text-muted-foreground/30">{empresa.nome_fantasia?.charAt(0)}</span>

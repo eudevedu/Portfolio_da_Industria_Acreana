@@ -25,6 +25,8 @@ import {
 import type { Empresa } from "@/lib/supabase.types"
 import type { Categoria } from "@/lib/services/category-service"
 import ImageGallery from "./ImageGallery"
+import { resolveImageUrl } from "@/lib/utils"
+
 
 interface EmpresaDetailsModalProps {
   empresa: Empresa | null
@@ -137,11 +139,12 @@ export default function EmpresaDetailsModal({ empresa, isOpen, onClose, allCateg
                       {p.imagem_url && (
                         <div className="w-full h-44 -mx-5 -mt-5 mb-5 overflow-hidden border-b border-slate-100">
                           <img
-                            src={p.imagem_url}
+                            src={resolveImageUrl(p.imagem_url)}
                             alt={p.nome}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
+
                       )}
                       <div className="flex items-center justify-between mb-3">
                         <Badge variant="outline" className="text-[8px] uppercase tracking-widest font-bold text-primary/70 border-primary/20 bg-primary/2">

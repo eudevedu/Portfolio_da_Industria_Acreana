@@ -5,7 +5,8 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { UploadCloud, Check, X, Loader2, FileText, AlertCircle, ImageIcon, Eye } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, resolveImageUrl } from "@/lib/utils"
+
 
 interface UploadComponentProps {
   onUploadSuccess: (url: string, filename: string) => void
@@ -161,7 +162,7 @@ export function UploadComponent({
           <div className="flex flex-col items-center gap-2 w-full animate-in fade-in zoom-in duration-300">
              <div className="relative group/preview w-24 h-16 rounded-lg overflow-hidden border bg-white shadow-sm flex items-center justify-center">
                 {isImage(previewUrl || currentUrl) ? (
-                  <img src={previewUrl || currentUrl || ""} alt="Preview" className="w-full h-full object-cover" />
+                  <img src={resolveImageUrl(previewUrl || currentUrl || "") || ""} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
                   <div className="flex flex-col items-center">
                     <FileText className="h-6 w-6 text-red-500" />

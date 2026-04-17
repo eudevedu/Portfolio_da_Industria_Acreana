@@ -17,8 +17,11 @@ import {
   ExternalLink,
   Plus,
   Phone,
-  X
+  X,
+  Building
 } from "lucide-react"
+import { resolveImageUrl } from "@/lib/utils"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -97,10 +100,11 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
             <div className="w-40 h-40 md:w-56 md:h-56 relative flex-shrink-0 bg-white rounded-[2.5rem] border-4 border-white shadow-2xl overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform duration-700">
               {empresa.logo_url ? (
                 <img
-                  src={empresa.logo_url}
+                  src={resolveImageUrl(empresa.logo_url) || empresa.logo_url}
                   alt={`Logo da ${empresa.nome_fantasia}`}
                   className="w-full h-full object-contain p-6"
                 />
+
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted/20">
                   <Building2 className="h-20 w-20 text-muted-foreground/20" />
@@ -233,10 +237,11 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
                     <div className="relative aspect-square overflow-hidden bg-slate-100 p-4">
                       {produto.imagem_url ? (
                         <img 
-                          src={produto.imagem_url} 
+                          src={resolveImageUrl(produto.imagem_url) || produto.imagem_url} 
                           alt={produto.nome} 
                           className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700" 
                         />
+
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
                           <ImageIcon className="h-12 w-12 mb-2 stroke-[1.5]" />
@@ -446,11 +451,12 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
                 <Card className="h-full border-border/40 hover:border-primary/20 hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white/50 backdrop-blur-sm overflow-hidden flex flex-col p-6">
                   <div className="w-16 h-16 bg-white rounded-2xl border border-border/50 shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                     {relacionada.logo_url ? (
-                      <img src={relacionada.logo_url} alt={relacionada.nome_fantasia} className="w-full h-full object-contain p-2" />
+                      <img src={resolveImageUrl(relacionada.logo_url) || relacionada.logo_url} alt={relacionada.nome_fantasia} className="w-full h-full object-contain p-2" />
                     ) : (
                       <Building2 className="h-8 w-8 text-muted-foreground/30" />
                     )}
                   </div>
+
                   <h4 className="text-lg font-display font-black truncate mb-2 group-hover:text-primary transition-colors">{relacionada.nome_fantasia}</h4>
                   <div className="flex items-center text-xs font-bold text-muted-foreground/80 mb-6">
                     <MapPin className="h-3 w-3 mr-1" />
@@ -474,10 +480,11 @@ export default function EmpresaDetailContent({ initialEmpresa, initialRelacionad
             <div className="flex flex-col md:flex-row h-full max-h-[90vh] overflow-y-auto md:overflow-hidden">
               <div className="md:w-1/2 bg-slate-50 flex items-center justify-center p-12 relative">
                 {selectedProduto.imagem_url ? (
-                  <img src={selectedProduto.imagem_url} alt={selectedProduto.nome} className="max-w-full max-h-[400px] object-contain drop-shadow-2xl" />
+                  <img src={resolveImageUrl(selectedProduto.imagem_url) || selectedProduto.imagem_url} alt={selectedProduto.nome} className="max-w-full max-h-[400px] object-contain drop-shadow-2xl" />
                 ) : (
                   <Package className="h-32 w-32 text-slate-200" />
                 )}
+
                 <div className="absolute top-8 left-8">
                    <Badge className="bg-white/80 backdrop-blur text-slate-900 border-none font-black text-[10px] py-1.5 px-4 rounded-full uppercase tracking-widest">
                      {selectedProduto.linha || "Portfólio Industrial"}
