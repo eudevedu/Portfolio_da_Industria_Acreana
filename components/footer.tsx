@@ -20,7 +20,7 @@ export default function Footer() {
     { label: 'Página Inicial', href: '/' },
     { label: 'Buscar Empresas', href: '/buscar' },
     { label: 'Cadastrar Indústria', href: '/cadastro' },
-    { label: 'Área Restrita', href: '/login' },
+    { label: 'Login', href: '/login' },
     { label: 'Sobre o Projeto', href: '#' },
   ];
 
