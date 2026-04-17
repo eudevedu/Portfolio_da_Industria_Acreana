@@ -5,18 +5,23 @@ import { redirect } from "next/navigation"
  * Obtém o usuário logado e identifica seu tipo de forma segura
  */
 export async function getAuthenticatedUser() {
-  const supabase = await createServerSideClient()
-  if (!supabase) return null
+  try {
+    const supabase = await createServerSideClient()
+    if (!supabase) return null
 
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) return null
-  
-  // O tipo pode estar no metadado (rápido) ou no banco (seguro)
-  const tipoMetadata = user.user_metadata?.tipo
-  
-  return {
-    ...user,
-    tipo: tipoMetadata
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error || !user) return null
+    
+    // O tipo pode estar no metadado (rápido) ou no banco (seguro)
+    const tipoMetadata = user.user_metadata?.tipo
+    
+    return {
+      ...user,
+      tipo: tipoMetadata
+    }
+  } catch (error) {
+    console.error("[getAuthenticatedUser Error]:", error)
+    return null
   }
 }
 

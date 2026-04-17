@@ -93,6 +93,7 @@ export default function HomeCompanyCarousel({ empresas }: HomeCompanyCarouselPro
                                 src={resolveImageUrl(empresa.logo_url) || empresa.logo_url}
                                 alt={`Logo da ${empresa.nome_fantasia}`}
                                 className="w-full h-full object-contain"
+                                crossOrigin="anonymous"
                               />
 
                             ) : (

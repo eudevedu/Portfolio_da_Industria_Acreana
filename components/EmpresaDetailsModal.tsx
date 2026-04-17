@@ -142,6 +142,7 @@ export default function EmpresaDetailsModal({ empresa, isOpen, onClose, allCateg
                             src={resolveImageUrl(p.imagem_url)}
                             alt={p.nome}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            crossOrigin="anonymous"
                           />
                         </div>
 

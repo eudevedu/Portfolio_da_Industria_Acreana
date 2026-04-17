@@ -162,7 +162,7 @@ export function UploadComponent({
           <div className="flex flex-col items-center gap-2 w-full animate-in fade-in zoom-in duration-300">
              <div className="relative group/preview w-24 h-16 rounded-lg overflow-hidden border bg-white shadow-sm flex items-center justify-center">
                 {isImage(previewUrl || currentUrl) ? (
-                  <img src={resolveImageUrl(previewUrl || currentUrl || "") || ""} alt="Preview" className="w-full h-full object-cover" />
+                  <img src={resolveImageUrl(previewUrl || currentUrl || "") || ""} alt="Preview" className="w-full h-full object-cover" crossOrigin="anonymous" />
                 ) : (
                   <div className="flex flex-col items-center">
                     <FileText className="h-6 w-6 text-red-500" />

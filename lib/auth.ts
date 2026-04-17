@@ -48,26 +48,31 @@ export async function logout(): Promise<void> {
  * Obtém o usuário atual com tipagem e papel corretos
  */
 export async function getCurrentUser(): Promise<User | null> {
-  const user = await getAuthenticatedUser()
-  if (!user) return null
+  try {
+    const user = await getAuthenticatedUser()
+    if (!user) return null
 
-  const supabase = await createServerSideClient()
-  const tipo = user.user_metadata?.tipo || "visitante"
-  let empresaId = null
+    const supabase = await createServerSideClient()
+    const tipo = user.user_metadata?.tipo || "visitante"
+    let empresaId = null
 
-  if (tipo === "empresa") {
-    const { data: perfil } = await supabase.from("perfis_empresas").select("empresa_id").eq("id", user.id).single()
-    empresaId = perfil?.empresa_id
+    if (tipo === "empresa") {
+      const { data: perfil } = await supabase.from("perfis_empresas").select("empresa_id").eq("id", user.id).single()
+      empresaId = perfil?.empresa_id
+    }
+
+    return {
+      id: user.id,
+      email: user.email!,
+      tipo: tipo as any,
+      empresa_id: empresaId,
+      created_at: user.created_at,
+      updated_at: user.updated_at || user.created_at,
+    } as User
+  } catch (error) {
+    console.error("[getCurrentUser Error]:", error)
+    return null
   }
-
-  return {
-    id: user.id,
-    email: user.email!,
-    tipo: tipo as any,
-    empresa_id: empresaId,
-    created_at: user.created_at,
-    updated_at: user.updated_at || user.created_at,
-  } as User
 }
 
 /**
@@ -115,11 +120,16 @@ export async function isAdmin() {
 }
 
 export async function isEmpresaAtiva() {
-  const user = await getCurrentUser()
-  if (!user || user.tipo !== "empresa") return false
-  if (!user.empresa_id) return false
+  try {
+    const user = await getCurrentUser()
+    if (!user || user.tipo !== "empresa") return false
+    if (!user.empresa_id) return false
 
-  const supabase = await createServerSideClient()
-  const { data: empresa } = await supabase.from("empresas").select("status").eq("id", user.empresa_id).single()
-  return empresa?.status === "ativo"
+    const supabase = await createServerSideClient()
+    const { data: empresa } = await supabase.from("empresas").select("status").eq("id", user.empresa_id).single()
+    return empresa?.status === "ativo"
+  } catch (error) {
+    console.error("[isEmpresaAtiva Error]:", error)
+    return false
+  }
 }
