@@ -16,6 +16,21 @@ import { LogoSeict } from "./LogoIndustria";
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
+  const navLinks = [
+    { label: 'Página Inicial', href: '/' },
+    { label: 'Buscar Empresas', href: '/buscar' },
+    { label: 'Cadastrar Indústria', href: '/cadastro' },
+    { label: 'Área Restrita', href: '/login' },
+    { label: 'Sobre o Projeto', href: '#' },
+  ];
+
+  const setoresPrincipais = [
+    { label: 'Alimentos e Bebidas', href: '/buscar' },
+    { label: 'Madeira e Móveis', href: '/buscar' },
+    { label: 'Construção Civil', href: '/buscar' },
+    { label: 'Agroindústria', href: '/buscar' },
+  ];
+
   return (
     <footer className="relative z-10 bg-[#228b22] text-white pt-24 pb-12 overflow-hidden">
       {/* Decorative background elements */}
@@ -27,15 +42,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-20">
           {/* Brand Column */}
           <div className="space-y-8">
-            <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div className="p-2.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
                 <LogoSeict className=" text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-display font-black tracking-tight leading-none">PORTFÓLIO</span>
-                <span className="text-[0.65rem] font-bold tracking-[0.2em] text-white uppercase">Indústria Acreana</span>
+                <span className="text-xl font-display font-black tracking-tight leading-none text-white">PORTFÓLIO</span>
+                <span className="text-[0.65rem] font-bold tracking-[0.2em] text-white/70 uppercase">Indústria Acreana</span>
               </div>
-            </div>
+            </Link>
 
             <p className="text-white text-sm leading-relaxed max-w-xs">
               Plataforma oficial para o desenvolvimento industrial do Estado do Acre. Conectando empresas, produtos e serviços para fortalecer nossa economia local.
@@ -64,13 +79,13 @@ export default function Footer() {
               Navegação
             </h4>
             <ul className="space-y-4">
-              {['Página Inicial', 'Buscar Empresas', 'Cadastrar Indústria', 'Área Restrita', 'Sobre o Projeto'].map((item) => (
-                <li key={item}>
+              {navLinks.map((item) => (
+                <li key={item.label}>
                   <Link
-                    href={item === 'Página Inicial' ? '/' : `/${item.toLowerCase().replace(/ /g, '-')}`}
+                    href={item.href}
                     className="group flex items-center text-white hover:text-white transition-colors"
                   >
-                    <span className="text-sm">{item}</span>
+                    <span className="text-sm">{item.label}</span>
                     <ArrowUpRight className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0" />
                   </Link>
                 </li>
@@ -85,14 +100,14 @@ export default function Footer() {
               Setores Principais
             </h4>
             <div className="grid grid-cols-1 gap-4">
-              {['Alimentos e Bebidas', 'Madeira e Móveis', 'Construção Civil', 'Agroindústria', 'Tecnologia'].map((setor) => (
+              {setoresPrincipais.map((setor) => (
                 <Link
-                  key={setor}
-                  href={`/buscar?setor=${setor}`}
+                  key={setor.label}
+                  href={setor.href}
                   className="text-sm text-white hover:text-green-400 transition-colors flex items-center gap-2"
                 >
                   <span className="w-1 h-1 rounded-full bg-white/20" />
-                  {setor}
+                  {setor.label}
                 </Link>
               ))}
             </div>
@@ -141,9 +156,9 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="relative pt-12 pb-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 text-[0.7rem] sm:text-xs">
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 text-white font-medium">
-            <Link href="/privacidade" className="hover:text-white transition-colors">Privacidade</Link>
-            <Link href="/termos" className="hover:text-white transition-colors">Termos de Uso</Link>
-            <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
+            <Link href="#" className="hover:text-white transition-colors">Privacidade</Link>
+            <Link href="#" className="hover:text-white transition-colors">Termos de Uso</Link>
+            <Link href="#" className="hover:text-white transition-colors">Cookies</Link>
           </div>
 
           <p className="text-white text-center md:text-right">
@@ -152,6 +167,6 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }
 
