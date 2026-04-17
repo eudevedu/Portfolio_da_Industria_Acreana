@@ -26,22 +26,34 @@ export const metadata: Metadata = {
   },
 }
 
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const loggedIn = await isLoggedIn()
   const user = await getCurrentUser()
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${inter.variable} ${outfit.variable} font-sans antialiased`}>
-        <div className="flex flex-col min-h-screen">
-          <Header loggedIn={loggedIn} user={user} dashboardLink={dashboardLink} />
-          <main className="flex-grow relative z-0">
-            {children}
-          </main>
-          <Footer />
-        </div>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="flex flex-col min-h-screen">
+            <Header loggedIn={loggedIn} user={user} dashboardLink={dashboardLink} />
+            <main className="flex-grow relative z-0">
+              {children}
+            </main>
+            <Footer />
+          </div>
+          <Toaster richColors position="top-right" closeButton />
+        </ThemeProvider>
       </body>
     </html>
   )
 }
+

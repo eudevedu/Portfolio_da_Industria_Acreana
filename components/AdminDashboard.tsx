@@ -33,6 +33,7 @@ import {
   AlertCircle,
   LayoutGrid
 } from "lucide-react"
+import { toast } from "sonner"
 import { IndustrialDetailsModal } from "@/components/IndustrialDetailsModal"
 import { ConfiguracoesModal } from "@/components/ConfiguracoesModal"
 import { CategoryManager } from "@/components/CategoryManager"
@@ -380,14 +381,18 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
         setShowFormDialog(false)
         methods.reset()
         setCreateStepTab("empresa")
-        alert("Empresa cadastrada com sucesso!")
+        setCreateStepTab("empresa")
+        toast.success("Perfil industrial cadastrado com sucesso!", {
+          description: "A empresa já está disponível na plataforma.",
+          duration: 5000,
+        })
       }
     } catch (error: any) {
       console.error("Erro ao criar empresa:", error)
       const errorMsg = error.message?.includes("duplicate key") 
         ? "Erro: CNPJ já cadastrado no sistema." 
         : `Erro ao criar perfil industrial: ${error.message || ""}`
-      alert(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setCreatingEmpresa(false)
     }
@@ -406,13 +411,17 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
         const empresasData = await buscarEmpresasAdmin()
         setEmpresas(empresasData)
         setShowFormDialog(false)
-        alert("Perfil industrial atualizado com sucesso!")
+        toast.success("Perfil atualizado!", {
+          description: "As alterações foram sincronizadas com sucesso.",
+        })
       } else {
         throw new Error("Falha na sincronização dos dados no servidor.")
       }
     } catch (error: any) {
       console.error("Erro ao atualizar:", error)
-      alert(`Erro ao atualizar perfil industrial: ${error.message || ""}`)
+      toast.error("Erro na atualização", {
+        description: error.message || "Não foi possível salvar as alterações."
+      })
     } finally {
       setUpdatingCompany(false)
     }
@@ -486,12 +495,17 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
         setEmpresas(prev => prev.filter(e => e.id !== companyToDelete.id))
         const updatedStats = await obterEstatisticasAdmin()
         setStats(updatedStats)
+        toast.success("Empresa excluída permanentemente.")
       } else {
-        alert("Erro ao excluir empresa")
+        toast.error("Erro ao excluir", {
+          description: "Tente novamente mais tarde."
+        })
       }
     } catch (error) {
       console.error("Erro ao excluir:", error)
-      alert("Erro de conexão ao excluir empresa")
+      toast.error("Falha de conexão", {
+        description: "Não foi possível completar a operação."
+      })
     } finally {
       setDeletingCompany(false)
       setShowDeleteDialog(false)
@@ -544,11 +558,15 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
           confirmPassword: "",
           cargo: ""
         })
-        alert("Administrador cadastrado com sucesso!")
+        toast.success("Novo administrador criado!", {
+          description: `Acesso liberado para ${result.nome}.`,
+        })
       }
     } catch (error: any) {
       console.error("Erro ao criar administrador:", error)
-      alert(error.message || "Erro ao criar administrador")
+      toast.error("Erro ao criar convite", {
+        description: error.message || "Tente novamente."
+      })
     } finally {
       setCreatingAdmin(false)
     }

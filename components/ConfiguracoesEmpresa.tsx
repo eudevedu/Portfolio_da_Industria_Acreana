@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Lock, Trash2, User, Mail, AlertTriangle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface ConfiguracoesEmpresaProps {
   userEmail: string
@@ -22,14 +22,12 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId, userType }:
   const [novaSenha, setNovaSenha] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null)
   const [deletingAccount, setDeletingAccount] = useState(false)
   const router = useRouter()
 
   const handleUpdateEmail = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setMessage(null)
 
     try {
       const response = await fetch('/api/auth/update-email', {
@@ -41,12 +39,12 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId, userType }:
       const data = await response.json()
 
       if (data.success) {
-        setMessage({ type: 'success', text: 'Email atualizado com sucesso!' })
+        toast.success('Email atualizado com sucesso!')
       } else {
-        setMessage({ type: 'error', text: data.error || 'Erro ao atualizar email' })
+        toast.error(data.error || 'Erro ao atualizar email')
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erro interno do servidor' })
+      toast.error('Erro interno do servidor')
     } finally {
       setLoading(false)
     }
@@ -55,16 +53,14 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId, userType }:
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setMessage(null)
-
     if (novaSenha !== confirmarSenha) {
-      setMessage({ type: 'error', text: 'As senhas não coincidem' })
+      toast.error('As senhas não coincidem')
       setLoading(false)
       return
     }
 
     if (novaSenha.length < 6) {
-      setMessage({ type: 'error', text: 'A nova senha deve ter pelo menos 6 caracteres' })
+      toast.error('A nova senha deve ter pelo menos 6 caracteres')
       setLoading(false)
       return
     }
@@ -82,15 +78,15 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId, userType }:
       const data = await response.json()
 
       if (data.success) {
-        setMessage({ type: 'success', text: 'Senha atualizada com sucesso!' })
+        toast.success('Senha atualizada com sucesso!')
         setSenhaAtual('')
         setNovaSenha('')
         setConfirmarSenha('')
       } else {
-        setMessage({ type: 'error', text: data.error || 'Erro ao atualizar senha' })
+        toast.error(data.error || 'Erro ao atualizar senha')
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erro interno do servidor' })
+      toast.error('Erro interno do servidor')
     } finally {
       setLoading(false)
     }
@@ -98,7 +94,6 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId, userType }:
 
   const handleDeleteAccount = async () => {
     setDeletingAccount(true)
-    setMessage(null)
 
     try {
       const response = await fetch('/api/auth/delete-account', {
@@ -109,28 +104,22 @@ export default function ConfiguracoesEmpresa({ userEmail, empresaId, userType }:
       const data = await response.json()
 
       if (data.success) {
-        setMessage({ type: 'success', text: 'Conta excluída com sucesso. Redirecionando...' })
+        toast.success('Conta excluída com sucesso.')
         setTimeout(() => {
           router.push('/')
         }, 2000)
       } else {
-        setMessage({ type: 'error', text: data.error || 'Erro ao excluir conta' })
+        toast.error(data.error || 'Erro ao excluir conta')
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erro interno do servidor' })
+      toast.error('Erro interno do servidor')
     } finally {
       setDeletingAccount(false)
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Mensagens de feedback */}
-      {message && (
-        <Alert variant={message.type === 'error' ? 'destructive' : 'default'}>
-          <AlertDescription>{message.text}</AlertDescription>
-        </Alert>
-      )}
+    <div className="space-y-6 animate-in fade-in duration-500">
 
       {/* Alterar Email */}
       <Card>
