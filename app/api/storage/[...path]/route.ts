@@ -7,13 +7,15 @@ import { NextRequest, NextResponse } from "next/server"
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const pathSegments = params.path
-    if (pathSegments.length < 2) {
+    const { path: pathSegments } = await params;
+    
+    if (!pathSegments || pathSegments.length < 2) {
       return new NextResponse("Caminho inválido", { status: 400 })
     }
+
 
     const bucket = pathSegments[0]
     const filePath = pathSegments.slice(1).join("/")
