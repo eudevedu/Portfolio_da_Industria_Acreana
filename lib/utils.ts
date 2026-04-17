@@ -45,28 +45,23 @@ export function getURL() {
 export function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   
-  // Se for uma URL completa externa (que não seja do nosso Supabase), retorna como está
-  if (url.startsWith('http') && !url.includes('supabase.co/storage')) {
-    return url;
-  }
-
-  // Se for base64
+  // Base64 retorna direto
   if (url.startsWith('data:')) {
     return url;
   }
 
-  // Se for uma URL do Supabase, extraímos apenas o caminho relativo para passar pelo nosso PROXY
-  // Isso resolve o problema de "funcionar em todos DNS"
-  let cleanPath = url;
-  if (url.includes('/storage/v1/object/public/')) {
-    // Extrai o que vem depois de /public/ (ex: Imagem/logo.png)
-    cleanPath = url.split('/public/').pop() || url;
+  // Se já for uma URL completa (http/https), retorna como está para máxima performance
+  if (url.startsWith('http')) {
+    return url;
   }
 
-  // Remove barra inicial se houver
-  cleanPath = cleanPath.startsWith('/') ? cleanPath.slice(1) : cleanPath;
+  // Se for apenas o caminho (ex: "Imagem/logo.png"), monta com o domínio do Supabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) return url;
+
+  const cleanPath = url.startsWith('/') ? url.slice(1) : url;
   
-  // Retorna o caminho via Proxy Interno (Agnóstico de DNS)
-  return `/api/storage/${cleanPath}`;
+  // Retorna a URL direta do CDN do Supabase (Acesso mais rápido)
+  return `${supabaseUrl}/storage/v1/object/public/${cleanPath}`;
 }
 
