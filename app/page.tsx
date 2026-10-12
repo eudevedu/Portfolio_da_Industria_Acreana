@@ -30,7 +30,7 @@ export default async function HomePage() {
 
   // Busca estatísticas dinâmicas
   const stats = await obterEstatisticasHome()
-  
+
   // Busca categorias para os filtros
   const categorias = await buscarCategorias()
 
@@ -45,11 +45,7 @@ export default async function HomePage() {
             alt="Acre Rural Landscape"
             className="w-full h-full object-cover"
           />
-<<<<<<< HEAD
           <div className="absolute inset-0 bg-gradient-to-b from-brand-petrol/90 via-brand-petrol/70 to-background" />
-=======
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/70 to-background" />
->>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 text-center animate-fade-in">
@@ -82,15 +78,6 @@ export default async function HomePage() {
             </Link>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* <div className="mt-12 flex items-center justify-center space-x-2 text-white/70 text-sm">
-            <span>Potencializado por</span>
-            <div className="bg-white/95 px-5 py-3 rounded-lg shadow-lg">
-              <LogoSeict className="h-14 w-auto object-contain" />
-            </div>
-          </div> */}
->>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
         </div>
 
         {/* Floating elements for visual depth */}
@@ -135,9 +122,9 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <FeaturedCompaniesSection 
-            initialEmpresas={empresas} 
-            categorias={categorias} 
+          <FeaturedCompaniesSection
+            initialEmpresas={empresas}
+            categorias={categorias}
           />
 
           {errorMsg && (

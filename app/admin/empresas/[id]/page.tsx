@@ -59,11 +59,7 @@ export default async function AdminEmpresaDetailPage({ params }: { params: { id:
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-<<<<<<< HEAD
               <LogoPortfolio className="h-14 w-14 " />
-=======
-              <LogoSeict />
->>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
               <span className="font-bold text-lg">Detalhes da Empresa</span>
             </div>
             <div className="flex items-center gap-2">

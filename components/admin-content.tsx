@@ -325,11 +325,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
           <div className="p-8 border-b border-slate-100">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
-<<<<<<< HEAD
                 <LogoPortfolio className="h-8 w-8 text-white" />
-=======
-                <LogoSeict className=" text-white" />
->>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-display font-black leading-none text-slate-900 uppercase">ADMIN</span>
@@ -813,7 +809,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
               <Label className="text-xs font-black uppercase text-slate-400">Cargo / Função</Label>
               <Input
                 className="rounded-xl"
-                placeholder="Ex: Moderador, Gestor SEICT"
+                placeholder="Ex: Moderador, Gestor do Portfólio"
                 value={novoAdmin.cargo}
                 onChange={e => setNovoAdmin({ ...novoAdmin, cargo: e.target.value })}
               />

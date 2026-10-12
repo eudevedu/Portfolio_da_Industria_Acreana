@@ -49,22 +49,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
-<<<<<<< HEAD
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Link href="/">
               <LogoPortfolio className="h-15  w-15 text-green-600" />
-=======
-      <Card className="w-full max-w-md shadow-2xl border-none glass">
-        <CardHeader className="text-center pb-2">
-          <div className="flex justify-center mb-8">
-            <Link href="/" className="group">
-              {/* Container Premium para a Logo */}
-              <div className="bg-white px-8 py-4 rounded-[2.5rem] shadow-xl shadow-green-900/10 group-hover:scale-105 transition-all duration-500 border border-slate-100/50">
-                <LogoSeict className="h-16 w-auto object-contain" />
-              </div>
->>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
             </Link>
           </div>
           <CardTitle className="text-3xl font-display font-black tracking-tight text-slate-900 uppercase">Acesso ao Portal</CardTitle>

@@ -21,13 +21,8 @@ export const metadata: Metadata = {
   description: "Plataforma independente que conecta empresas, produtos e serviços da indústria acreana. Explore o potencial produtivo do Acre.",
   generator: "Next.js",
   icons: {
-<<<<<<< HEAD
     icon: '/brand/logo-portfolio-acre-v2.png',
     apple: '/brand/logo-portfolio-acre-v2.png',
-=======
-    icon: '/favicon.ico',
-    apple: '/favicon.ico',
->>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
   },
 }
 

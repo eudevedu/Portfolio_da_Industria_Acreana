@@ -4,12 +4,6 @@ import { isSupabaseConfigured } from "@/lib/supabase"
 import { isLoggedIn, isAdmin as checkIsAdmin, getCurrentUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import type { Empresa } from "@/lib/supabase.types"
-<<<<<<< HEAD
-import { AdminContent } from "@/components/admin-content"
-import { LogoPortfolio } from "@/components/LogoIndustria"
-import { Badge } from "@/components/ui/badge"
-=======
->>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
 
 export const dynamic = "force-dynamic"
 
@@ -56,11 +50,11 @@ export default async function AdminDashboardPage() {
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-solid border-green-500 border-t-transparent shadow-lg shadow-green-100" />
         </div>
       ) : (
-        <AdminDashboard 
-          initialStats={stats} 
-          initialEmpresas={initialEmpresas} 
-          isConfiguredProp={isConfigured} 
-          user={user} 
+        <AdminDashboard
+          initialStats={stats}
+          initialEmpresas={initialEmpresas}
+          isConfiguredProp={isConfigured}
+          user={user}
         />
       )}
     </div>

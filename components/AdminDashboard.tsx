@@ -98,7 +98,7 @@ import {
   buscarEmpresas as buscarEmpresasService
 } from "@/lib/services/empresa-service"
 import { logout } from "@/lib/auth"
-import { LogoSeict } from "@/components/LogoIndustria"
+import { LogoPortfolio } from "@/components/LogoIndustria"
 import type { Empresa, Admin } from "@/lib/supabase.types"
 import { formatBrazilianShortDate, cn } from "@/lib/utils"
 import { createServerSideClient } from "@/lib/supabase"
@@ -598,7 +598,7 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
           <div className="p-8 border-b border-slate-100">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
-                <LogoSeict className=" text-white" />
+                <LogoPortfolio className=" text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-display font-black leading-none text-slate-900 uppercase">ADMIN</span>
@@ -1140,7 +1140,7 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
               <Label className="text-xs font-black uppercase text-slate-400">Cargo / Função</Label>
               <Input
                 className="rounded-xl"
-                placeholder="Ex: Moderador, Gestor SEICT"
+                placeholder="Ex: Moderador, Gestor do Portfólio"
                 value={novoAdmin.cargo}
                 onChange={e => setNovoAdmin({ ...novoAdmin, cargo: e.target.value })}
               />

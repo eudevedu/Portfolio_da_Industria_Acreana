@@ -45,7 +45,7 @@ export default async function DashboardPage() {
 
   // Bloqueio imediato se a empresa não estiver ativa (exceto para admins)
   if (!active && user?.tipo === "empresa") {
-    redirect("/login?error=Sua conta industrial não está ativa. Entre em contato com o suporte da SEICT.")
+    redirect("/login?error=Sua conta industrial não está ativa. Entre em contato com o suporte do Portfólio.")
   }
 
   const isConfigured = isSupabaseConfigured()
@@ -92,64 +92,18 @@ export default async function DashboardPage() {
     >
       <div className="min-h-screen bg-[#f8fafc] flex">
         <Tabs defaultValue="empresa" className="flex-1 flex flex-col h-full">
-<<<<<<< HEAD
-        {/* Sidebar Navigation */}
-        <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col z-50">
-          <div className="p-8 border-b border-slate-100">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
-                <LogoPortfolio className="h-8 w-8 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-display font-black tracking-tight leading-none text-slate-900 uppercase">PORTFÓLIO</span>
-                <span className="text-[0.6rem] font-bold tracking-[0.2em] text-green-600 uppercase">Indústria Acreana</span>
-              </div>
-            </Link>
-          </div>
-
-          <nav className="flex-1 p-6 space-y-2">
-            <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Menu Principal</p>
-            <TabsList className="flex flex-col w-full bg-transparent p-0 gap-2 h-auto">
-              {[
-                { id: 'empresa', label: 'Dados da Empresa', icon: Building2 },
-                { id: 'produtos', label: 'Gestão de Produtos', icon: Package },
-                { id: 'arquivos', label: 'Arquivos e Mídias', icon: ImageIcon },
-                { id: 'analytics', label: 'Desempenho', icon: BarChart3 },
-              ].map((item) => (
-                <TabsTrigger 
-                  key={item.id} 
-                  value={item.id}
-                  className="w-full justify-start gap-3 px-4 py-3 rounded-xl text-slate-600 data-[state=active]:bg-green-50 data-[state=active]:text-green-700 data-[state=active]:shadow-none hover:bg-slate-50 transition-all font-medium border-transparent"
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <div className="pt-8 space-y-2">
-              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 mb-4 px-3">Atalhos</p>
-              <ViewProfileButton company={empresa} />
-              <ConfiguracoesButton 
-                userEmail={user?.email || ""} 
-                empresaId={empresaId} 
-                userType="empresa" 
-                userName={empresa?.nome_fantasia} 
-              />
-=======
           {/* Sidebar Navigation */}
           <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col z-50">
             <div className="p-8 border-b border-slate-100">
               <Link href="/" className="flex items-center gap-3 group">
                 <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
-                  <LogoSeict className="text-white" />
+                  <LogoPortfolio className="text-white" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-lg font-display font-black tracking-tight leading-none text-slate-900 uppercase">PORTFÓLIO</span>
                   <span className="text-[0.6rem] font-bold tracking-[0.2em] text-green-600 uppercase">Indústria Acreana</span>
                 </div>
               </Link>
->>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
             </div>
 
             <nav className="flex-1 p-6 space-y-2">
