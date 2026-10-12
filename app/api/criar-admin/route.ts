@@ -1,31 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-// Cliente administrativo usando SERVICE_ROLE_KEY
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
+import { getAdminApiClient } from '@/lib/admin-api'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔍 API Route - Verificando variáveis:')
-    console.log('- SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL)
-    console.log('- SUPABASE_SERVICE_ROLE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
-    console.log('- SERVICE_ROLE_KEY Length:', process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0)
-
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json(
-        { error: 'Configuração do Supabase não encontrada' },
-        { status: 500 }
-      )
-    }
+    const { client: supabaseAdmin, response } = await getAdminApiClient()
+    if (response) return response
 
     const body = await request.json()
     const { nome, email, password, cargo } = body

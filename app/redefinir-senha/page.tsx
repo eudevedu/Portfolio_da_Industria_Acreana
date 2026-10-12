@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase"
 import Link from "next/link"
+
+const supabase = createClient()
 
 function RedefinirSenhaContent() {
   const [newPassword, setNewPassword] = useState("")
@@ -21,6 +23,13 @@ function RedefinirSenhaContent() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
+    let disposed = false
+    let recoveryTimer: ReturnType<typeof setTimeout> | undefined
+    let subscription: { unsubscribe: () => void } | undefined
+    const markReady = () => {
+      if (recoveryTimer) clearTimeout(recoveryTimer)
+      if (!disposed) setReady(true)
+    }
     const checkRecoverySession = async () => {
       try {
         if (!supabase) {
@@ -40,37 +49,39 @@ function RedefinirSenhaContent() {
         }
         
         // Listener para mudanças no estado de autenticação
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const listener = supabase.auth.onAuthStateChange((event, session) => {
           console.log("Auth state changed:", event, session?.user?.email)
           
           if (event === 'PASSWORD_RECOVERY') {
             console.log("Sessão de recuperação de senha detectada")
-            setReady(true)
+            markReady()
           } else if (event === 'SIGNED_IN' && session) {
             console.log("Usuário autenticado")
-            setReady(true)
+            markReady()
           } else if (event === 'USER_UPDATED') {
             console.log("Usuário atualizado")
           }
         })
+        subscription = listener.data.subscription
+        if (disposed) {
+          subscription.unsubscribe()
+          return
+        }
         
         // Se já houver sessão, marcar como pronto
         if (session) {
           console.log("Sessão existente encontrada")
-          setReady(true)
+          markReady()
         } else {
           // Se não houver sessão após 2 segundos, mostrar erro
-          setTimeout(() => {
-            if (!ready) {
+          recoveryTimer = setTimeout(() => {
+            if (!disposed) {
               setError("Link de recuperação inválido ou expirado. Solicite um novo link.")
               setReady(true)
             }
           }, 2000)
         }
         
-        return () => {
-          subscription.unsubscribe()
-        }
       } catch (err) {
         console.error("Erro ao validar sessão:", err)
         setError("Erro ao validar sessão de recuperação. Tente solicitar um novo link.")
@@ -78,6 +89,11 @@ function RedefinirSenhaContent() {
       }
     }
     checkRecoverySession()
+    return () => {
+      disposed = true
+      if (recoveryTimer) clearTimeout(recoveryTimer)
+      subscription?.unsubscribe()
+    }
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

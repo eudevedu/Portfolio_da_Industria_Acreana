@@ -57,11 +57,8 @@ export function createAdminClient() {
     return null as any
   }
 
-  return createServerClient(supabaseUrl, serviceKey, {
-    cookies: {
-      getAll() { return [] },
-      setAll() {}
-    }
+  return createLegacyClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false }
   })
 }
 

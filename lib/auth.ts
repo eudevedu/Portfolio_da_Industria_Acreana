@@ -1,9 +1,46 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 import { createServerSideClient } from "./supabase"
 import { getAuthenticatedUser } from "./auth-guards"
 import type { User } from "./supabase.types"
+
+export async function recoverPassword(email: string): Promise<{ success: boolean; message: string }> {
+  if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    return { success: false, message: "Informe um email válido." }
+  }
+
+  try {
+    const supabase = await createServerSideClient()
+    if (!supabase) {
+      return { success: false, message: "Serviço de autenticação indisponível." }
+    }
+
+    const requestHeaders = await headers()
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+      || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null)
+      || requestHeaders.get("origin")
+      || (process.env.NODE_ENV !== "production" ? "http://localhost:3000" : null)
+    if (!baseUrl) {
+      return { success: false, message: "Endereço da plataforma não configurado." }
+    }
+    const callbackUrl = new URL("/auth/callback", baseUrl)
+    if (!["http:", "https:"].includes(callbackUrl.protocol)) {
+      return { success: false, message: "Endereço da plataforma inválido." }
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: callbackUrl.toString(),
+    })
+    if (error) {
+      return { success: false, message: "Não foi possível enviar o link de recuperação. Tente novamente." }
+    }
+    return { success: true, message: "Se o email estiver cadastrado, você receberá um link para redefinir sua senha." }
+  } catch {
+    return { success: false, message: "Erro ao solicitar recuperação de senha. Tente novamente." }
+  }
+}
 
 /**
  * Login consolidado usando Supabase Auth

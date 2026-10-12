@@ -7,6 +7,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "check:conflicts": "node scripts/check-merge-conflicts.mjs",
+    "test:build-regressions": "node --experimental-vm-modules scripts/test-build-regressions.mjs",
     "start": "next start"
   },
   "dependencies": {
