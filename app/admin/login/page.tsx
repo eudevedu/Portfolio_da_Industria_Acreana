@@ -1,9 +1,8 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
-import Link from "next/link"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+<<<<<<< HEAD
 import { Building2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,36 +10,18 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { loginAdmin } from "@/lib/auth" // Importa a Server Action de login para admin
 import { LogoPortfolio } from "@/components/LogoIndustria"
+=======
+>>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-
-    try {
-      const result = await loginAdmin(email, password) // Chama a Server Action de login para admin
-      if (result.success) {
-        router.push("/admin") // Redireciona para o painel de administração
-        router.refresh() // Força refresh para garantir que o cookie seja lido
-      } else {
-        setError(result.message)
-      }
-    } catch (err) {
-      console.error("Erro no login do admin:", err)
-      setError("Ocorreu um erro inesperado durante o login do administrador.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
+  
+  useEffect(() => {
+    router.replace("/login")
+  }, [router])
+  
   return (
+<<<<<<< HEAD
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
@@ -98,6 +79,12 @@ export default function AdminLoginPage() {
           </div>
         </CardContent>
       </Card>
+=======
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="animate-pulse text-slate-400 font-medium">
+        Redirecionando para o portal de acesso unificado...
+      </div>
+>>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
     </div>
   )
 }

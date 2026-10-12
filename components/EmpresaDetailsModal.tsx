@@ -23,15 +23,19 @@ import {
   CheckCircle2
 } from "lucide-react"
 import type { Empresa } from "@/lib/supabase.types"
+import type { Categoria } from "@/lib/services/category-service"
 import ImageGallery from "./ImageGallery"
+import { resolveImageUrl } from "@/lib/utils"
+
 
 interface EmpresaDetailsModalProps {
   empresa: Empresa | null
   isOpen: boolean
   onClose: () => void
+  allCategories?: Categoria[]
 }
 
-export default function EmpresaDetailsModal({ empresa, isOpen, onClose }: EmpresaDetailsModalProps) {
+export default function EmpresaDetailsModal({ empresa, isOpen, onClose, allCategories = [] }: EmpresaDetailsModalProps) {
   const [selectedDocIndex, setSelectedDocIndex] = useState(0)
 
   // Reset doc index when company changes
@@ -114,7 +118,11 @@ export default function EmpresaDetailsModal({ empresa, isOpen, onClose }: Empres
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <DataCard label="Município" value={`${empresa.municipio}, AC`} icon={<MapPin className="h-4 w-4" />} />
-                <DataCard label="Setor Econômico" value={empresa.setor_economico} icon={<Building2 className="h-4 w-4" />} />
+                <DataCard 
+                  label="Setor Econômico" 
+                  value={allCategories.find(c => c.id === empresa.setor_economico)?.nome || empresa.setor_economico} 
+                  icon={<Building2 className="h-4 w-4" />} 
+                />
                 <DataCard label="Segmento" value={empresa.segmento || "Indústria Geral"} icon={<Package className="h-4 w-4" />} />
                 <DataCard label="CNPJ" value={empresa.cnpj || "Disponível sob consulta"} />
                 <DataCard label="Endereço" value={empresa.endereco || "Não Informado"} className="md:col-span-2" />
@@ -131,11 +139,12 @@ export default function EmpresaDetailsModal({ empresa, isOpen, onClose }: Empres
                       {p.imagem_url && (
                         <div className="w-full h-44 -mx-5 -mt-5 mb-5 overflow-hidden border-b border-slate-100">
                           <img
-                            src={p.imagem_url}
+                            src={resolveImageUrl(p.imagem_url)}
                             alt={p.nome}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
+
                       )}
                       <div className="flex items-center justify-between mb-3">
                         <Badge variant="outline" className="text-[8px] uppercase tracking-widest font-bold text-primary/70 border-primary/20 bg-primary/2">

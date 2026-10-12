@@ -1,19 +1,52 @@
 import { NextResponse } from "next/server"
-import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabase'
+import { createServerSideClient } from '@/lib/supabase'
 import { randomUUID } from 'crypto'
 
-async function uploadToSupabase(file: File): Promise<string> {
-  const timestamp = Date.now()
-  const fileExt = file.name.split('.').pop()
-  const fileName = `${timestamp}-${randomUUID()}.${fileExt}`
-  
-  // Selecionar bucket baseado no tipo
-  const bucket = file.type.toLowerCase().includes('pdf') ? 'PDF' : 'Imagem'
-  
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+
+export async function POST(request: Request): Promise<NextResponse> {
   try {
-    if (!isSupabaseAdminConfigured() || !supabaseAdmin) {
-      throw new Error("Supabase Storage não configurado")
+    const supabase = await createServerSideClient()
+    
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    // Se não houver usuário, permitimos o upload mas em uma pasta pública de cadastro
+    const ownerId = user?.id || "public-registration"
+
+
+    const formData = await request.formData()
+    const file = formData.get("file") as File
+    
+    if (!file) {
+      return NextResponse.json({ success: false, error: "Arquivo não fornecido" }, { status: 400 })
     }
+
+    // 2. Validar Limites de Tamanho Dinâmicos
+    const isPDF = file.type === 'application/pdf'
+    const limit = isPDF ? 5 * 1024 * 1024 : 1 * 1024 * 1024
+    
+    if (file.size > limit) {
+      const limitText = isPDF ? "5MB" : "1MB"
+      return NextResponse.json({ 
+        success: false, 
+        error: `O arquivo excede o limite permitido para ${isPDF ? 'PDFs' : 'Imagens'} (${limitText}).` 
+      }, { status: 400 })
+    }
+
+    // 3. Validar Tipo
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json({ success: false, error: "Tipo de arquivo não permitido" }, { status: 400 })
+    }
+
+
+    // 4. Upload para Supabase Storage (Usando Admin Client para contornar RLS do Storage)
+    const { createAdminClient } = await import('@/lib/supabase')
+    const supabaseAdmin = createAdminClient()
+    
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${ownerId}/${Date.now()}-${randomUUID()}.${fileExt}`
+    const bucket = file.type.includes('pdf') ? 'PDF' : 'Imagem'
 
     const { data, error: uploadError } = await supabaseAdmin.storage
       .from(bucket)
@@ -22,103 +55,27 @@ async function uploadToSupabase(file: File): Promise<string> {
         upsert: false
       })
 
+
     if (uploadError) throw uploadError
 
-    const { data: { publicUrl } } = supabaseAdmin.storage
-      .from(bucket)
-      .getPublicUrl(fileName)
-
-    console.log(`Upload para bucket ${bucket} concluído:`, publicUrl)
-    return publicUrl
-  } catch (error) {
-    console.warn(`Erro no upload para o Supabase (Bucket ${bucket}), usando base64 fallback:`, error)
-    try {
-      const arrayBuffer = await file.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-      const base64 = buffer.toString('base64')
-      return `data:${file.type};base64,${base64}`
-    } catch (e) {
-      return `https://fake-storage.com/${bucket}/${fileName}`
-    }
-  }
-}
-
-export async function POST(request: Request): Promise<NextResponse> {
-  try {
-    console.log("=== UPLOAD API START ===")
-
-    const formData = await request.formData()
-    const file = formData.get("file") as File
-    const nome = formData.get("nome") as string
-    const tipo = formData.get("tipo") as string
-    const categoria = formData.get("categoria") as string
-
-    console.log("FormData parsed:", {
-      hasFile: !!file,
-      fileName: file?.name || "none",
-      fileSize: file?.size || 0,
-      nome,
-      tipo,
-      categoria
-    })
-
-    if (!file) {
-      return NextResponse.json({ success: false, error: "Arquivo é obrigatório" }, { status: 400 })
-    }
-
-    if (!nome) {
-      return NextResponse.json({ success: false, error: "Nome é obrigatório" }, { status: 400 })
-    }
-
-    const fileUrl = await uploadToSupabase(file)
+    // Retorna caminho relativo para o nosso Proxy (Agnóstico de DNS)
+    const relativeUrl = `/api/storage/${bucket}/${fileName}`
 
     return NextResponse.json({
       success: true,
       arquivo: {
-        url: fileUrl,
-        nome,
+        url: relativeUrl,
+        nome: file.name,
       },
-      message: "Arquivo enviado com sucesso!",
+      message: "Upload concluído com sucesso!",
     })
-  } catch (error) {
-    console.error("=== UPLOAD API ERROR ===", error)
+
+
+  } catch (error: any) {
+    console.error("Erro no Upload API:", error)
     return NextResponse.json({ 
       success: false, 
-      error: `Erro interno: ${error instanceof Error ? error.message : 'Erro desconhecido'}` 
+      error: error.message || "Erro interno no servidor" 
     }, { status: 500 })
   }
 }
-
-async function uploadFileToStorage(file: File): Promise<string> {
-  return await uploadToSupabase(file)
-}
-
-
-import { criarArquivo } from '../../../lib/database'
-
-// Importe ou defina a função reloadArquivos antes de usá-la
-// Exemplo de importação (ajuste o caminho conforme necessário):
-// import { reloadArquivos } from '../../../lib/arquivos';
-
-const reloadArquivos = async () => {
-  // Implemente a lógica de atualização dos arquivos aqui
-  // Por exemplo, buscar novamente os arquivos do banco de dados
-  console.log("Arquivos recarregados.");
-};
-
-const handleUpload = async (file: File, empresa: { id: string }) => {
-  // 1. Upload para storage
-  const fileUrl = await uploadFileToStorage(file);
-
-  // 2. Registrar no banco de dados
-  await criarArquivo({
-    empresa_id: empresa.id, // ID da empresa logada
-    nome: file.name,
-    url: fileUrl,
-    tipo: file.type,
-    categoria: "documento",
-  });
-
-  // 3. Atualizar lista de arquivos (opcional)
-  await reloadArquivos();
-};

@@ -16,7 +16,7 @@ const nextConfig = {
   },
   // Melhorar performance no Vercel
   experimental: {
-    optimizePackageImports: ['@supabase/supabase-js'],
+    optimizePackageImports: ['@supabase/supabase-js', 'lucide-react'],
   },
 }
 

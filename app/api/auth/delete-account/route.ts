@@ -100,9 +100,13 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // 7. Limpar cookies de sessão
-    const cookieStore = await cookies()
-    cookieStore.delete('user_session')
+    // 7. Limpar sessão do Supabase
+    const { createServerSideClient: createSSC } = await import('@/lib/supabase')
+    const supabaseClient = await createSSC()
+    if (supabaseClient) {
+      await supabaseClient.auth.signOut()
+    }
+
 
     return NextResponse.json({
       success: true,

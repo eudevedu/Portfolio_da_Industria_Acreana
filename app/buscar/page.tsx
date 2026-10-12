@@ -1,18 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, MapPin, Loader2 } from "lucide-react"
+import { Search, MapPin, Loader2, Phone } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { buscarEmpresas } from "@/lib/database"
-import type { Empresa } from "@/lib/supabase.types"
 import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import EmpresaDetailsModal from "@/components/EmpresaDetailsModal"
+import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
+import { buscarEmpresas } from "@/lib/services/empresa-service"
+import type { Empresa } from "@/lib/supabase.types"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
@@ -21,22 +22,26 @@ export default function BuscarPage() {
   const initialSearchTerm = searchParams.get("busca") || ""
   const initialStatus = searchParams.get("status") || "ativo"
   const initialSector = searchParams.get("setor_economico") || "all"
+  const initialActivity = searchParams.get("atividade") || searchParams.get("subcategoria") || "all"
   const initialCity = searchParams.get("municipio") || "all"
 
   const [empresas, setEmpresas] = useState<Empresa[]>([])
+  const [allCategories, setAllCategories] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm)
   const [selectedStatus] = useState(initialStatus)
   const [selectedSector, setSelectedSector] = useState(initialSector)
+  const [selectedActivity, setSelectedActivity] = useState(initialActivity)
   const [selectedCity, setSelectedCity] = useState(initialCity)
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null)
 
-  const setoresEconomicos = [
-    { value: "industria", label: "Indústria" },
-    { value: "agroindustria", label: "Agroindústria" },
-    { value: "servicos", label: "Serviços" },
-    { value: "comercio", label: "Comércio" },
-  ]
+  const setoresEconomicos = allCategories
+    .filter(c => c.tipo === "setor_economico")
+    .map(c => ({ value: c.id, label: c.nome }))
+
+  const atividadesDinamicas = allCategories
+    .filter(c => c.tipo === "atividade_principal" && (selectedSector === "all" || c.parent_id === selectedSector))
+    .map(c => ({ value: c.id, label: c.nome }))
 
   const municipios = [
     { value: "Rio Branco", label: "Rio Branco" },
@@ -69,6 +74,7 @@ export default function BuscarPage() {
       const fetchedEmpresas = await buscarEmpresas({
         status: selectedStatus === "all" ? undefined : selectedStatus,
         setor_economico: selectedSector === "all" ? undefined : selectedSector,
+        setor_empresa: selectedActivity === "all" ? undefined : selectedActivity,
         municipio: selectedCity === "all" ? undefined : selectedCity,
         busca: searchTerm,
       })
@@ -82,19 +88,35 @@ export default function BuscarPage() {
   }
 
   useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await buscarCategorias()
+        setAllCategories(cats)
+      } catch (err) {
+        console.error("Erro ao carregar categorias:", err)
+      }
+    }
+    loadCategories()
+  }, [])
+
+  useEffect(() => {
     fetchEmpresas()
-  }, [selectedStatus, selectedSector, selectedCity, searchTerm])
+  }, [selectedStatus, selectedSector, selectedActivity, selectedCity, searchTerm])
+
+  const getCategoryName = (id: string) => {
+    return allCategories.find(c => c.id === id)?.nome || id
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-background py-12">
       {/* Search and Filters Section */}
       <section className="py-12 px-4 glass mx-4 rounded-3xl mb-12">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-display font-black text-gray-900 mb-6 flex items-center justify-center">
+          <h2 className="text-3xl font-display font-black text-foreground mb-6 flex items-center justify-center">
             <Search className="mr-3 h-8 w-8 text-primary" />
             Encontre Indústrias e Produtos
           </h2>
-          <p className="text-lg text-gray-600 mb-10 max-w-xl mx-auto">Filtre por setor ou município para encontrar exatamente o que você procura.</p>
+          <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">Filtre por setor ou município para encontrar exatamente o que você procura.</p>
 
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-10">
@@ -118,7 +140,10 @@ export default function BuscarPage() {
           <div className="flex flex-wrap justify-center gap-4">
             <div className="space-y-1.5 text-left">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Setor Econômico</label>
-              <Select value={selectedSector} onValueChange={setSelectedSector}>
+              <Select value={selectedSector} onValueChange={(val) => {
+                setSelectedSector(val)
+                setSelectedActivity("all") // Reset activity when sector changes
+              }}>
                 <SelectTrigger className="w-56 h-12 rounded-xl border-primary/10 bg-white/50 backdrop-blur-sm">
                   <SelectValue placeholder="Todos os Setores" />
                 </SelectTrigger>
@@ -127,6 +152,23 @@ export default function BuscarPage() {
                   {setoresEconomicos.map((sector) => (
                     <SelectItem key={sector.value} value={sector.value}>
                       {sector.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5 text-left">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Atividade Industrial</label>
+              <Select value={selectedActivity} onValueChange={setSelectedActivity}>
+                <SelectTrigger className="w-56 h-12 rounded-xl border-primary/10 bg-white/50 backdrop-blur-sm">
+                  <SelectValue placeholder="Todas as Atividades" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as Atividades</SelectItem>
+                  {atividadesDinamicas.map((activity) => (
+                    <SelectItem key={activity.value} value={activity.value}>
+                      {activity.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -157,7 +199,7 @@ export default function BuscarPage() {
       <section className="px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10">
-            <h3 className="text-2xl font-display font-bold text-gray-900">
+            <h3 className="text-2xl font-display font-bold text-foreground">
               {loading ? "Buscando..." : `${empresas.length} Resultados Encontrados`}
             </h3>
           </div>
@@ -202,7 +244,7 @@ export default function BuscarPage() {
                           {empresa.nome_fantasia}
                         </CardTitle>
                         <CardDescription className="text-xs font-medium uppercase tracking-tighter text-muted-foreground">
-                          {empresa.setor_economico}
+                          {getCategoryName(empresa.setor_economico)}
                         </CardDescription>
                       </div>
                     </div>
@@ -212,8 +254,15 @@ export default function BuscarPage() {
                       <MapPin className="h-4 w-4 mr-2 text-primary" />
                       {empresa.municipio}, AC
                     </div>
+
+                    {empresa.telefone && (
+                      <div className="flex items-center text-sm font-medium text-muted-foreground mb-4">
+                        <Phone className="h-4 w-4 mr-2 text-primary" />
+                        {empresa.telefone}
+                      </div>
+                    )}
                     
-                    <p className="text-sm text-gray-600 mb-6 line-clamp-3 leading-relaxed grow">
+                    <p className="text-sm text-muted-foreground mb-6 line-clamp-3 leading-relaxed grow">
                       {empresa.apresentacao || "Esta indústria contribui para a economia local oferecendo serviços de alta qualidade."}
                     </p>
                     
@@ -247,6 +296,7 @@ export default function BuscarPage() {
         empresa={selectedEmpresa} 
         isOpen={!!selectedEmpresa} 
         onClose={() => setSelectedEmpresa(null)} 
+        allCategories={allCategories}
       />
     </div>
   )

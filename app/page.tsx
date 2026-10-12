@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { isLoggedIn, getCurrentUser } from "@/lib/auth"
 import { getLastCompanies } from "@/lib/empresa"
 import { obterEstatisticasHome } from "@/lib/database"
-import HomeCompanyGrid from "@/components/HomeCompanyGrid"
+import FeaturedCompaniesSection from "@/components/FeaturedCompaniesSection"
+import { buscarCategorias } from "@/lib/services/category-service"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -21,7 +22,7 @@ export default async function HomePage() {
   let errorMsg = null
 
   try {
-    empresas = await getLastCompanies(6)
+    empresas = await getLastCompanies(24)
   } catch (error) {
     errorMsg = error instanceof Error ? error.message : 'Erro desconhecido'
     empresas = []
@@ -29,19 +30,26 @@ export default async function HomePage() {
 
   // Busca estatísticas dinâmicas
   const stats = await obterEstatisticasHome()
+  
+  // Busca categorias para os filtros
+  const categorias = await buscarCategorias()
 
   return (
     <div className="flex flex-col w-full overflow-x-hidden">
       {/* Hero Section */}
       <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Parallax-like feel */}
+        {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img
             src="/acre.jpg"
             alt="Acre Rural Landscape"
             className="w-full h-full object-cover"
           />
+<<<<<<< HEAD
           <div className="absolute inset-0 bg-gradient-to-b from-brand-petrol/90 via-brand-petrol/70 to-background" />
+=======
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/70 to-background" />
+>>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 text-center animate-fade-in">
@@ -74,17 +82,26 @@ export default async function HomePage() {
             </Link>
           </div>
 
+<<<<<<< HEAD
+=======
+          {/* <div className="mt-12 flex items-center justify-center space-x-2 text-white/70 text-sm">
+            <span>Potencializado por</span>
+            <div className="bg-white/95 px-5 py-3 rounded-lg shadow-lg">
+              <LogoSeict className="h-14 w-auto object-contain" />
+            </div>
+          </div> */}
+>>>>>>> 790b098bbcec49c4291db6b82aec7f1defc4288c
         </div>
 
         {/* Floating elements for visual depth */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce flex flex-col items-center text-white/40">
+        {/* <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce flex flex-col items-center text-white/40">
           <span className="text-xs font-medium uppercase tracking-widest mb-2">Scroll</span>
           <div className="w-0.5 h-10 bg-gradient-to-b from-white/40 to-transparent rounded-full" />
-        </div>
+        </div> */}
       </section>
 
       {/* Stats Section - Floated over hero transition */}
-      <section className="relative z-20 -mt-16 mb-20 px-4">
+      <section className="relative z-20 -mt-6 mb-20 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="glass grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x border-primary/10 rounded-2xl overflow-hidden shadow-2xl">
             <div className="p-8 text-center bg-white/50 hover:bg-white transition-colors duration-300">
@@ -118,8 +135,13 @@ export default async function HomePage() {
             </Link>
           </div>
 
+          <FeaturedCompaniesSection 
+            initialEmpresas={empresas} 
+            categorias={categorias} 
+          />
+
           {errorMsg && (
-            <div className="mb-8 p-6 glass border-red-200 bg-red-50/50 rounded-xl">
+            <div className="mt-8 p-6 glass border-red-200 bg-red-50/50 rounded-xl">
               <h4 className="font-bold text-red-800 flex items-center mb-2">
                 <span className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse" />
                 Erro ao sincronizar dados
@@ -127,8 +149,6 @@ export default async function HomePage() {
               <p className="text-red-600 text-sm leading-relaxed">{errorMsg}</p>
             </div>
           )}
-
-          <HomeCompanyGrid empresas={empresas} />
         </div>
       </section>
     </div>

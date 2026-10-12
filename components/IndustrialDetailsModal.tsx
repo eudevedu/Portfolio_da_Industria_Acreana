@@ -24,15 +24,17 @@ import {
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import type { Empresa } from "@/lib/supabase.types"
+import type { Categoria } from "@/lib/services/category-service"
 import ImageGallery from "./ImageGallery"
 
 interface IndustrialDetailsModalProps {
   isOpen: boolean
   onClose: () => void
   company: Empresa | null
+  allCategories?: Categoria[]
 }
 
-export function IndustrialDetailsModal({ isOpen, onClose, company }: IndustrialDetailsModalProps) {
+export function IndustrialDetailsModal({ isOpen, onClose, company, allCategories = [] }: IndustrialDetailsModalProps) {
   const [selectedDocIndex, setSelectedDocIndex] = React.useState(0)
 
   // Reset doc index when company changes
@@ -114,7 +116,11 @@ export function IndustrialDetailsModal({ isOpen, onClose, company }: IndustrialD
               {/* Grid of Info Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <InfoItemCard label="Município" value={company.municipio || "Não informado"} icon={<MapPin className="h-4 w-4 text-green-500" />} />
-                <InfoItemCard label="Setor Econômico" value={company.setor_economico || "Não informado"} icon={<Factory className="h-4 w-4 text-green-500" />} />
+                <InfoItemCard 
+                  label="Setor Econômico" 
+                  value={allCategories.find(c => c.id === company.setor_economico)?.nome || company.setor_economico || "Não informado"} 
+                  icon={<Factory className="h-4 w-4 text-green-500" />} 
+                />
                 <InfoItemCard label="Segmento" value={company.segmento || "Indústria Geral"} icon={<Package className="h-4 w-4 text-green-500" />} />
                 <InfoItemCard label="CNPJ" value={company.cnpj || "Não informado"} />
                 <InfoItemCard label="Endereço" value={company.endereco || "Endereço não informado"} className="md:col-span-2" />
@@ -130,8 +136,9 @@ export function IndustrialDetailsModal({ isOpen, onClose, company }: IndustrialD
                     <Card key={produto.id} className="rounded-2xl border-slate-100 shadow-sm overflow-hidden group hover:border-green-200 transition-all">
                       <div className="aspect-video relative bg-slate-100">
                         {produto.imagem_url ? (
-                          <img src={produto.imagem_url} alt={produto.nome} className="w-full h-full object-cover" />
+                          <img src={resolveImageUrl(produto.imagem_url) || produto.imagem_url} alt={produto.nome} className="w-full h-full object-cover" />
                         ) : (
+
                           <div className="w-full h-full flex items-center justify-center text-slate-300">
                             <Package className="h-8 w-8" />
                           </div>

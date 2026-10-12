@@ -1,5 +1,5 @@
 "use client"
-import { EmpresaDashboard } from "../app/dashboard/EmpresaDashboard"
+import EmpresaDashboard from "../app/dashboard/EmpresaDashboard"
 import type { Empresa } from "../lib/supabase.types"
 
 export default function EmpresaDashboardWrapper({ empresa }: { empresa: Empresa }) {
