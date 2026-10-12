@@ -1,7 +1,7 @@
 "use client"
 
 import { Search, Plus, Menu, X } from "lucide-react"
-import { LogoSeict } from "@/components/LogoIndustria"
+import { LogoPortfolio } from "@/components/LogoIndustria"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -39,7 +39,7 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 sm:px-6 lg:px-8",
           isScrolled 
             ? "bg-white/80 backdrop-blur-md shadow-sm h-16 py-2" 
-            : "bg-gradient-to-r from-green-900/90 to-green-600/90 h-20 py-4"
+            : "bg-gradient-to-r from-brand-petrol/95 to-primary/95 h-20 py-4"
         )}
       >
         <div className="max-w-7xl mx-auto h-full">
@@ -51,11 +51,11 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
               <div className="flex items-center space-x-3">
                 <Link href="/" className="flex items-center space-x-2 group">
                   <div className="bg-white p-1 rounded-lg shadow-sm group-hover:scale-105 transition-transform">
-                    <LogoSeict className="h-10 w-10 sm:h-12 sm:w-12" />
+                    <LogoPortfolio className="h-10 w-10 sm:h-12 sm:w-12" />
                   </div>
                   <h1 className={cn(
                     "text-lg sm:text-xl font-bold tracking-tight transition-colors",
-                    isScrolled ? "text-green-900" : "text-white"
+                    isScrolled ? "text-brand-petrol" : "text-white"
                   )}>
                     Portfólio Industrial
                   </h1>
@@ -115,7 +115,7 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
                     </Button>
                   </Link>
                   <Link href="/cadastro">
-                    <Button className={isScrolled ? "" : "bg-white text-green-700 hover:bg-green-50 border-none"}>
+                    <Button className={isScrolled ? "" : "bg-white text-primary hover:bg-secondary border-none"}>
                       Cadastrar Empresa
                     </Button>
                   </Link>
@@ -153,7 +153,7 @@ export default function Header({ loggedIn, user, dashboardLink }: HeaderProps) {
                   </div>
                   <Link 
                     href={dashboardLink}
-                    className="block px-4 py-2 text-green-700 font-bold"
+                    className="block px-4 py-2 text-primary font-bold"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Meu Painel

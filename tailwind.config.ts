@@ -13,6 +13,10 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+            brand: {
+                petrol: 'hsl(var(--brand-petrol))',
+                copper: 'hsl(var(--brand-copper))',
+            },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

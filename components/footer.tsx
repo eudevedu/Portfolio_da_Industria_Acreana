@@ -5,22 +5,18 @@ import {
   Facebook, 
   Youtube, 
   Linkedin, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Globe,
   ArrowUpRight
 } from "lucide-react";
-import { LogoSeict } from "./LogoIndustria";
+import { LogoPortfolio } from "./LogoIndustria";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative z-[60] bg-[#022c22] text-white pt-24 pb-12 overflow-hidden">
+    <footer className="relative z-[60] bg-brand-petrol text-white pt-24 pb-12 overflow-hidden">
       {/* Decorative background elements */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500/0 via-green-500/50 to-green-500/0" />
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-green-500/10 rounded-full blur-[100px]" />
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary/50 to-primary/0" />
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-[100px]" />
       <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -28,21 +24,21 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="space-y-8">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
-                <LogoSeict className="h-10 w-10 text-white" />
+              <div className="p-2.5 bg-white rounded-2xl border border-white/10 shadow-xl">
+                <LogoPortfolio className="h-10 w-10 text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-display font-black tracking-tight leading-none">PORTFÓLIO</span>
-                <span className="text-[0.65rem] font-bold tracking-[0.2em] text-green-400 uppercase">Indústria Acreana</span>
+                <span className="text-[0.65rem] font-bold tracking-[0.2em] text-[#75CED2] uppercase">Indústria Acreana</span>
               </div>
             </div>
             
             <p className="text-slate-300 text-sm leading-relaxed max-w-xs">
-              Plataforma oficial para o desenvolvimento industrial do Estado do Acre. Conectando empresas, produtos e serviços para fortalecer nossa economia local.
+              Plataforma independente dedicada à indústria acreana. Conectando empresas, produtos e serviços para fortalecer a economia local.
             </p>
 
             <div className="flex items-center gap-4">
-              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all transform hover:-translate-y-1">
+              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary hover:text-white transition-all transform hover:-translate-y-1">
                 <Instagram className="h-5 w-5" />
               </a>
               <a href="#" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all transform hover:-translate-y-1">
@@ -60,7 +56,7 @@ export default function Footer() {
           {/* Navigation Columns */}
           <div>
             <h4 className="text-lg font-display font-bold mb-8 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
               Navegação
             </h4>
             <ul className="space-y-4">
@@ -81,7 +77,7 @@ export default function Footer() {
           {/* Industry Sectors */}
           <div>
             <h4 className="text-lg font-display font-bold mb-8 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
               Setores Principais
             </h4>
             <div className="grid grid-cols-1 gap-4">
@@ -89,7 +85,7 @@ export default function Footer() {
                 <Link 
                   key={setor}
                   href={`/buscar?setor=${setor}`}
-                  className="text-sm text-slate-400 hover:text-green-400 transition-colors flex items-center gap-2"
+                  className="text-sm text-slate-400 hover:text-[#75CED2] transition-colors flex items-center gap-2"
                 >
                   <span className="w-1 h-1 rounded-full bg-white/20" />
                   {setor}
@@ -98,42 +94,18 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Contact Column */}
+          {/* About the project */}
           <div>
             <h4 className="text-lg font-display font-bold mb-8 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              Contato SEICT
+              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+              Sobre o Portfólio
             </h4>
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                  <MapPin className="h-5 w-5 text-green-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1 text-[0.6rem]">Localização</p>
-                  <p className="text-sm text-slate-300 leading-snug">R. Benjamin Constant, 123 - Centro, Rio Branco - AC</p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                  <Phone className="h-5 w-5 text-green-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1 text-[0.6rem]">Telefone</p>
-                  <p className="text-sm text-slate-300">(68) 3212-4500</p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                  <Mail className="h-5 w-5 text-green-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1 text-[0.6rem]">E-mail</p>
-                  <p className="text-sm text-slate-300">contato@seict.ac.gov.br</p>
-                </div>
-              </div>
+            <div className="space-y-6 text-sm text-slate-300 leading-relaxed">
+              <p>Um projeto independente para dar visibilidade às empresas e à produção do Acre.</p>
+              <p>Explore o catálogo ou cadastre sua empresa para apresentar seus produtos e serviços.</p>
+              <Link href="/cadastro" className="inline-flex items-center gap-2 text-[#75CED2] hover:text-white transition-colors">
+                Fazer parte do Portfólio <ArrowUpRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </div>
@@ -147,7 +119,7 @@ export default function Footer() {
           </div>
 
           <p className="text-slate-600 text-center md:text-right">
-            © {currentYear} SEICT Acre. Desenvolvido por <a href="https://eudevedu.github.io/" target="_blank" rel="noopener noreferrer" className="text-green-500/80 hover:text-green-400 font-bold transition-colors underline underline-offset-4 decoration-current/30">Eduardo Batista</a>.
+            © {currentYear} Portfólio Industrial do Acre. Desenvolvido por <a href="https://eudevedu.github.io/" target="_blank" rel="noopener noreferrer" className="text-primary/80 hover:text-[#75CED2] font-bold transition-colors underline underline-offset-4 decoration-current/30">Eduardo Batista</a>.
           </p>
         </div>
       </div>

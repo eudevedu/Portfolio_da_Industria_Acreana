@@ -71,7 +71,7 @@ import { criarEmpresa } from "@/lib/database"
 import { logout } from "@/lib/auth"
 import type { Empresa, Admin } from "@/lib/supabase.types"
 import { formatBrazilianShortDate, cn } from "@/lib/utils"
-import { LogoSeict } from "@/components/LogoIndustria"
+import { LogoPortfolio } from "@/components/LogoIndustria"
 
 interface AdminContentProps {
   initialStats: {
@@ -273,7 +273,7 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
           <div className="p-8 border-b border-slate-100">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
-                <LogoSeict className="h-8 w-8 text-white" />
+                <LogoPortfolio className="h-8 w-8 text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-display font-black leading-none text-slate-900 uppercase">ADMIN</span>

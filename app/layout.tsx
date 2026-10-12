@@ -18,11 +18,11 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "Portfólio das Indústrias do Acre",
-  description: "Plataforma oficial para o desenvolvimento industrial do Estado do Acre. Conectando empresas, produtos e serviços.",
+  description: "Plataforma independente que conecta empresas, produtos e serviços da indústria acreana. Explore o potencial produtivo do Acre.",
   generator: "Next.js",
   icons: {
-    icon: '/icon.svg',
-    apple: '/icon.svg',
+    icon: '/brand/logo-portfolio-acre-v2.png',
+    apple: '/brand/logo-portfolio-acre-v2.png',
   },
 }
 

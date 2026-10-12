@@ -9,24 +9,32 @@ export async function POST(request: NextRequest) {
   try {
     console.log("🔍 Adicionando arquivos de teste...")
     
-    // Arquivos de teste para a empresa SEICT
+    const empresaId = new URL(request.url).searchParams.get('empresa_id')
+    if (!empresaId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(empresaId)) {
+      return NextResponse.json(
+        { success: false, error: 'Informe um empresa_id válido para adicionar arquivos de teste' },
+        { status: 400 }
+      )
+    }
+
+    // Arquivos de demonstração para a empresa informada
     const arquivosTeste = [
       {
-        empresa_id: 'fcbde269-fc75-4664-a0c8-4c0d6380929b', // SEICT
-        nome: 'Catálogo de Produtos SEICT 2025',
+        empresa_id: empresaId,
+        nome: 'Catálogo de Produtos — Demonstração',
         url: 'https://exemplo.com/catalogo_produtos_2025.pdf',
         tipo: 'pdf',
         categoria: 'catalogo'
       },
       {
-        empresa_id: 'fcbde269-fc75-4664-a0c8-4c0d6380929b', // SEICT
+        empresa_id: empresaId,
         nome: 'Apresentação Institucional',
         url: 'https://exemplo.com/apresentacao_institucional.pdf',
         tipo: 'pdf',
         categoria: 'apresentacao'
       },
       {
-        empresa_id: 'fcbde269-fc75-4664-a0c8-4c0d6380929b', // SEICT
+        empresa_id: empresaId,
         nome: 'Certificação ISO 9001',
         url: 'https://exemplo.com/certificacao_iso_9001.pdf',
         tipo: 'pdf',
@@ -52,7 +60,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      message: `${data.length} arquivos de teste adicionados para a empresa SEICT`,
+      message: `${data.length} arquivos de teste adicionados para a empresa informada`,
       arquivos: data
     })
     

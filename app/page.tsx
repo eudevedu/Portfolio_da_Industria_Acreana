@@ -1,5 +1,4 @@
 import { Search, MapPin, Plus } from "lucide-react"
-import { LogoSeict } from "@/components/LogoIndustria"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -42,7 +41,7 @@ export default async function HomePage() {
             alt="Acre Rural Landscape"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-green-950/80 via-green-900/60 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-petrol/90 via-brand-petrol/70 to-background" />
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 text-center animate-fade-in">
@@ -50,10 +49,10 @@ export default async function HomePage() {
             Portfólio Industrial do Acre
           </Badge>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-extrabold text-white mb-6 leading-[1.1] tracking-tight text-balance">
-            Conectando a Indústria <span className="text-primary-foreground underline decoration-primary/50 underline-offset-8">Acreana</span> ao Futuro
+            Conectando a Indústria <span className="text-primary-foreground underline decoration-brand-copper underline-offset-8">Acreana</span> ao Futuro
           </h1>
           <p className="text-lg md:text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed text-balance">
-            A plataforma oficial que destaca o potencial produtivo do nosso estado. Encontre empresas, produtos e serviços com excelência regional.
+            Uma plataforma independente que destaca o potencial produtivo do Acre. Encontre empresas, produtos e serviços com excelência regional.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -75,12 +74,6 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-12 flex items-center justify-center space-x-2 text-white/70 text-sm">
-            <span>Potencializado por</span>
-            <div className="bg-white/90 p-1.5 rounded-md">
-              <LogoSeict className="h-6 w-auto" />
-            </div>
-          </div>
         </div>
 
         {/* Floating elements for visual depth */}

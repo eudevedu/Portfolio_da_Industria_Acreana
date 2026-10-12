@@ -28,7 +28,7 @@ import { redirect } from "next/navigation"
 import { CompanyInfoCard } from "@/components/company-info-card"
 import ProdutosManager from "@/components/ProdutosManager"
 import ArquivosManager from "@/components/ArquivosManager"
-import { LogoSeict } from "@/components/LogoIndustria"
+import { LogoPortfolio } from "@/components/LogoIndustria"
 import { ViewProfileButton } from "@/components/ViewProfileButton"
 import { ConfiguracoesButton } from "@/components/ConfiguracoesButton"
 
@@ -91,7 +91,7 @@ export default async function DashboardPage() {
           <div className="p-8 border-b border-slate-100">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="p-2 bg-green-600 rounded-xl shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform">
-                <LogoSeict className="h-8 w-8 text-white" />
+                <LogoPortfolio className="h-8 w-8 text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-display font-black tracking-tight leading-none text-slate-900 uppercase">PORTFÓLIO</span>

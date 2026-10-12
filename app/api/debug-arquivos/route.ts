@@ -4,7 +4,13 @@ import { supabase } from "@/lib/supabase"
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const empresaId = searchParams.get('empresa_id') || 'fcbde269-fc75-4664-a0c8-4c0d6380929b' // SEICT ID
+    const empresaId = searchParams.get('empresa_id')
+    if (!empresaId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(empresaId)) {
+      return NextResponse.json(
+        { success: false, error: 'Informe um empresa_id válido para consultar os arquivos' },
+        { status: 400 }
+      )
+    }
     
     console.log("🔍 Debug Arquivos - Buscando arquivos para empresa:", empresaId)
     

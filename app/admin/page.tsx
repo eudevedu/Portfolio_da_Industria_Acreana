@@ -7,7 +7,7 @@ import { logout, isLoggedIn, isAdmin as checkIsAdmin, getCurrentUser } from "@/l
 import { redirect } from "next/navigation"
 import type { Empresa } from "@/lib/supabase.types"
 import { AdminContent } from "@/components/admin-content"
-import { LogoSeict } from "@/components/LogoIndustria"
+import { LogoPortfolio } from "@/components/LogoIndustria"
 import { Badge } from "@/components/ui/badge"
 
 export const dynamic = "force-dynamic"

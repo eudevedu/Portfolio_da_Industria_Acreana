@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { login } from "@/lib/auth" // Importa a Server Action de login para empresas
 
-import { LogoSeict } from "@/components/LogoIndustria"
+import { LogoPortfolio } from "@/components/LogoIndustria"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -47,7 +47,7 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Link href="/">
-              <LogoSeict className="h-15  w-15 text-green-600" />
+              <LogoPortfolio className="h-15  w-15 text-green-600" />
             </Link>
           </div>
           <CardTitle className="text-2xl font-bold">Entrar como Empresa</CardTitle>
