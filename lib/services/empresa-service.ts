@@ -1,7 +1,8 @@
 "use server"
 
 import { createServerSideClient, createAdminClient } from "../supabase"
-import type { Empresa } from "../supabase.types"
+import type { Empresa, ResultadoExclusaoEmpresa } from "../supabase.types"
+import { requireAdmin } from "../auth-guards"
 
 /**
  * Busca empresas com filtros. Suporta uso público e administrativo.
@@ -88,37 +89,75 @@ export async function atualizarStatusEmpresa(
   return data as Empresa
 }
 
-export async function excluirEmpresa(id: string): Promise<boolean> {
+export async function excluirEmpresa(id: string): Promise<ResultadoExclusaoEmpresa> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return { success: false, message: "O identificador da empresa é inválido." }
+  }
   const supabase = createAdminClient()
   if (!supabase) {
-    console.error("Supabase Admin Client não disponível.")
-    return false
+    return { success: false, message: "Exclusão indisponível: configure SUPABASE_SERVICE_ROLE_KEY no servidor." }
   }
 
+  const actingAdmin = await requireAdmin()
   try {
-    const { data: profiles } = await supabase
+    const { data: profiles, error: profilesError } = await supabase
       .from("perfis_empresas")
       .select("id")
       .eq("empresa_id", id)
-    
-    if (profiles && profiles.length > 0) {
-      for (const profile of profiles) {
-        await supabase.auth.admin.deleteUser(profile.id)
-      }
+    if (profilesError) {
+      console.error("Erro ao consultar contas da empresa:", profilesError)
+      return { success: false, message: "Não foi possível consultar as contas vinculadas. Nenhum dado foi excluído." }
     }
 
-    await Promise.allSettled([
-      supabase.from("analytics").delete().eq("empresa_id", id),
-      supabase.from("produtos").delete().eq("empresa_id", id),
-      supabase.from("arquivos").delete().eq("empresa_id", id),
-      supabase.from("perfis_empresas").delete().eq("empresa_id", id)
-    ])
+    const profileIds = (profiles || []).map((profile: { id: string }) => profile.id)
+    const protectedIds = new Set([actingAdmin.id])
+    if (profileIds.length) {
+      const { data: admins, error: adminsError } = await supabase.from("admins")
+        .select("id").in("id", profileIds)
+      if (adminsError) {
+        console.error("Erro ao verificar contas administrativas:", adminsError)
+        return { success: false, message: "Não foi possível verificar as contas vinculadas. Nenhum dado foi excluído." }
+      }
+      for (const admin of admins || []) protectedIds.add(admin.id)
+    }
 
-    const { error } = await supabase.from("empresas").delete().eq("id", id)
-    return !error
+    // Produtos, arquivos e analytics são removidos pelo ON DELETE CASCADE
+    // definido no schema. Se uma FK impedir a operação, o banco desfaz tudo.
+    const { data: deletedCompany, error } = await supabase.from("empresas")
+      .delete().eq("id", id).select("id").maybeSingle()
+    if (error) {
+      console.error("Erro ao excluir empresa:", error)
+      return { success: false, message: error.code === "23503"
+        ? "A empresa possui vínculos que impedem a exclusão. Revise as relações de exclusão em cascata no banco. Nenhum dado foi excluído."
+        : "O banco não permitiu excluir a empresa. Nenhum dado foi excluído. Tente novamente." }
+    }
+    if (!deletedCompany) {
+      return { success: false, message: "Empresa não encontrada. Ela pode já ter sido excluída." }
+    }
+
+    // A exclusão no Auth não participa da transação do banco. Só limpar
+    // contas depois de confirmar a remoção da empresa; preservar admins.
+    let failedAccounts = 0
+    for (const profileId of profileIds.filter((profileId: string) => !protectedIds.has(profileId))) {
+      try {
+        const { error: authError } = await supabase.auth.admin.deleteUser(profileId)
+        if (authError) {
+          failedAccounts++
+          console.error("Empresa excluída; falha ao remover conta associada:", profileId, authError)
+        }
+      } catch (authError) {
+        failedAccounts++
+        console.error("Empresa excluída; falha ao remover conta associada:", profileId, authError)
+      }
+    }
+    return {
+      success: true,
+      message: "Empresa excluída permanentemente.",
+      ...(failedAccounts ? { warning: `A empresa foi excluída, mas ${failedAccounts} conta(s) vinculada(s) ainda precisam ser removidas no serviço de autenticação.` } : {}),
+    }
   } catch (err) {
     console.error("Erro ao excluir empresa:", err)
-    return false
+    return { success: false, message: "Não foi possível confirmar a exclusão. Atualize a lista antes de tentar novamente." }
   }
 }
 

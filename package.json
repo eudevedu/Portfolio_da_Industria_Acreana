@@ -8,6 +8,7 @@
     "lint": "next lint",
     "check:conflicts": "node scripts/check-merge-conflicts.mjs",
     "test:build-regressions": "node --experimental-vm-modules scripts/test-build-regressions.mjs",
+    "test:company-deletion": "node --experimental-vm-modules scripts/test-company-deletion.mjs",
     "start": "next start"
   },
   "dependencies": {

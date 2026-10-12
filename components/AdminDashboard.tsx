@@ -485,31 +485,38 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
   }
 
   const confirmDeleteCompany = async () => {
-    if (!companyToDelete) return
+    if (!companyToDelete || deletingCompany) return
+    const empresaId = companyToDelete.id
     
     setDeletingCompany(true)
     try {
-      const result = await excluirEmpresa(companyToDelete.id)
+      const result = await excluirEmpresa(empresaId)
       
-      if (result) {
-        setEmpresas(prev => prev.filter(e => e.id !== companyToDelete.id))
-        const updatedStats = await obterEstatisticasAdmin()
-        setStats(updatedStats)
-        toast.success("Empresa excluída permanentemente.")
-      } else {
-        toast.error("Erro ao excluir", {
-          description: "Tente novamente mais tarde."
-        })
+      if (!result.success) {
+        toast.error("Não foi possível excluir a empresa", { description: result.message })
+        return
+      }
+      setEmpresas(prev => prev.filter(e => e.id !== empresaId))
+      setShowDeleteDialog(false)
+      setCompanyToDelete(null)
+      if (companyToView?.id === empresaId) {
+        setShowDetailsDialog(false)
+        setCompanyToView(null)
+      }
+      toast.success(result.message)
+      if (result.warning) toast.warning(result.warning)
+      try {
+        setStats(await obterEstatisticasAdmin())
+      } catch {
+        toast.warning("A empresa foi excluída, mas os indicadores não foram atualizados. Atualize o painel.")
       }
     } catch (error) {
       console.error("Erro ao excluir:", error)
-      toast.error("Falha de conexão", {
-        description: "Não foi possível completar a operação."
+      toast.error("Não foi possível confirmar a exclusão", {
+        description: "Verifique sua sessão e atualize a lista antes de tentar novamente."
       })
     } finally {
       setDeletingCompany(false)
-      setShowDeleteDialog(false)
-      setCompanyToDelete(null)
     }
   }
 
@@ -1201,7 +1208,9 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
         empresaId=""
       />
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialog open={showDeleteDialog} onOpenChange={(open) => {
+        if (!deletingCompany) setShowDeleteDialog(open)
+      }}>
         <AlertDialogContent className="rounded-3xl p-8 border-none">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-black">Confirmar Exclusão</AlertDialogTitle>
@@ -1211,7 +1220,7 @@ export default function AdminDashboard({ initialStats, initialEmpresas, isConfig
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 mt-6">
-            <AlertDialogCancel className="rounded-xl h-12 px-6 font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingCompany} className="rounded-xl h-12 px-6 font-bold">Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={(e: React.MouseEvent) => {
                 e.preventDefault();

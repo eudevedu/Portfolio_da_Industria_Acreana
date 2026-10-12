@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { toast } from "sonner"
 import Link from "next/link"
 import {
   Factory,
@@ -240,14 +241,22 @@ export function AdminContent({ initialStats, initialEmpresas, isConfiguredProp, 
   const handleDeleteCompany = async (empresa: Empresa) => {
     if (!confirm(`Excluir permanentemente "${empresa.nome_fantasia}"?`)) return
     try {
-      const success = await excluirEmpresa(empresa.id)
-      if (success) {
-        setEmpresas(prev => prev.filter(e => e.id !== empresa.id))
-        const updatedStats = await obterEstatisticasAdmin()
-        setStats(updatedStats)
+      const result = await excluirEmpresa(empresa.id)
+      if (!result.success) {
+        toast.error(result.message)
+        return
+      }
+      setEmpresas(prev => prev.filter(e => e.id !== empresa.id))
+      toast.success(result.message)
+      if (result.warning) toast.warning(result.warning)
+      try {
+        setStats(await obterEstatisticasAdmin())
+      } catch {
+        toast.warning("A empresa foi excluída, mas os indicadores não foram atualizados. Atualize o painel.")
       }
     } catch (error) {
       console.error("Erro ao excluir:", error)
+      toast.error("Não foi possível confirmar a exclusão. Verifique sua sessão e atualize a lista.")
     }
   }
 

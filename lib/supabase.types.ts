@@ -30,6 +30,12 @@ export type Empresa = {
   perfil_empresa?: PerfilEmpresa[] // Relação para perfis de contato
 }
 
+export type ResultadoExclusaoEmpresa = {
+  success: boolean
+  message: string
+  warning?: string
+}
+
 export interface Produto {
   id: string
   empresa_id: string

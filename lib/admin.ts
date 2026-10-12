@@ -1,6 +1,7 @@
 "use server"
 
 import { requireAdmin } from "./auth-guards"
+import { revalidatePath } from "next/cache"
 import * as empresaService from "./services/empresa-service"
 import * as adminService from "./services/admin-service"
 import * as analyticsService from "./services/analytics-service"
@@ -68,8 +69,18 @@ export async function obterTodosAdmins() {
  * Exclui uma empresa permanentemente
  */
 export async function excluirEmpresa(id: string) {
-  await requireAdmin()
-  return empresaService.excluirEmpresa(id)
+  const result = await empresaService.excluirEmpresa(id)
+  if (result.success) {
+    try {
+      for (const path of ["/admin", "/", "/buscar", `/empresas/${id}`]) {
+        revalidatePath(path)
+      }
+    } catch (error) {
+      console.error("Empresa excluída; falha ao atualizar o cache:", error)
+      return { ...result, warning: [result.warning, "A empresa foi excluída, mas as páginas podem levar mais tempo para atualizar."].filter(Boolean).join(" ") }
+    }
+  }
+  return result
 }
 
 /**
