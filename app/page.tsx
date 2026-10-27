@@ -3,19 +3,15 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { isLoggedIn, getCurrentUser } from "@/lib/auth"
-import { getLastCompanies } from "@/lib/empresa"
-import { obterEstatisticasHome } from "@/lib/database"
+import { getLastCompanies } from "@/lib/public-actions"
+import { obterEstatisticasHome } from "@/lib/public-actions"
 import FeaturedCompaniesSection from "@/components/FeaturedCompaniesSection"
-import { buscarCategorias } from "@/lib/services/category-service"
+import { buscarCategorias } from "@/lib/public-actions"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export default async function HomePage() {
-  const loggedIn = await isLoggedIn()
-  const user = await getCurrentUser()
-  const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
   // Busque as últimas 6 empresas cadastradas
   let empresas: any[] = []

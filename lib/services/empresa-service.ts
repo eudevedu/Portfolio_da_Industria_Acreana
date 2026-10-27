@@ -127,8 +127,10 @@ export async function excluirEmpresa(id: string): Promise<ResultadoExclusaoEmpre
       .delete().eq("id", id).select("id").maybeSingle()
     if (error) {
       console.error("Erro ao excluir empresa:", error)
+      const linkedTable = typeof error.details === "string"
+        ? error.details.match(/table "([a-zA-Z0-9_]+)"/)?.[1] : undefined
       return { success: false, message: error.code === "23503"
-        ? "A empresa possui vínculos que impedem a exclusão. Revise as relações de exclusão em cascata no banco. Nenhum dado foi excluído."
+        ? `A empresa possui vínculos${linkedTable ? ` na tabela ${linkedTable}` : ""} que impedem a exclusão. Aplique a migração 05-fix-company-delete-relations.sql no Supabase. Nenhum dado foi excluído.`
         : "O banco não permitiu excluir a empresa. Nenhum dado foi excluído. Tente novamente." }
     }
     if (!deletedCompany) {

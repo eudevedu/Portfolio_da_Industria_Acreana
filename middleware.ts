@@ -8,6 +8,12 @@ export async function middleware(request: NextRequest) {
     },
   })
 
+  // O catálogo público não depende da disponibilidade da autenticação.
+  const pathname = request.nextUrl.pathname
+  if (pathname === '/' || pathname === '/buscar' || pathname.startsWith('/empresas/')) {
+    return response
+  }
+
   try {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

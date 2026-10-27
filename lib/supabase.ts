@@ -30,6 +30,14 @@ export async function createServerSideClient() {
   const cookieStore = await cookies()
 
   return createServerClient(supabaseUrl!, supabaseKey!, {
+    global: {
+      fetch: (input, init) => fetch(input, {
+        ...init,
+        signal: init?.signal
+          ? AbortSignal.any([init.signal, AbortSignal.timeout(4000)])
+          : AbortSignal.timeout(4000),
+      }),
+    },
     cookies: {
       getAll() {
         return cookieStore.getAll()

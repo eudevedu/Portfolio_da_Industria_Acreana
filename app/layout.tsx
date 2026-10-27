@@ -4,7 +4,7 @@ import { Inter, Outfit } from "next/font/google"
 import "./globals.css"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { isLoggedIn, getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/auth"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,8 +30,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const loggedIn = await isLoggedIn()
   const user = await getCurrentUser()
+  const loggedIn = Boolean(user)
   const dashboardLink = user?.tipo === "admin" ? "/admin" : "/dashboard"
 
   return (

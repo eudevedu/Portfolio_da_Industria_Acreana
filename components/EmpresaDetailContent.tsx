@@ -34,7 +34,8 @@ import {
 } from "@/components/ui/dialog"
 import ImageGallery from "@/components/ImageGallery"
 import AnalyticsTracker from "@/components/AnalyticsTracker"
-import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
+import type { Categoria } from "@/lib/services/category-service"
+import { buscarCategorias } from "@/lib/public-actions"
 import { useEffect } from "react"
 
 interface EmpresaContentProps {

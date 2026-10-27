@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/check-merge-conflicts.mjs && next build",
+    "build": "node scripts/check-merge-conflicts.mjs && node scripts/snapshot-public-catalog.mjs && next build",
+    "snapshot:catalog": "node scripts/snapshot-public-catalog.mjs",
+    "test:catalog": "node --experimental-vm-modules scripts/test-public-catalog.mjs",
     "dev": "next dev",
     "lint": "next lint",
     "check:conflicts": "node scripts/check-merge-conflicts.mjs",

@@ -86,6 +86,13 @@ assert.equal((await exclude(companyId)).success, false)
 assert.deepEqual(state.events, ["authorize", "delete:empresas"])
 cases++
 
+reset({ deleteError: { code: "23503", details: 'Key (id) is still referenced from table "produtos".' } })
+const namedRestriction = await exclude(companyId)
+assert.equal(namedRestriction.success, false)
+assert.match(namedRestriction.message, /tabela produtos/)
+assert.deepEqual(state.events, ["authorize", "delete:empresas"])
+cases++
+
 reset({ profiles: [] })
 assert.equal((await exclude(companyId)).success, true)
 assert.deepEqual(state.events, ["authorize", "delete:empresas"])

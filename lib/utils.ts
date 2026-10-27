@@ -44,6 +44,7 @@ export function getURL() {
  */
 export function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
+  if (url.startsWith('/catalogo-media/')) return url;
   
   // Base64 retorna direto
   if (url.startsWith('data:')) {

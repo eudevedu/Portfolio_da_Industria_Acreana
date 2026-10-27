@@ -9,15 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSearchParams } from "next/navigation"
-import { useAuth } from "@/hooks/use-auth"
 import EmpresaDetailsModal from "@/components/EmpresaDetailsModal"
-import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
-import { buscarEmpresas } from "@/lib/services/empresa-service"
+import type { Categoria } from "@/lib/services/category-service"
+import { buscarCategorias } from "@/lib/public-actions"
+import { buscarEmpresas } from "@/lib/public-actions"
 import type { Empresa } from "@/lib/supabase.types"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
-  const { loading: authLoading } = useAuth()
   
   const initialSearchTerm = searchParams.get("busca") || ""
   const initialStatus = searchParams.get("status") || "ativo"

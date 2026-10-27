@@ -1,0 +1,1033 @@
+{
+  "updatedAt": "2026-10-27T22:38:12.982Z",
+  "empresas": [
+    {
+      "id": "42f72763-70de-4386-8193-c7a76c703a95",
+      "nome_fantasia": "SEICT",
+      "razao_social": "Secretaria de Estado de Industria, Ciencia e Tecnologia",
+      "cnpj": "16.958.425/0001-48",
+      "setor_economico": "3cff8746-27c4-48d8-a703-6c651ea0a9c9",
+      "setor_empresa": "205c5ecc-9401-42e3-bf28-b3f9be228667",
+      "segmento": "Administração publica",
+      "tema_segmento": "Industria, Ciencia e Tecnologia",
+      "descricao_produtos": "Agente articulador do Governo junto à sociedade para o fomento, inovação e desenvolvimento de pesquisas",
+      "apresentacao": "A Secretaria de Estado de Indústria Ciência e Tecnologia – SEICT foi criada através da Lei Complementar nº 247, de 17 de fevereiro de 2012, resultante de uma reforma administrativa do Governo do Estado do Acre cujo objetivo principal é promover e executar políticas públicas de expansão do desenvolvimento tecnológico.\n\nNesse contexto, a SEICT consolida-se como agente articulador do Governo junto à sociedade para o fomento, inovação e desenvolvimento de pesquisas, corroborando para o fortalecimento das instituições de Ensino e Pesquisa já existentes no Estado.\n\nÀ SEICT vinculam-se as seguintes instituições estaduais: Fundação de Amparo à Pesquisa do Estado do Acre – FAPAC; Instituto de Mudanças Climáticas e Regulação de Serviços Ambientais – IMC; Fundação de Tecnologia do Estado do Acre – FUNTAC.",
+      "endereco": " R. Rui Barbosa, 450 - Centro, Rio Branco - AC - CEP: 69900-084 ",
+      "municipio": "Rio Branco",
+      "instagram": "@_seict",
+      "facebook": "",
+      "youtube": "",
+      "linkedin": "",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-17T05:39:28.694505+00:00",
+      "updated_at": "2026-04-17T05:42:14.924+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/a9ae863230667c47a818195e.jpg",
+      "telefone": "(68) 3215-4554",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "cc6c730b-be4f-451c-b646-7449e0420bf3",
+          "url": "/catalogo-media/a9ae863230667c47a818195e.jpg",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-17T05:42:15.776848+00:00",
+          "empresa_id": "42f72763-70de-4386-8193-c7a76c703a95",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "d22aaeec-4863-44eb-b1c5-f678212976ee",
+      "nome_fantasia": "FIEAC",
+      "razao_social": "Federação das Indústrias do Estado do Acre",
+      "cnpj": "14.366.215/0001-35",
+      "setor_economico": "3cff8746-27c4-48d8-a703-6c651ea0a9c9",
+      "setor_empresa": "63d3ae2a-64cb-4d26-a90b-c8178616d9eb",
+      "segmento": "Representante das Industrias",
+      "tema_segmento": "Representante das Industrias",
+      "descricao_produtos": "Representante das Industrias",
+      "apresentacao": "A Federação das Indústrias do Estado do Acre é a entidade de representação das indústrias do estado do Acre. Sedia-se na cidade de Rio Branco. O Sistema FIEAC é composto pelo SESI, SENAI, IEL e sindicatos patronais da indústria do Acre.",
+      "endereco": "Av. Ceará, 3727 - 7º BEC - Jardim Nazle, Rio Branco - AC, 69918-108",
+      "municipio": "Rio Branco",
+      "instagram": "@sistemafieac",
+      "facebook": "",
+      "youtube": "",
+      "linkedin": "",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-17T05:31:46.706067+00:00",
+      "updated_at": "2026-04-17T05:31:55.981+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/ce005eafa0699013ea08aa1d.jpg",
+      "telefone": "(68) 99971-9180",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "baf606f3-a0a6-4b5d-b18b-de945b504136",
+          "url": "/catalogo-media/ce005eafa0699013ea08aa1d.jpg",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-17T05:31:48.439823+00:00",
+          "empresa_id": "d22aaeec-4863-44eb-b1c5-f678212976ee",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "048d06d7-86db-44e4-b332-1e8205420ebe",
+      "nome_fantasia": "Malharia Ponto sem no",
+      "razao_social": "Lima e Abrahao Ltda",
+      "cnpj": "84.308.337/0003-12",
+      "setor_economico": "093b4790-08c7-46d8-a5bc-e5255abb8066",
+      "setor_empresa": "0fb8aa7a-cd79-4035-ade2-47995143cf13",
+      "segmento": "Comércio Varejista de Artigos do Vestuário e Acessórios",
+      "tema_segmento": "Venda e Confeção de Vestuário e Acessórios",
+      "descricao_produtos": "Fabricação de produtos têxteis\n\n",
+      "apresentacao": " A melhor e mais completa Malharia do Acre. Temos duas Unidades em Rio Branco. Entregamos em todos os Estados da Região Norte do país com frete rápido e barato. Consulte. Jalecos em Rio Branco. camisa personalizada. Jalecos em promoção.",
+      "endereco": "Avenida Getúlio Vargas, 3457, vila ivonete, Rio Branco, Acre 69918-616",
+      "municipio": "Rio Branco",
+      "instagram": "@malhariapontosemno",
+      "facebook": "facebook.com/MalhariaPontoSemNo/",
+      "youtube": "",
+      "linkedin": "linkedin.com/company/malharia-ponto-sem-no/",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-17T05:15:09.84491+00:00",
+      "updated_at": "2026-04-17T05:16:30.322+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/7593db348342f8e25cadb0a3.jpg",
+      "telefone": "(68) 3228-2361",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "7fc73bf1-6ceb-457f-b7c1-8dd6b25a216a",
+          "url": "/catalogo-media/7593db348342f8e25cadb0a3.jpg",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-17T05:16:25.059317+00:00",
+          "empresa_id": "048d06d7-86db-44e4-b332-1e8205420ebe",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "20acd3b3-8715-4b2f-8441-16b97a2d38c9",
+      "nome_fantasia": "SEBRAE - ACRE",
+      "razao_social": "Serviço de Apoio às Micro e Pequenas Empresas do Estado do Acre ",
+      "cnpj": "63.595.557/0001-32",
+      "setor_economico": "ff2fd198-8099-4617-ab34-a9bd9cf2b9db",
+      "setor_empresa": "a625ccfe-a67a-49dc-b110-481fcdbcbbf6",
+      "segmento": "Consultoria em Gestão Empresarial",
+      "tema_segmento": "Consultoria ",
+      "descricao_produtos": "Consultoria em Gestão Empresarial",
+      "apresentacao": "Sebrae significa “Serviço Brasileiro de Apoio às Micro e Pequenas Empresas”, ou seja, tem o objetivo fomentar o empreendedorismo no Brasil auxiliando as pequenas empresas e Micro empreendedores individuais.",
+      "endereco": "Avenida Ceara, 3693 - 7º Bec, Rio Branco - AC, 69.918-108.",
+      "municipio": "Rio Branco",
+      "instagram": "@sebraenoacre",
+      "facebook": "",
+      "youtube": "",
+      "linkedin": "",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-17T05:03:49.818516+00:00",
+      "updated_at": "2026-04-17T05:18:15.353+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/36e68d9f6464de73c5c1c7c4.png",
+      "telefone": "(68) 3216-2100",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "6622fa1e-6f72-4d7b-819f-14854c147bf0",
+          "url": "/catalogo-media/36e68d9f6464de73c5c1c7c4.png",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-17T05:18:15.946887+00:00",
+          "empresa_id": "20acd3b3-8715-4b2f-8441-16b97a2d38c9",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "eed10773-7f75-4def-827b-0e09bee8473b",
+      "nome_fantasia": "OCB-AC",
+      "razao_social": "SINDICATO E ORGANIZACAO DAS COOPERATIVAS BRASILEIRAS NO ACRE",
+      "cnpj": "04.076.741/0001-07",
+      "setor_economico": "83b84aeb-b4b7-4d19-a380-6bc2d44ddd2b",
+      "setor_empresa": "53e533b8-8b37-4ae8-b79e-ad41f0522c5e",
+      "segmento": "Organização de Cooperativas",
+      "tema_segmento": "Organização de Cooperativas",
+      "descricao_produtos": "Organização de Cooperativas com o propósito de fortalecer o cooperativismo Acreano",
+      "apresentacao": "Nós nascemos com o objetivo de unir pessoas que acreditam no cooperativismo. Nos organizamos para fortalecer o movimento cooperativista e defendê-lo como modelo socioeconômico capaz de transformar o mundo em um lugar mais justo, feliz, equilibrado e com melhores oportunidades para todos. Ser cooperativista é acreditar que juntos podemos mais, e o Sistema OCB/AC é a consolidação dessa ideia.",
+      "endereco": "Rua Coronel Alexandrino, 580,Bosque, Rio Branco - AC CEP: 69.909-730",
+      "municipio": "Rio Branco",
+      "instagram": "@sistemaocbac",
+      "facebook": "",
+      "youtube": "",
+      "linkedin": "",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-17T04:36:30.525514+00:00",
+      "updated_at": "2026-04-17T04:41:17.988+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/fe1bc91d0534ec4222077c26.png",
+      "telefone": "(68) 3223-8189",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "46ed8ed5-0b91-41a2-b9f7-b0f628e15f6b",
+          "url": "/catalogo-media/fe1bc91d0534ec4222077c26.png",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-17T04:40:51.820263+00:00",
+          "empresa_id": "eed10773-7f75-4def-827b-0e09bee8473b",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "c82f9513-d51e-4966-943a-188ab3671aa0",
+      "nome_fantasia": "Nutrak",
+      "razao_social": "Nutrak - Industria e Comercio de Alimentos Para Animais Importacao e Exportacao LTDA",
+      "cnpj": "34.703.835/0001-20",
+      "setor_economico": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "setor_empresa": "b6caba7c-3867-47f4-9d4c-b279c971df11",
+      "segmento": "Alimentos Para Animais",
+      "tema_segmento": "Ração Animal",
+      "descricao_produtos": "Ração de alto padrão para todos os tipos de animais.",
+      "apresentacao": "Diariamente, nos impulsiona o desafio constante de conceber produtos em nutrição animal com desempenho excepcional e qualidade superior. Este é o nosso compromisso, não apenas com os produtores rurais, mas também com os tutores de pets, assegurando que cada criação receba o mais alto padrão de cuidado nutricional.",
+      "endereco": "Rua Monte Sião - Residencial Rosa Linda - 69909006 -  Rio Branco/Ac",
+      "municipio": "Rio Branco",
+      "instagram": "nutrakac",
+      "facebook": "",
+      "youtube": "",
+      "linkedin": "",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-16T22:03:20.466008+00:00",
+      "updated_at": "2026-04-16T22:14:37.975+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/711b129398662fff3d7a2bcb.webp",
+      "telefone": "(68) 99255-1502",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "77162ffa-46c1-4888-9356-0f50e6494dc2",
+          "url": "/catalogo-media/711b129398662fff3d7a2bcb.webp",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-16T22:14:38.950179+00:00",
+          "empresa_id": "c82f9513-d51e-4966-943a-188ab3671aa0",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "01c40f25-05c5-4d06-9cf8-0c17c165e7d9",
+      "nome_fantasia": "Cooperacre",
+      "razao_social": "Cooperativa Central de Comercializacao Extrativista do Estado do Acre Ltda",
+      "cnpj": "04.814.502/0001-07",
+      "setor_economico": "83b84aeb-b4b7-4d19-a380-6bc2d44ddd2b",
+      "setor_empresa": "db2e9c45-6d54-4dcf-aa08-9b9c2c1cadfa",
+      "segmento": "Cooperativa de Agroextrativismo",
+      "tema_segmento": "Agroextrativismo",
+      "descricao_produtos": "A Cooperacre trabalha principalmente com produtos oriundos do extrativismo e da agricultura familiar da Amazônia. Os principais são:\n\n🌰 Castanha-do-Brasil (principal produto, beneficiado e exportado)\n🧴 Borracha (látex)\n🍓 Polpas de frutas (como açaí, cupuaçu, acerola, entre outras)\n🌴 Palmito de pupunha\n☕ Café (em fase de expansão/implantação)\n\nTodos esses produtos seguem uma linha de produção sustentável, com certificação orgânica e foco na preservação da Amazônia.",
+      "apresentacao": "A Cooperacre foi fundada em 2001, em Rio Branco (AC), para unir cooperativas extrativistas e viabilizar a comercialização de produtos da Amazônia.\n\nHoje, reúne mais de 2.500 famílias em cerca de 18 municípios e é destaque nacional na produção de castanha-do-Brasil beneficiada, com planos de liderança mundial.\nA cooperativa expandiu suas atividades a partir de 2006, com indústrias de beneficiamento, e atualmente trabalha com produtos como castanha, borracha, polpas de frutas, palmito e café, sempre com foco em sustentabilidade.\nPossui estrutura com galpões e indústrias, comercializa em vários estados do Brasil e exporta para diversos países. Seus produtos são orgânicos e certificados, garantindo parceria com grandes empresas.\nSua missão é fortalecer o extrativismo e melhorar a vida das famílias cooperadas, preservando a cultura e o meio ambiente amazônico.",
+      "endereco": "Rodovia AC 40 Km 04, 1858 - Vila da Amizade, Rio Branco - AC, 69.909-640",
+      "municipio": "Rio Branco",
+      "instagram": "@cooperacre",
+      "facebook": "cooperacre",
+      "youtube": "",
+      "linkedin": "",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-16T21:55:16.703326+00:00",
+      "updated_at": "2026-04-17T05:05:52.51+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/7269da935b01177e2dd7b317.jpg",
+      "telefone": "(68) 99964-6099",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "8f95134f-3a8e-43e6-97f8-2d026deea0e8",
+          "url": "/catalogo-media/7269da935b01177e2dd7b317.jpg",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-17T05:05:53.409057+00:00",
+          "empresa_id": "01c40f25-05c5-4d06-9cf8-0c17c165e7d9",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "0160ec27-05ca-4c6b-a7aa-b5196ecc852d",
+      "nome_fantasia": "Acre Jet",
+      "razao_social": "Acre Jet Informatica Ltda",
+      "cnpj": "06.082.078/0001-89",
+      "setor_economico": "49929ade-5944-452b-bf55-0a6d3314757e",
+      "setor_empresa": "35714eb3-aaa4-4dac-800d-c76860f7972d",
+      "segmento": "Materiais de Informática",
+      "tema_segmento": " Comércio varejista especializado de equipamentos e suprimentos de informática",
+      "descricao_produtos": "Equipamentos e suprimentos de informática, manutenção de notebooks, impressoras e desktops",
+      "apresentacao": "A empresa com a razão social Acre Jet Informatica Ltda, tem o nome fantasia Acre Jet, opera com o CNPJ 06.082.078/0001-89 (06082078000189) e foi fundada em 29/01/2004. O endereço de sua sede está localizada na Avenida Ceara, 1546 - Ipase, Rio Branco - AC, 69.900-330. Sua atividade principal é de Comércio varejista especializado de equipamentos e suprimentos de informática",
+      "endereco": "Av. Ceará, 1546 Centro - Ipase, Rio Branco - AC, 69900-330",
+      "municipio": "Rio Branco",
+      "instagram": "@acrejet",
+      "facebook": "",
+      "youtube": "",
+      "linkedin": "",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-16T21:27:37.458486+00:00",
+      "updated_at": "2026-04-16T21:39:12.113+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/7b53b96ae7c8c04ba12a196e.jpg",
+      "telefone": "(68) 99960-3446",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "17a34945-3eb6-4f75-a35a-5bf89dd346dc",
+          "url": "/catalogo-media/7b53b96ae7c8c04ba12a196e.jpg",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-16T21:39:12.839618+00:00",
+          "empresa_id": "0160ec27-05ca-4c6b-a7aa-b5196ecc852d",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "ea0913f4-43b7-4842-8983-d3f265d00b47",
+      "nome_fantasia": "Ceramica Telhanorte",
+      "razao_social": "Ceramica Telhanorte Ltda",
+      "cnpj": "08.852.277/0001-54",
+      "setor_economico": "industria",
+      "setor_empresa": "outros",
+      "segmento": "Indústria de materiais de construção",
+      "tema_segmento": "fornos, maquinário, área de extração de argila",
+      "descricao_produtos": "Atua principalmente na fabricação de tijolos, telhas e outros produtos de barro cozido voltados ao mercado regional da construção.",
+      "apresentacao": "A empresa integra o polo cerâmico de Acrelândia, produzindo artefatos estruturais e de vedação (como blocos, tijolos e possivelmente telhas) utilizados em obras residenciais e comerciais. Sua atuação é voltada principalmente ao mercado local e regional, abastecendo lojas de materiais de construção e construtoras que demandam produtos cerâmicos de baixo e médio custo. ",
+      "endereco": "Acrelândia – AC, zona rural / distrito industrial",
+      "municipio": "Acrelândia",
+      "instagram": "@_telhanorte",
+      "facebook": "",
+      "youtube": "",
+      "linkedin": "",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-16T20:26:43.804817+00:00",
+      "updated_at": "2026-04-16T20:26:55.73+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/0e795d666716bd3fcf2f015b.jpg",
+      "telefone": "(68) 99972-4987",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "6355fd3b-dde2-4757-bfee-d68e653ce12e",
+          "url": "/catalogo-media/0e795d666716bd3fcf2f015b.jpg",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-16T20:26:45.145342+00:00",
+          "empresa_id": "ea0913f4-43b7-4842-8983-d3f265d00b47",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "fa96198b-f199-4d57-8027-4a02f6f9fdaa",
+      "nome_fantasia": "Miragina",
+      "razao_social": "Miragina S/A Indústria e Comércio",
+      "cnpj": "04.063.681/0001-98",
+      "setor_economico": "comercio",
+      "setor_empresa": "alimentos",
+      "segmento": "Fabricação de biscoitos e bolachas",
+      "tema_segmento": "biscoitos e bolachas",
+      "descricao_produtos": "Atualmente, oferecemos uma variedade com mais de 20 produtos, incluindo os derivados da castanha do Brasil. A produção foi evoluindo com o decorrer dos anos, fazendo com que todos os produtos estejam disponíveis aos clientes no mercado, em todos os 22 municípios acreanos, além de serem comercializados também em Rondônia, Amazonas e enviado para todo Brasil quando solicitado.",
+      "apresentacao": "A Miragina é uma empresa familiar genuinamente acreana que carrega consigo 58 anos de história. Somos a indústria mais antiga em atividade no Acre e a primeira e única fábrica de biscoitos do Estado, sendo totalmente automatizada e dentro dos mais modernos métodos de fabricação. Nosso legado iniciou em 1967, quando Abrahão Felício e sua esposa, Miriam Assis Felício, fundaram o Grupo Miragina.",
+      "endereco": "Estrada do Aviário, 448 - Centro - CEP 69900-854 - Rio Branco - AC",
+      "municipio": "Rio Branco",
+      "instagram": "@miraginaprodutos",
+      "facebook": "",
+      "youtube": "",
+      "linkedin": "",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-16T20:18:18.855042+00:00",
+      "updated_at": "2026-04-16T20:41:01.414+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/ec4b2f8f6fc34e97a5ed7a68.png",
+      "telefone": "(68) 3224-6482",
+      "produtos": [
+        {
+          "id": "474d6d86-b262-4351-a191-c4f028e96751",
+          "nome": "Biscoito Salgado – Redondo (330g)",
+          "linha": null,
+          "preco": null,
+          "status": "ativo",
+          "descricao": "Olá! É um prazer apresentar a você o nosso Biscoito Salgado, uma opção deliciosa para quem busca uma sobremesa ou um lanche rápido e saboroso. Cada porção de 30g contém 116 kcal de valor energético, 23g de carboidratos e 3,15g de proteínas, além de ferro e fibras.\n\nCom 6% do valor diário de calorias recomendado, o Biscoito Salgado é perfeito para um lanche ou para ser compartilhado com amigos e familiares. Além disso, o baixo teor de gorduras garante uma opção saudável e equilibrada para quem busca uma alimentação balanceada.\n\nExperimente nosso Biscoito Salgado e descubra todo o sabor e a qualidade que oferecemos. Estamos sempre buscando trazer opções gostosas e nutritivas para você e sua família.",
+          "created_at": "2026-04-16T20:41:02.105884+00:00",
+          "empresa_id": "fa96198b-f199-4d57-8027-4a02f6f9fdaa",
+          "imagem_url": "/catalogo-media/3653990af5f204f020580fb4.png",
+          "updated_at": "2026-04-16T20:41:02.105884+00:00",
+          "nome_tecnico": "",
+          "ficha_tecnica": null,
+          "video_produto": "",
+          "folder_produto": null
+        }
+      ],
+      "arquivos": [
+        {
+          "id": "96d82e96-8a59-40ae-8b1d-307dc38006d2",
+          "url": "/catalogo-media/ec4b2f8f6fc34e97a5ed7a68.png",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-16T20:41:02.269162+00:00",
+          "empresa_id": "fa96198b-f199-4d57-8027-4a02f6f9fdaa",
+          "produto_id": null
+        }
+      ]
+    },
+    {
+      "id": "ef84bdd0-9a46-44b1-a9d3-50036985bbec",
+      "nome_fantasia": "Agroboi",
+      "razao_social": "Agro Boi Importacao e Exportacao Ltda",
+      "cnpj": "04.119.970/0001-61",
+      "setor_economico": "comercio",
+      "setor_empresa": "construcao",
+      "segmento": "Comércio varejista de materiais de construção em geral",
+      "tema_segmento": "Materiais de Construção",
+      "descricao_produtos": "material de construção, acabamentos, iluminaçâo, material básico, artigos para casa",
+      "apresentacao": "A empresa com a razão social Agro Boi Importacao e Exportacao Ltda, tem o nome fantasia Agro Boi Ltda, opera com o CNPJ 04.119.970/0001-61 (04119970000161) e foi fundada em 24/01/1980. O endereço de sua sede está localizada na Avenida Dr. Pereira Passos, 85 - Seis de Agosto, Rio Branco - AC, 69.905-611. Sua atividade principal é de Comércio varejista de materiais de construção em geral",
+      "endereco": "Avenida Ceará, 3795, 7º BEC, Rio Branco - AC\nCEP: 69918-108",
+      "municipio": "Rio Branco",
+      "instagram": "@agroboi",
+      "facebook": "facebook.com/agroboi.oficial",
+      "youtube": "",
+      "linkedin": "linkedin.com/company/agro-boi-imp-exp-ltda-a-gigante-da-construção/",
+      "twitter": "",
+      "video_apresentacao": "",
+      "folder_apresentacao": null,
+      "status": "ativo",
+      "created_at": "2026-04-16T18:22:24.402581+00:00",
+      "updated_at": "2026-04-16T21:01:59.962+00:00",
+      "email": null,
+      "logo_url": "/catalogo-media/802a866831f9e5836aba271c.jpg",
+      "telefone": "(68) 98401-7067",
+      "produtos": [],
+      "arquivos": [
+        {
+          "id": "7902ad48-9639-4062-a95d-3dcbf4466927",
+          "url": "/catalogo-media/802a866831f9e5836aba271c.jpg",
+          "nome": "Logo da Empresa",
+          "tipo": "imagem",
+          "tamanho": null,
+          "categoria": "logo",
+          "created_at": "2026-04-16T21:02:00.603096+00:00",
+          "empresa_id": "ef84bdd0-9a46-44b1-a9d3-50036985bbec",
+          "produto_id": null
+        }
+      ]
+    }
+  ],
+  "categorias": [
+    {
+      "id": "ce8c094b-a490-47b2-b5a5-57ec900d886c",
+      "nome": "Açougues e Peixarias",
+      "slug": "acougues-e-peixarias",
+      "tipo": "atividade_principal",
+      "parent_id": "49929ade-5944-452b-bf55-0a6d3314757e",
+      "created_at": "2026-04-17T03:24:37.857899+00:00"
+    },
+    {
+      "id": "74db0bc3-e665-4314-a5d5-8927983e9db2",
+      "nome": "Agroindústria",
+      "slug": "agroindustria",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-16T20:53:13.902349+00:00"
+    },
+    {
+      "id": "f1337af0-cbd1-4301-9b7c-0347fd9f8363",
+      "nome": "Alimentos Congelados e Prontos",
+      "slug": "alimentos-congelados-e-prontos",
+      "tipo": "atividade_principal",
+      "parent_id": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "created_at": "2026-04-17T03:24:07.058518+00:00"
+    },
+    {
+      "id": "b6caba7c-3867-47f4-9d4c-b279c971df11",
+      "nome": "Alimentos e Bebidas",
+      "slug": "alimentos-e-bebidas",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-16T20:53:13.902349+00:00"
+    },
+    {
+      "id": "180a8a19-e537-4a16-8df6-382d002719e1",
+      "nome": "Artefatos de Madeira (Portas, Janelas, Pisos)",
+      "slug": "artefatos-de-madeira-(portas,-janelas,-pisos)",
+      "tipo": "atividade_principal",
+      "parent_id": "4fa2c137-abbf-41ac-8949-f635cb22905c",
+      "created_at": "2026-04-17T03:34:52.53065+00:00"
+    },
+    {
+      "id": "6ad78a46-2a9f-4608-a23b-e3f68a56b4d9",
+      "nome": "Bares e Pubs",
+      "slug": "bares-e-pubs",
+      "tipo": "atividade_principal",
+      "parent_id": "b6d921c3-8ca6-4e93-a6bb-8d86209be5d9",
+      "created_at": "2026-04-17T03:26:16.529876+00:00"
+    },
+    {
+      "id": "bcc4c3c9-18b8-4dba-8fac-4efaa4261c09",
+      "nome": "Bebidas Alcoólicas (Cervejas, Vinhos, Destilados)",
+      "slug": "bebidas-alcoolicas-(cervejas,-vinhos,-destilados)",
+      "tipo": "atividade_principal",
+      "parent_id": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "created_at": "2026-04-17T03:23:56.91535+00:00"
+    },
+    {
+      "id": "75cf1835-beb7-4bd8-adde-b4141dee5d47",
+      "nome": "Bebidas Não Alcoólicas (Sucos, Refrescos, Água)",
+      "slug": "bebidas-nao-alcoolicas-(sucos,-refrescos,-agua)",
+      "tipo": "atividade_principal",
+      "parent_id": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "created_at": "2026-04-17T03:23:47.115018+00:00"
+    },
+    {
+      "id": "b465bef4-52bc-430f-bfc9-726531c46a51",
+      "nome": "Beneficiamento de Cana-de-Açúcar e Bioenergia",
+      "slug": "beneficiamento-de-cana-de-acucar-e-bioenergia",
+      "tipo": "atividade_principal",
+      "parent_id": "74db0bc3-e665-4314-a5d5-8927983e9db2",
+      "created_at": "2026-04-16T22:17:08.117915+00:00"
+    },
+    {
+      "id": "ccd8d3ef-7914-48b0-8254-f62ab464b96c",
+      "nome": "Beneficiamento de Fibras (Algodão, Sintéticos)",
+      "slug": "beneficiamento-de-fibras-(algodao,-sinteticos)",
+      "tipo": "atividade_principal",
+      "parent_id": "093b4790-08c7-46d8-a5bc-e5255abb8066",
+      "created_at": "2026-04-17T03:57:56.682745+00:00"
+    },
+    {
+      "id": "0ca4ce05-db64-497f-a062-f0a76675a270",
+      "nome": "Buffets e Catering (Eventos)",
+      "slug": "buffets-e-catering-(eventos)",
+      "tipo": "atividade_principal",
+      "parent_id": "b6d921c3-8ca6-4e93-a6bb-8d86209be5d9",
+      "created_at": "2026-04-17T03:26:56.451362+00:00"
+    },
+    {
+      "id": "ac536802-c385-4529-a78d-76cb71e9ba56",
+      "nome": "Cafeterias e Docerias",
+      "slug": "cafeterias-e-docerias",
+      "tipo": "atividade_principal",
+      "parent_id": "b6d921c3-8ca6-4e93-a6bb-8d86209be5d9",
+      "created_at": "2026-04-17T03:26:42.893133+00:00"
+    },
+    {
+      "id": "3687efac-3b57-4e29-8387-d6950b984480",
+      "nome": "Calçados e Artefatos de Couro",
+      "slug": "calcados-e-artefatos-de-couro",
+      "tipo": "atividade_principal",
+      "parent_id": "093b4790-08c7-46d8-a5bc-e5255abb8066",
+      "created_at": "2026-04-17T03:58:03.82593+00:00"
+    },
+    {
+      "id": "eaa9745d-ee0c-42ad-973c-53fe009b440c",
+      "nome": "Cama, Mesa e Banho",
+      "slug": "cama,-mesa-e-banho",
+      "tipo": "atividade_principal",
+      "parent_id": "093b4790-08c7-46d8-a5bc-e5255abb8066",
+      "created_at": "2026-04-17T03:57:45.490443+00:00"
+    },
+    {
+      "id": "6d1105ad-3ea4-4a3d-8b71-7bf321e36d66",
+      "nome": "Carnes e Derivados",
+      "slug": "carnes-e-derivados",
+      "tipo": "atividade_principal",
+      "parent_id": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "created_at": "2026-04-16T22:07:18.5681+00:00"
+    },
+    {
+      "id": "99704047-6536-4fd2-960d-e4c261083c16",
+      "nome": "Celulose e Papel",
+      "slug": "celulose-e-papel",
+      "tipo": "atividade_principal",
+      "parent_id": "4fa2c137-abbf-41ac-8949-f635cb22905c",
+      "created_at": "2026-04-17T03:50:30.607147+00:00"
+    },
+    {
+      "id": "db2e9c45-6d54-4dcf-aa08-9b9c2c1cadfa",
+      "nome": "Central de Cooperativas",
+      "slug": "central-de-cooperativas",
+      "tipo": "atividade_principal",
+      "parent_id": "83b84aeb-b4b7-4d19-a380-6bc2d44ddd2b",
+      "created_at": "2026-04-17T05:05:20.409838+00:00"
+    },
+    {
+      "id": "88a53d25-3f97-4c39-8a4c-8466d5a1d569",
+      "nome": "Cibersegurança e Dados",
+      "slug": "ciberseguranca-e-dados",
+      "tipo": "atividade_principal",
+      "parent_id": "35714eb3-aaa4-4dac-800d-c76860f7972d",
+      "created_at": "2026-04-17T03:51:50.208674+00:00"
+    },
+    {
+      "id": "49929ade-5944-452b-bf55-0a6d3314757e",
+      "nome": "Comércio Varejista (Venda de Produtos)",
+      "slug": "comercio-varejista-(venda-de-produtos)",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-16T20:53:13.902349+00:00"
+    },
+    {
+      "id": "0fb8aa7a-cd79-4035-ade2-47995143cf13",
+      "nome": "Confecção de Vestuário e Acessórios",
+      "slug": "confeccao-de-vestuario-e-acessorios",
+      "tipo": "atividade_principal",
+      "parent_id": "093b4790-08c7-46d8-a5bc-e5255abb8066",
+      "created_at": "2026-04-17T03:57:37.153946+00:00"
+    },
+    {
+      "id": "aff420c7-7b15-4f69-b4ea-37c83098bfaf",
+      "nome": "Construção Civil",
+      "slug": "construcao",
+      "tipo": "atividade_principal",
+      "parent_id": "ff2fd198-8099-4617-ab34-a9bd9cf2b9db",
+      "created_at": "2026-04-16T20:53:13.902349+00:00"
+    },
+    {
+      "id": "a4a8dfed-f1a2-41ac-8bc9-64cd92608078",
+      "nome": "Consultoria em TI e Transformação Digital",
+      "slug": "consultoria-em-ti-e-transformacao-digital",
+      "tipo": "atividade_principal",
+      "parent_id": "35714eb3-aaa4-4dac-800d-c76860f7972d",
+      "created_at": "2026-04-17T03:51:15.693173+00:00"
+    },
+    {
+      "id": "a625ccfe-a67a-49dc-b110-481fcdbcbbf6",
+      "nome": "Consultoria empresarial",
+      "slug": "consultoria-empresarial",
+      "tipo": "atividade_principal",
+      "parent_id": "ff2fd198-8099-4617-ab34-a9bd9cf2b9db",
+      "created_at": "2026-04-17T05:17:58.757711+00:00"
+    },
+    {
+      "id": "db8b6829-8e33-47cb-a62e-083187e9a923",
+      "nome": "Consultoria Jurídica, Contábil e Administrativa",
+      "slug": "consultoria-juridica,-contabil-e-administrativa",
+      "tipo": "atividade_principal",
+      "parent_id": "ff2fd198-8099-4617-ab34-a9bd9cf2b9db",
+      "created_at": "2026-04-17T03:30:25.021758+00:00"
+    },
+    {
+      "id": "b3598443-b0a8-459f-8d8f-60d26eedeea7",
+      "nome": "Cooperativa",
+      "slug": "cooperativa",
+      "tipo": "atividade_principal",
+      "parent_id": "83b84aeb-b4b7-4d19-a380-6bc2d44ddd2b",
+      "created_at": "2026-04-17T04:02:00.358716+00:00"
+    },
+    {
+      "id": "83b84aeb-b4b7-4d19-a380-6bc2d44ddd2b",
+      "nome": "Cooperativismo",
+      "slug": "cooperativismo",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-17T04:01:16.005526+00:00"
+    },
+    {
+      "id": "0b496a6c-5985-47c2-be6a-291f0e1f93a6",
+      "nome": "Cozinhas Industriais (Refeições Coletivas)",
+      "slug": "cozinhas-industriais-(refeicoes-coletivas)",
+      "tipo": "atividade_principal",
+      "parent_id": "b6d921c3-8ca6-4e93-a6bb-8d86209be5d9",
+      "created_at": "2026-04-17T03:27:15.719013+00:00"
+    },
+    {
+      "id": "497a2834-3ecb-4375-a33c-6aada474ba92",
+      "nome": "Dark Kitchens (Apenas Delivery)",
+      "slug": "dark-kitchens-(apenas-delivery)",
+      "tipo": "atividade_principal",
+      "parent_id": "b6d921c3-8ca6-4e93-a6bb-8d86209be5d9",
+      "created_at": "2026-04-17T03:55:12.407151+00:00"
+    },
+    {
+      "id": "72e87753-d033-491c-8f44-73518fc7a4cc",
+      "nome": "Defensivos e Fertilizantes",
+      "slug": "defensivos-e-fertilizantes",
+      "tipo": "atividade_principal",
+      "parent_id": "74db0bc3-e665-4314-a5d5-8927983e9db2",
+      "created_at": "2026-04-17T03:32:22.369851+00:00"
+    },
+    {
+      "id": "30c0adbd-ee29-487a-af36-2e89aff80523",
+      "nome": "Desenvolvimento de Software (SaaS/Apps)",
+      "slug": "desenvolvimento-de-software-(saas/apps)",
+      "tipo": "atividade_principal",
+      "parent_id": "35714eb3-aaa4-4dac-800d-c76860f7972d",
+      "created_at": "2026-04-17T03:51:05.092235+00:00"
+    },
+    {
+      "id": "da12bd6d-2ccc-4e1c-b315-f648757248c9",
+      "nome": "E-commerce e Marketplaces",
+      "slug": "e-commerce-e-marketplaces",
+      "tipo": "atividade_principal",
+      "parent_id": "35714eb3-aaa4-4dac-800d-c76860f7972d",
+      "created_at": "2026-04-17T03:51:25.959701+00:00"
+    },
+    {
+      "id": "00ceabbd-d45a-47d3-b48b-2caf2846dd00",
+      "nome": "Educação e Treinamentos",
+      "slug": "educacao-e-treinamentos",
+      "tipo": "atividade_principal",
+      "parent_id": "ff2fd198-8099-4617-ab34-a9bd9cf2b9db",
+      "created_at": "2026-04-17T03:29:56.917191+00:00"
+    },
+    {
+      "id": "9a79f8d7-1eeb-4013-92cd-f95468df563a",
+      "nome": "Extração e Refino de Óleos Vegetais",
+      "slug": "extracao-e-refino-de-oleos-vegetais",
+      "tipo": "atividade_principal",
+      "parent_id": "74db0bc3-e665-4314-a5d5-8927983e9db2",
+      "created_at": "2026-04-17T03:31:47.552971+00:00"
+    },
+    {
+      "id": "46ad7a3c-7269-4eb7-a8b6-d13d2c819d12",
+      "nome": "Fabricação de Móveis Residenciais",
+      "slug": "fabricacao-de-moveis-residenciais",
+      "tipo": "atividade_principal",
+      "parent_id": "4fa2c137-abbf-41ac-8949-f635cb22905c",
+      "created_at": "2026-04-17T03:34:28.254714+00:00"
+    },
+    {
+      "id": "63d3ae2a-64cb-4d26-a90b-c8178616d9eb",
+      "nome": "Federação",
+      "slug": "federacao",
+      "tipo": "atividade_principal",
+      "parent_id": "3cff8746-27c4-48d8-a703-6c651ea0a9c9",
+      "created_at": "2026-04-17T05:24:46.290615+00:00"
+    },
+    {
+      "id": "5eac32d7-7a4b-43f8-9f00-50809337afab",
+      "nome": "Food Service (Restaurantes/Bares)",
+      "slug": "food-service-(restaurantes/bares)",
+      "tipo": "atividade_principal",
+      "parent_id": "b6caba7c-3867-47f4-9d4c-b279c971df11",
+      "created_at": "2026-04-17T03:28:49.874127+00:00"
+    },
+    {
+      "id": "b6d921c3-8ca6-4e93-a6bb-8d86209be5d9",
+      "nome": "Food Service (Serviço de Alimentação)",
+      "slug": "food-service-(servico-de-alimentacao)",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-17T03:25:30.845491+00:00"
+    },
+    {
+      "id": "fade8139-d906-4715-93eb-3753ccce82bb",
+      "nome": "Hardware e Equipamentos Eletrônicos",
+      "slug": "hardware-e-equipamentos-eletronicos",
+      "tipo": "atividade_principal",
+      "parent_id": "35714eb3-aaa4-4dac-800d-c76860f7972d",
+      "created_at": "2026-04-17T03:51:36.727989+00:00"
+    },
+    {
+      "id": "d76a2bfd-8a61-4012-bc41-99bc2bbaf95a",
+      "nome": "Hortifruti e Lojas de Produtos Naturais",
+      "slug": "hortifruti-e-lojas-de-produtos-naturais",
+      "tipo": "atividade_principal",
+      "parent_id": "49929ade-5944-452b-bf55-0a6d3314757e",
+      "created_at": "2026-04-16T22:12:53.810062+00:00"
+    },
+    {
+      "id": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "nome": "Indústria",
+      "slug": "industria",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-16T20:53:13.902349+00:00"
+    },
+    {
+      "id": "fddae65b-c9bc-4e02-bea1-437320d50edd",
+      "nome": "Indústria de Processamento (Fábricas)",
+      "slug": "industria-de-processamento-(fabricas)",
+      "tipo": "atividade_principal",
+      "parent_id": "b6caba7c-3867-47f4-9d4c-b279c971df11",
+      "created_at": "2026-04-17T03:29:09.097843+00:00"
+    },
+    {
+      "id": "54a97991-d8df-468f-8311-bbf676977d57",
+      "nome": "Lanchonetes e Fast-Food",
+      "slug": "lanchonetes-e-fast-food",
+      "tipo": "atividade_principal",
+      "parent_id": "b6d921c3-8ca6-4e93-a6bb-8d86209be5d9",
+      "created_at": "2026-04-17T03:26:08.503304+00:00"
+    },
+    {
+      "id": "99bb0ad4-af28-449c-9861-44a8902975e5",
+      "nome": "Laticínios e Queijos",
+      "slug": "laticinios-e-queijos",
+      "tipo": "atividade_principal",
+      "parent_id": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "created_at": "2026-04-16T22:07:35.921761+00:00"
+    },
+    {
+      "id": "11f52fb0-2e82-41e6-82d0-a0100fc198a4",
+      "nome": "Lojas de Bebidas (Adegas e Depósitos)",
+      "slug": "lojas-de-bebidas-(adegas-e-depositos)",
+      "tipo": "atividade_principal",
+      "parent_id": "49929ade-5944-452b-bf55-0a6d3314757e",
+      "created_at": "2026-04-17T03:24:51.126112+00:00"
+    },
+    {
+      "id": "9c1d523f-f312-44fa-af3e-72ee2fd58db8",
+      "nome": "Lojas de Conveniência",
+      "slug": "lojas-de-conveniencia",
+      "tipo": "atividade_principal",
+      "parent_id": "49929ade-5944-452b-bf55-0a6d3314757e",
+      "created_at": "2026-04-17T03:25:03.578344+00:00"
+    },
+    {
+      "id": "00524b5c-28ab-4cd9-a45f-e8bbd919b9a8",
+      "nome": "Lojas de Suplementos e Nutrição",
+      "slug": "lojas-de-suplementos-e-nutricao",
+      "tipo": "atividade_principal",
+      "parent_id": "49929ade-5944-452b-bf55-0a6d3314757e",
+      "created_at": "2026-04-17T03:24:56.759694+00:00"
+    },
+    {
+      "id": "4fa2c137-abbf-41ac-8949-f635cb22905c",
+      "nome": "Madeira e Móveis",
+      "slug": "madeira-e-moveis",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-16T20:53:13.902349+00:00"
+    },
+    {
+      "id": "5a37030c-8eb6-4e54-be77-dc82abcc302b",
+      "nome": "Manutenção e Reparos Técnicos",
+      "slug": "manutencao-e-reparos-tecnicos",
+      "tipo": "atividade_principal",
+      "parent_id": "ff2fd198-8099-4617-ab34-a9bd9cf2b9db",
+      "created_at": "2026-04-17T03:30:18.28876+00:00"
+    },
+    {
+      "id": "db19ff07-fd92-4775-a2b3-6bf3ce1ac274",
+      "nome": "Marketing, Publicidade e Eventos",
+      "slug": "marketing,-publicidade-e-eventos",
+      "tipo": "atividade_principal",
+      "parent_id": "ff2fd198-8099-4617-ab34-a9bd9cf2b9db",
+      "created_at": "2026-04-17T03:30:10.037355+00:00"
+    },
+    {
+      "id": "0558dd81-75d3-418d-a3b9-2b5ffbeaaa1e",
+      "nome": "Moagem de Grãos e Farinhas",
+      "slug": "moagem-de-graos-e-farinhas",
+      "tipo": "atividade_principal",
+      "parent_id": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "created_at": "2026-04-16T22:07:47.431287+00:00"
+    },
+    {
+      "id": "d01349ea-5457-4521-84f3-80d58b542a02",
+      "nome": "Móveis para Escritório e Planejados",
+      "slug": "moveis-para-escritorio-e-planejados",
+      "tipo": "atividade_principal",
+      "parent_id": "4fa2c137-abbf-41ac-8949-f635cb22905c",
+      "created_at": "2026-04-17T03:34:38.207583+00:00"
+    },
+    {
+      "id": "ceb3ff97-536a-4a84-8f8c-c1d4e61c9e1b",
+      "nome": "Óleos, Gorduras e Conservas",
+      "slug": "oleos,-gorduras-e-conservas",
+      "tipo": "atividade_principal",
+      "parent_id": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "created_at": "2026-04-17T03:23:35.058041+00:00"
+    },
+    {
+      "id": "205c5ecc-9401-42e3-bf28-b3f9be228667",
+      "nome": "Orgão governamental",
+      "slug": "orgao-governamental",
+      "tipo": "atividade_principal",
+      "parent_id": "3cff8746-27c4-48d8-a703-6c651ea0a9c9",
+      "created_at": "2026-04-17T05:26:14.098944+00:00"
+    },
+    {
+      "id": "4699f6bd-7193-4f36-b79f-e0ede84afbce",
+      "nome": "Padarias e Confeitarias (Varejo)",
+      "slug": "padarias-e-confeitarias-(varejo)",
+      "tipo": "atividade_principal",
+      "parent_id": "49929ade-5944-452b-bf55-0a6d3314757e",
+      "created_at": "2026-04-16T22:12:41.981783+00:00"
+    },
+    {
+      "id": "07e8a2ad-afbd-4a45-85b1-aad44f9062f3",
+      "nome": "Panificação e Massas (Escala Industrial)",
+      "slug": "panificacao-e-massas-(escala-industrial)",
+      "tipo": "atividade_principal",
+      "parent_id": "5d1bfe3b-cbd2-4edb-85a9-b3e37b44999b",
+      "created_at": "2026-04-16T22:08:10.21131+00:00"
+    },
+    {
+      "id": "94bec19f-2932-4d4a-bd18-32c9bb68f457",
+      "nome": "Processamento de Grãos e Sementes",
+      "slug": "processamento-de-graos-e-sementes",
+      "tipo": "atividade_principal",
+      "parent_id": "74db0bc3-e665-4314-a5d5-8927983e9db2",
+      "created_at": "2026-04-17T03:30:48.067682+00:00"
+    },
+    {
+      "id": "71427568-f9af-475b-9908-5410f76be76b",
+      "nome": "Produção de Rações Animais",
+      "slug": "producao-de-racoes-animais",
+      "tipo": "atividade_principal",
+      "parent_id": "74db0bc3-e665-4314-a5d5-8927983e9db2",
+      "created_at": "2026-04-16T22:17:22.621084+00:00"
+    },
+    {
+      "id": "6ca5150b-cdd8-4dbd-9ead-e4c60beefa56",
+      "nome": "Restaurantes e Churrascarias",
+      "slug": "restaurantes-e-churrascarias",
+      "tipo": "atividade_principal",
+      "parent_id": "b6d921c3-8ca6-4e93-a6bb-8d86209be5d9",
+      "created_at": "2026-04-17T03:25:59.98873+00:00"
+    },
+    {
+      "id": "ec9a489b-08e0-4d87-8a2c-504d9c518335",
+      "nome": "Saúde e Bem-estar (Clínicas, Academias)",
+      "slug": "saude-e-bem-estar-(clinicas,-academias)",
+      "tipo": "atividade_principal",
+      "parent_id": "ff2fd198-8099-4617-ab34-a9bd9cf2b9db",
+      "created_at": "2026-04-17T03:29:45.056998+00:00"
+    },
+    {
+      "id": "3cff8746-27c4-48d8-a703-6c651ea0a9c9",
+      "nome": "Secretarias e Instituições",
+      "slug": "secretarias-e-instituicoes",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-17T05:24:05.36684+00:00"
+    },
+    {
+      "id": "a00cf26f-e44b-4886-b7b5-e90cbae6e60d",
+      "nome": "Serrarias e Beneficiamento de Madeira",
+      "slug": "serrarias-e-beneficiamento-de-madeira",
+      "tipo": "atividade_principal",
+      "parent_id": "4fa2c137-abbf-41ac-8949-f635cb22905c",
+      "created_at": "2026-04-17T03:34:13.788681+00:00"
+    },
+    {
+      "id": "ff2fd198-8099-4617-ab34-a9bd9cf2b9db",
+      "nome": "Serviços",
+      "slug": "servicos",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-16T20:53:13.902349+00:00"
+    },
+    {
+      "id": "53e533b8-8b37-4ae8-b79e-ad41f0522c5e",
+      "nome": "Sindicato/Organização",
+      "slug": "sindicato/organizacao",
+      "tipo": "atividade_principal",
+      "parent_id": "83b84aeb-b4b7-4d19-a380-6bc2d44ddd2b",
+      "created_at": "2026-04-17T04:01:46.125212+00:00"
+    },
+    {
+      "id": "25c585c5-25cb-4b5d-ba7b-932c54b65843",
+      "nome": "Supermercados e Minimercados",
+      "slug": "supermercados-e-minimercados",
+      "tipo": "atividade_principal",
+      "parent_id": "49929ade-5944-452b-bf55-0a6d3314757e",
+      "created_at": "2026-04-16T22:12:20.794259+00:00"
+    },
+    {
+      "id": "35714eb3-aaa4-4dac-800d-c76860f7972d",
+      "nome": "Tecnologia",
+      "slug": "tecnologia",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-16T20:53:13.902349+00:00"
+    },
+    {
+      "id": "093b4790-08c7-46d8-a5bc-e5255abb8066",
+      "nome": "Têxtil e Moda",
+      "slug": "textil-e-moda",
+      "tipo": "setor_economico",
+      "parent_id": null,
+      "created_at": "2026-04-16T20:53:13.902349+00:00"
+    },
+    {
+      "id": "ac1fbbcb-81a8-417a-aa49-c2ad4a62f0dc",
+      "nome": "Têxtil e Moda",
+      "slug": "textil-e-moda",
+      "tipo": "atividade_principal",
+      "parent_id": "093b4790-08c7-46d8-a5bc-e5255abb8066",
+      "created_at": "2026-04-17T03:57:29.074359+00:00"
+    },
+    {
+      "id": "f75719ae-befe-4d02-99cd-93ca8e2f3ca4",
+      "nome": "Varejo Alimentar (Supermercados/Lojas)",
+      "slug": "varejo-alimentar-(supermercados/lojas)",
+      "tipo": "atividade_principal",
+      "parent_id": "b6caba7c-3867-47f4-9d4c-b279c971df11",
+      "created_at": "2026-04-17T03:28:59.64459+00:00"
+    }
+  ],
+  "media": {
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776404282523-fd0a182a-dd4c-4b30-8b20-da9166bf7158.jpg": "/catalogo-media/a9ae863230667c47a818195e.jpg",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776403897199-7425cc5b-bf88-40fe-87ca-c4314ae4b81d.jpg": "/catalogo-media/ce005eafa0699013ea08aa1d.jpg",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776402977976-c36fe3f1-7b28-40b0-ae72-2f7d2cc52831.jpg": "/catalogo-media/7593db348342f8e25cadb0a3.jpg",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776401862220-e5f45075-eaa0-446a-9b9a-d6136981f96c.png": "/catalogo-media/36e68d9f6464de73c5c1c7c4.png",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776400841394-64d3bfff-6d2a-4f35-b872-bcdc1972484a.png": "/catalogo-media/fe1bc91d0534ec4222077c26.png",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776376675239-c3709224-15a3-4dd0-8955-36c1f0359a26.webp": "/catalogo-media/711b129398662fff3d7a2bcb.webp",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776376009772-53c780f7-4f56-4dee-be3d-18ae1f9bc66a.jpg": "/catalogo-media/7269da935b01177e2dd7b317.jpg",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776374554107-a3be5f70-fe37-4956-93ed-badf53b8ae5d.jpg": "/catalogo-media/7b53b96ae7c8c04ba12a196e.jpg",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776370986614-6699054d-4764-4b56-8ff8-6b4557dcb251.jpg": "/catalogo-media/0e795d666716bd3fcf2f015b.jpg",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776370614807-f339a29a-df00-4886-be2c-212f762e313d.png": "/catalogo-media/ec4b2f8f6fc34e97a5ed7a68.png",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776372039546-15d07d6a-2ebf-45d3-a81b-a306864f8dba.png": "/catalogo-media/3653990af5f204f020580fb4.png",
+    "https://czyxfbqjonwmjqqkdesd.supabase.co/storage/v1/object/public/Imagem/248bedd0-d472-40f9-9ff9-e53ed08820aa/1776373315475-23bb0275-9bd6-4e32-93f1-4cfdb18dfb55.jpg": "/catalogo-media/802a866831f9e5836aba271c.jpg"
+  }
+}

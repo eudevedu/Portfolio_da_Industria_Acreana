@@ -1,0 +1,26 @@
+Disponibilidade do catálogo público
+
+A página inicial, busca, filtros e perfis usam lib/public-actions.ts.
+As consultas públicas usam somente a chave anônima e empresas ativas.
+O cache do Next revalida a cada cinco minutos; erros não substituem dados válidos.
+Sem cache, o servidor usa data/catalogo-publico.json, incluído no build.
+O middleware dispensa a autenticação nas rotas do catálogo público.
+Consultas de autenticação do servidor têm limite de tempo por requisição.
+
+Atualização da cópia:
+  npm run snapshot:catalog
+O comando também roda antes de cada build. Se o banco estiver indisponível,
+a cópia anterior é preservada. Versione data/catalogo-publico.json e os arquivos
+public/catalogo-media para manter o fallback em novos deploys durante a pausa.
+
+Imagens e PDFs públicos do Storage são copiados para public/catalogo-media.
+Arquivos externos, vídeos e mídias criadas após o último build dependem da origem.
+Para atualizar a cópia de segurança em produção, gere um novo deploy.
+Uma exclusão ou desativação também exige atualizar a cópia para que um deploy
+futuro com banco pausado não apresente novamente a versão antiga.
+
+Login, cadastro, edição e painéis continuam dependendo do Supabase ativo.
+Esta alteração mantém o catálogo público disponível e não reativa o banco.
+
+Verificação sem banco real:
+  npm run test:catalog

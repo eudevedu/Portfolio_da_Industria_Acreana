@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { Empresa } from "@/lib/supabase.types"
 import EmpresaDetailsModal from "./EmpresaDetailsModal"
-import { buscarCategorias, type Categoria } from "@/lib/services/category-service"
+import type { Categoria } from "@/lib/services/category-service"
+import { buscarCategorias } from "@/lib/public-actions"
 import { useEffect } from "react"
 import {
   Carousel,

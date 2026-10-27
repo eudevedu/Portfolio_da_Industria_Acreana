@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { QuickFilters, AdvancedCategorySearch } from "./SegmentFilters"
 import HomeCompanyCarousel from "./HomeCompanyCarousel"
-import { buscarEmpresas } from "@/lib/services/empresa-service"
+import { buscarEmpresas } from "@/lib/public-actions"
 import type { Empresa } from "@/lib/supabase.types"
 import type { Categoria } from "@/lib/services/category-service"
 import { Loader2 } from "lucide-react"
